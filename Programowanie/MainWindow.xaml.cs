@@ -11,12 +11,22 @@ using ZXing.QrCode;
 using ZXing.Common;
 using ZXing.Windows.Compatibility;
 using System.Windows.Controls;
-
+using System.Net.Http;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Programowanie
 {
+
     
-    public partial class MainWindow : Window
+
+
+
+
+
+
+
+public partial class MainWindow : Window
     {
         private FilterInfoCollection videoDevices; // Lista kamer
         private VideoCaptureDevice videoSource;   // Wybrana kamera
@@ -27,6 +37,42 @@ namespace Programowanie
             InitializeComponent();
            
         }
+
+
+        public async Task<dynamic> GetProductFromApi(string barcode)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    string url = $"https://world.openfoodfacts.org/api/v0/product/{barcode}.json";
+
+                    var response = await client.GetStringAsync(url);
+
+                    // Zdeserializowanie odpowiedzi JSON do obiektu dynamicznego
+                    dynamic apiResponse = JsonConvert.DeserializeObject(response);
+
+                    // Sprawdzamy, czy odpowiedź zawiera produkty
+                    if (apiResponse != null && apiResponse.product != null)
+                    {
+                        return apiResponse.product; // Zwracamy produkt
+                    }
+                    else
+                    {
+                        Console.WriteLine("Brak danych produktu.");
+                        return null; // Jeśli nie znaleziono produktu
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Błąd: {ex.Message}");
+                    return null; // W przypadku błędu
+                }
+            }
+        }
+
+
+
 
 
         private void InitializeBarcodeReader()
@@ -46,44 +92,79 @@ namespace Programowanie
             }
                 }
             };
-            Console.WriteLine("BarcodeReader został zainicjalizowany.");
+            Console.WriteLine("BarcodeReader został zainicjalizowany.5");
         }
 
         private void StartScanning_Click(object sender, RoutedEventArgs e)
         {
             InitializeCamera();
+            ResetUI("scan");
+            isBarcodeScanned = false;
         }
 
 
 
         private void ProductName_TextChanged(object sender, TextChangedEventArgs e)
         {
-            // Przypisujemy tekst z TextBox do TextBlock, aby wyświetlić na bieżąco to, co użytkownik wpisuje
             ResultTextBlock.Visibility = Visibility.Visible;
             ResultTextBlock.Text = "Wpisujesz: " + ProductName.Text;
         }
 
         private void AddProduct_Click(object sender, RoutedEventArgs e)
         {
-            // Przechodzimy na stronę formularza z "InputPanel"
-            startPanel.Visibility = Visibility.Collapsed;  
-            InputPanel.Visibility = Visibility.Visible;   
-            BackButton.Visibility = Visibility.Visible;     
+            ResetUI("add_product");
+
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            // Cofamy do strony głównej
-            startPanel.Visibility = Visibility.Visible;    
-            InputPanel.Visibility = Visibility.Collapsed;  
-            BackButton.Visibility = Visibility.Collapsed;  
-            ProductName.Text = "";
-            ResultTextBlock.Visibility = Visibility.Collapsed;
+            ResetUI("start");
+            
             
 
 
         }
 
+
+        private void ResetUI(string Int)
+        {
+            if (Int == "add_product")
+            {
+                startPanel.Visibility = Visibility.Collapsed;
+                InputPanel.Visibility = Visibility.Visible;
+                BackButton.Visibility = Visibility.Visible;
+                BarcodeResult.Text = "";
+                CameraPreview.Visibility = Visibility.Collapsed;
+                if (videoSource != null && videoSource.IsRunning)
+                {
+                    videoSource.SignalToStop();  // Zatrzymanie kamery
+                    videoSource = null;          // Zwalniamy zasoby
+                }
+
+
+            }
+            else if(Int == "start")
+            {
+
+                startPanel.Visibility = Visibility.Visible;
+                InputPanel.Visibility = Visibility.Collapsed;
+                BackButton.Visibility = Visibility.Collapsed;
+                ProductName.Text = "";
+                ResultTextBlock.Visibility = Visibility.Collapsed;
+                BarcodeResult.Text = "";
+
+
+            }
+            else if (Int == "scan")
+            {
+                CameraPreview.Visibility = Visibility.Visible;
+                BarcodeResult.Text = "";
+                BrandResult.Text = "";
+
+            }
+
+
+        }
 
 
 
@@ -138,22 +219,42 @@ namespace Programowanie
         {
             try
             {
-
+                if (isBarcodeScanned)
+                    return;
                 if (barcodeReader == null)
                 {
                     InitializeBarcodeReader();
                 }
-                if (isBarcodeScanned)
-                    return;
-                var result = barcodeReader.Decode(bitmap);
                
+                var result = barcodeReader.Decode(bitmap);
+
                 if (result != null)
                 {
-                    Dispatcher.Invoke(() =>
+                    Dispatcher.Invoke(async () =>
                     {
                         BarcodeResult.Text = "Kod: " + result.Text;
-                        Console.WriteLine("Zeskanowany kod: " + result.Text);
-                        isBarcodeScanned = true;
+
+                        // Otrzymanie produktu za pomocą API
+                        var product = await GetProductFromApi(result.Text);
+
+                        // Sprawdzenie, czy produkt istnieje
+                        if (product != null)
+                        {
+                            // Wyświetlanie danych produktu
+                            isBarcodeScanned = true;
+
+                           
+                            BarcodeResult.Text = "\nNazwa: " + product.product_name;
+                            BrandResult.Text = "\nNazwa: " + product.brands;
+                        }
+                        else
+                        {
+                            isBarcodeScanned = true;
+
+                            BarcodeResult.Text = "Błąd";
+                            BrandResult.Text = "Zeskanuj ponownie";
+
+                        }
 
 
                         // Wyłączenie kamery po zeskanowaniu kodu
