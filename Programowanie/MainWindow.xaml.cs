@@ -14,61 +14,24 @@ using System.Windows.Controls;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Programowanie;
 
 namespace Programowanie
 {
-
-    
-
-
-
-
-
-
 
 public partial class MainWindow : Window
     {
         private FilterInfoCollection videoDevices; // Lista kamer
         private VideoCaptureDevice videoSource;   // Wybrana kamera
         private BarcodeReader<Bitmap> barcodeReader;      // Czytnik kodów kreskowych
+        private ProductServiceAPI _productService;
         private bool isBarcodeScanned = false;
         public MainWindow()
         {
             InitializeComponent();
-           
-        }
+            _productService = new ProductServiceAPI();
 
 
-        public async Task<dynamic> GetProductFromApi(string barcode)
-        {
-            using (HttpClient client = new HttpClient())
-            {
-                try
-                {
-                    string url = $"https://world.openfoodfacts.org/api/v0/product/{barcode}.json";
-
-                    var response = await client.GetStringAsync(url);
-
-                    // Zdeserializowanie odpowiedzi JSON do obiektu dynamicznego
-                    dynamic apiResponse = JsonConvert.DeserializeObject(response);
-
-                    // Sprawdzamy, czy odpowiedź zawiera produkty
-                    if (apiResponse != null && apiResponse.product != null)
-                    {
-                        return apiResponse.product; // Zwracamy produkt
-                    }
-                    else
-                    {
-                        Console.WriteLine("Brak danych produktu.");
-                        return null; // Jeśli nie znaleziono produktu
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Błąd: {ex.Message}");
-                    return null; // W przypadku błędu
-                }
-            }
         }
 
 
@@ -77,10 +40,9 @@ public partial class MainWindow : Window
 
         private void InitializeBarcodeReader()
         {
-            barcodeReader = new BarcodeReader
+            if (barcodeReader == null) // Zapobiega wielokrotnej inicjalizacji
             {
-                AutoRotate = true,
-                Options = new DecodingOptions
+                var options = new DecodingOptions
                 {
                     TryHarder = true,
                     PossibleFormats = new List<BarcodeFormat>
@@ -90,10 +52,22 @@ public partial class MainWindow : Window
                 BarcodeFormat.CODE_128,
                 BarcodeFormat.UPC_A
             }
-                }
-            };
-            Console.WriteLine("BarcodeReader został zainicjalizowany.5");
+                };
+
+                barcodeReader = new BarcodeReader
+                {
+                    AutoRotate = true,
+                    Options = options
+                };
+
+                Console.WriteLine("BarcodeReader został zainicjalizowany.");
+            }
+            else
+            {
+                Console.WriteLine("BarcodeReader był już zainicjalizowany.");
+            }
         }
+
 
         private void StartScanning_Click(object sender, RoutedEventArgs e)
         {
@@ -113,16 +87,11 @@ public partial class MainWindow : Window
         private void AddProduct_Click(object sender, RoutedEventArgs e)
         {
             ResetUI("add_product");
-
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
             ResetUI("start");
-            
-            
-
-
         }
 
 
@@ -134,13 +103,13 @@ public partial class MainWindow : Window
                 InputPanel.Visibility = Visibility.Visible;
                 BackButton.Visibility = Visibility.Visible;
                 BarcodeResult.Text = "";
+                BrandResult.Text = "";
                 CameraPreview.Visibility = Visibility.Collapsed;
                 if (videoSource != null && videoSource.IsRunning)
                 {
                     videoSource.SignalToStop();  // Zatrzymanie kamery
                     videoSource = null;          // Zwalniamy zasoby
                 }
-
 
             }
             else if(Int == "start")
@@ -234,13 +203,10 @@ public partial class MainWindow : Window
                     {
                         BarcodeResult.Text = "Kod: " + result.Text;
 
-                        // Otrzymanie produktu za pomocą API
-                        var product = await GetProductFromApi(result.Text);
+                        var product = await _productService.GetProductFromApiBarcode(result.Text);
 
-                        // Sprawdzenie, czy produkt istnieje
                         if (product != null)
                         {
-                            // Wyświetlanie danych produktu
                             isBarcodeScanned = true;
 
                            
@@ -257,9 +223,8 @@ public partial class MainWindow : Window
                         }
 
 
-                        // Wyłączenie kamery po zeskanowaniu kodu
 
-                        if (videoSource != null && videoSource.IsRunning)
+                        if ((videoSource != null && videoSource.IsRunning) && isBarcodeScanned)
                         {
                             videoSource.SignalToStop();  // Zatrzymanie kamery
                             videoSource = null;
@@ -275,15 +240,31 @@ public partial class MainWindow : Window
 
         private BitmapImage ConvertBitmapToBitmapImage(Bitmap bitmap)
         {
+            // Tworzymy strumień pamięci, w którym zapiszemy dane obrazu.
             using (MemoryStream memory = new MemoryStream())
             {
+                // Zapisujemy obiekt Bitmap do strumienia pamięci w formacie BMP.
                 bitmap.Save(memory, ImageFormat.Bmp);
+
+                // Ustawiamy pozycję strumienia na początek, aby móc go później odczytać.
                 memory.Position = 0;
+
+                // Tworzymy nowy obiekt BitmapImage, który będzie zawierał obraz.
                 BitmapImage bitmapImage = new BitmapImage();
+
+                // Inicjujemy obraz w asynchroniczny sposób.
                 bitmapImage.BeginInit();
+
+                // Przypisujemy strumień pamięci jako źródło danych obrazu.
                 bitmapImage.StreamSource = memory;
+
+                // Wybieramy opcję przechowywania obrazu w pamięci, co umożliwia jego natychmiastowe załadowanie.
                 bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+
+                // Kończymy inicjalizację obrazu.
                 bitmapImage.EndInit();
+
+                // Zwracamy przygotowany obiekt BitmapImage.
                 return bitmapImage;
             }
         }
