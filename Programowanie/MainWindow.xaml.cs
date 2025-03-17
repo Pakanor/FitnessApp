@@ -15,6 +15,8 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Programowanie;
+using System.Reflection.Emit;
+using System.Windows.Threading;
 
 namespace Programowanie
 {
@@ -26,10 +28,14 @@ public partial class MainWindow : Window
         private BarcodeReader<Bitmap> barcodeReader;      // Czytnik kodów kreskowych
         private ProductServiceAPI _productService;
         private bool isBarcodeScanned = false;
+        private MainViewModel _viewModel;
+
         public MainWindow()
         {
             InitializeComponent();
             _productService = new ProductServiceAPI();
+            _viewModel = new MainViewModel();
+            DataContext = _viewModel;
 
 
         }
@@ -74,14 +80,59 @@ public partial class MainWindow : Window
             InitializeCamera();
             ResetUI("scan");
             isBarcodeScanned = false;
+
+        }
+        public class Debouncer
+        {
+            private DispatcherTimer _timer;
+            private Action _action;
+
+            public Debouncer(int milliseconds)
+            {
+                _timer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromMilliseconds(milliseconds)
+                };
+                _timer.Tick += (s, e) =>
+                {
+                    _timer.Stop();
+                    _action?.Invoke();
+                };
+            }
+
+            public void Debounce(Action action)
+            {
+                _action = action;
+                _timer.Stop();
+                _timer.Start();
+            }
         }
 
 
 
-        private void ProductName_TextChanged(object sender, TextChangedEventArgs e)
+        //wzorce projektowe-----------------------------------------------------------------
+
+
+
+        private readonly Debouncer _debouncer = new Debouncer(500); // Opóźnienie 500ms
+
+        private async void ProductName_TextChanged(object sender, TextChangedEventArgs e)
         {
-            ResultTextBlock.Visibility = Visibility.Visible;
-            ResultTextBlock.Text = "Wpisujesz: " + ProductName.Text;
+            ProductNameChange.Visibility = Visibility.Visible;
+            ProductName.Text = "Wpisujesz: " + ProductNameChange.Text;
+            _debouncer.Debounce(async () =>
+            {
+                string productName = ProductNameChange.Text.Trim();
+                if (productName.Length > 3)
+                {
+                    //var product = await _productService.GetProductFromApiName(productName);
+                    _ = _viewModel.LoadProductByName(productName);
+
+                }
+            });
+
+
+
         }
 
         private void AddProduct_Click(object sender, RoutedEventArgs e)
@@ -103,7 +154,6 @@ public partial class MainWindow : Window
                 InputPanel.Visibility = Visibility.Visible;
                 BackButton.Visibility = Visibility.Visible;
                 BarcodeResult.Text = "";
-                BrandResult.Text = "";
                 CameraPreview.Visibility = Visibility.Collapsed;
                 if (videoSource != null && videoSource.IsRunning)
                 {
@@ -118,8 +168,7 @@ public partial class MainWindow : Window
                 startPanel.Visibility = Visibility.Visible;
                 InputPanel.Visibility = Visibility.Collapsed;
                 BackButton.Visibility = Visibility.Collapsed;
-                ProductName.Text = "";
-                ResultTextBlock.Visibility = Visibility.Collapsed;
+               
                 BarcodeResult.Text = "";
 
 
@@ -128,14 +177,11 @@ public partial class MainWindow : Window
             {
                 CameraPreview.Visibility = Visibility.Visible;
                 BarcodeResult.Text = "";
-                BrandResult.Text = "";
 
             }
 
 
         }
-
-
 
         private void InitializeCamera()
         {
@@ -203,26 +249,9 @@ public partial class MainWindow : Window
                     {
                         BarcodeResult.Text = "Kod: " + result.Text;
 
-                        var product = await _productService.GetProductFromApiBarcode(result.Text);
-
-                        if (product != null)
-                        {
-                            isBarcodeScanned = true;
-
-                           
-                            BarcodeResult.Text = "\nNazwa: " + product.product_name;
-                            BrandResult.Text = "\nNazwa: " + product.brands;
-                        }
-                        else
-                        {
-                            isBarcodeScanned = true;
-
-                            BarcodeResult.Text = "Błąd";
-                            BrandResult.Text = "Zeskanuj ponownie";
-
-                        }
-
-
+                        //var product = await _productService.GetProductFromApiBarcode(result.Text);
+                        await _viewModel.LoadProductByBarcode(result.Text);
+                        isBarcodeScanned = true;
 
                         if ((videoSource != null && videoSource.IsRunning) && isBarcodeScanned)
                         {

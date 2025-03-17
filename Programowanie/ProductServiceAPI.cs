@@ -47,23 +47,31 @@ namespace Programowanie
             }
         }
 
-        public async Task<dynamic> GetProductFromApiName(string barcode)
+        public async Task<dynamic> GetProductFromApiName(string productName)
         {
             try
             {
-                // URL API, do którego wysyłamy zapytanie
-                string url = $"https://world.openfoodfacts.org/api/v0/product/{barcode}.json";
+                string url = $"https://world.openfoodfacts.org/cgi/search.pl?search_terms={Uri.EscapeDataString(productName)}&search_simple=1&action=process&json=1";
 
-                // Wykonanie zapytania i pobranie odpowiedzi
                 var response = await _client.GetStringAsync(url);
+
 
                 // Zdeserializowanie odpowiedzi JSON do obiektu dynamicznego
                 dynamic apiResponse = JsonConvert.DeserializeObject(response);
 
-                // Sprawdzenie, czy odpowiedź zawiera dane o produkcie
-                if (apiResponse != null && apiResponse.product != null)
+                if (apiResponse != null && apiResponse.products != null && apiResponse.products.Count > 0)
                 {
-                    return apiResponse.product; // Zwrócenie danych produktu
+                    dynamic mostPopularProduct = null;
+                    List<dynamic> popularProducts = new List<dynamic>();
+
+                    foreach (var product in apiResponse.products)
+                    {
+                        if (mostPopularProduct == null || product.popularity_key > mostPopularProduct.popularity_key)
+                        {
+                            mostPopularProduct = product;
+                        }
+                    }
+                    return mostPopularProduct;
                 }
                 else
                 {
