@@ -40,6 +40,9 @@
         <TextBlock Name="BarcodeResult" FontSize="10" Foreground="Red" 
            VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="10" 
            Text="{Binding ProductName}"/>
+        <TextBlock Name="ErrorTextBlock" FontSize="12" Foreground="Red"
+   VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="10"
+   Text="{Binding ErrorMessage}" Visibility="{Binding ErrorMessage}"/>
         <Grid Grid.Row="2">
         </Grid>
 

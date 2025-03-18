@@ -25,13 +25,15 @@ namespace Programowanie
 
     public partial class MainWindow : Window
     {
-        
+
         private ICameraService _cameraService; // Zmienna przechowująca instancję serwisu kamery
 
         private BarcodeReader<Bitmap> barcodeReader;      // Czytnik kodów kreskowych
         private ProductServiceAPI _productService;
         private bool isBarcodeScanned = false;
         private MainViewModel _viewModel;
+        private BarcodeReaderService _barcodeReaderService;
+        
 
         public MainWindow()
         {
@@ -41,51 +43,27 @@ namespace Programowanie
             DataContext = _viewModel;
             _cameraService = new CameraService();
             _cameraService.FrameReceived += CameraService_FrameReceived;
+            _barcodeReaderService = new BarcodeReaderService();
+            _barcodeReaderService.BarcodeDetected += OnBarcodeDetected;
         }
         private void CameraService_FrameReceived(object sender, System.Drawing.Bitmap e)
         {
             // Kiedy otrzymujemy nową klatkę, aktualizujemy interfejs użytkownika
             Dispatcher.Invoke(() =>
             {
-                CameraPreview.Source = ConvertBitmapToBitmapImage(e); // Aktualizacja obrazu na UI
-                DecodeBarcode(e); // Aktualizacja obrazu na UI
+                CameraPreview.Source = _barcodeReaderService.ConvertBitmapToBitmapImage(e); // Aktualizacja obrazu
+                _barcodeReaderService.DecodeBarcode(e); // Wywołanie skanowania
             });
         }
-
-
-
-
-
-        private void InitializeBarcodeReader()
+        private async void OnBarcodeDetected(object sender, string barcode)
         {
-            if (barcodeReader == null) // Zapobiega wielokrotnej inicjalizacji
+            _ = Dispatcher.Invoke(async () =>
             {
-                var options = new DecodingOptions
-                {
-                    TryHarder = true,
-                    PossibleFormats = new List<BarcodeFormat>
-            {
-                BarcodeFormat.EAN_13,
-                BarcodeFormat.QR_CODE,
-                BarcodeFormat.CODE_128,
-                BarcodeFormat.UPC_A
-            }
-                };
-
-                barcodeReader = new BarcodeReader
-                {
-                    AutoRotate = true,
-                    Options = options
-                };
-
-                Console.WriteLine("BarcodeReader został zainicjalizowany.");
-            }
-            else
-            {
-                Console.WriteLine("BarcodeReader był już zainicjalizowany.");
-            }
+                BarcodeResult.Text = "Kod: " + barcode;
+                await _viewModel.LoadProductByBarcode(barcode);
+                _cameraService.StopCamera();  
+            });
         }
-
 
         private void StartScanning_Click(object sender, RoutedEventArgs e)
         {
@@ -137,7 +115,6 @@ namespace Programowanie
                 string productName = ProductNameChange.Text.Trim();
                 if (productName.Length > 3)
                 {
-                    //var product = await _productService.GetProductFromApiName(productName);
                     _ = _viewModel.LoadProductByName(productName);
 
                 }
@@ -168,17 +145,17 @@ namespace Programowanie
                 BackButton.Visibility = Visibility.Visible;
                 BarcodeResult.Text = "";
                 CameraPreview.Visibility = Visibility.Collapsed;
-               
+
 
 
             }
-            else if(Int == "start")
+            else if (Int == "start")
             {
 
                 startPanel.Visibility = Visibility.Visible;
                 InputPanel.Visibility = Visibility.Collapsed;
                 BackButton.Visibility = Visibility.Collapsed;
-               
+
                 BarcodeResult.Text = "";
 
 
@@ -192,75 +169,6 @@ namespace Programowanie
 
 
         }
-
-
-
-
-        private void DecodeBarcode(Bitmap bitmap)
-        {
-            try
-            {
-                if (isBarcodeScanned)
-                    return;
-                if (barcodeReader == null)
-                {
-                    InitializeBarcodeReader();
-                }
-
-                var result = barcodeReader.Decode(bitmap);
-
-                if (result != null)
-                {
-                    Dispatcher.Invoke(async () =>
-                    {
-                        BarcodeResult.Text = "Kod: " + result.Text;
-
-                        await _viewModel.LoadProductByBarcode(result.Text);
-                        isBarcodeScanned = true;
-
-                        // Zatrzymujemy kamerę, jeśli kod został zeskanowany
-                        _cameraService.StopCamera();  // Używamy serwisu do zatrzymania kamery
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Błąd dekodowania kodu: " + ex.Message);
-            }
-        }
-
-        private BitmapImage ConvertBitmapToBitmapImage(Bitmap bitmap)
-        {
-            // Tworzymy strumień pamięci, w którym zapiszemy dane obrazu.
-            using (MemoryStream memory = new MemoryStream())
-            {
-                // Zapisujemy obiekt Bitmap do strumienia pamięci w formacie BMP.
-                bitmap.Save(memory, ImageFormat.Bmp);
-
-                // Ustawiamy pozycję strumienia na początek, aby móc go później odczytać.
-                memory.Position = 0;
-
-                // Tworzymy nowy obiekt BitmapImage, który będzie zawierał obraz.
-                BitmapImage bitmapImage = new BitmapImage();
-
-                // Inicjujemy obraz w asynchroniczny sposób.
-                bitmapImage.BeginInit();
-
-                // Przypisujemy strumień pamięci jako źródło danych obrazu.
-                bitmapImage.StreamSource = memory;
-
-                // Wybieramy opcję przechowywania obrazu w pamięci, co umożliwia jego natychmiastowe załadowanie.
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-
-                // Kończymy inicjalizację obrazu.
-                bitmapImage.EndInit();
-
-                // Zwracamy przygotowany obiekt BitmapImage.
-                return bitmapImage;
-            }
-        }
-
-
 
 
 

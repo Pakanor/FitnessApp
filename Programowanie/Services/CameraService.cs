@@ -3,6 +3,8 @@ using AForge.Video;
 using Programowanie.Interfaces;
 using System.Drawing.Imaging;
 using System.Drawing;
+using Programowanie.Services;
+using System.Windows.Threading;
 
 public class CameraService : ICameraService
 {

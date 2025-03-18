@@ -15,5 +15,6 @@ namespace Programowanie.Interfaces
         void InitializeBarcodeReader();
 
 
+
     }
 }

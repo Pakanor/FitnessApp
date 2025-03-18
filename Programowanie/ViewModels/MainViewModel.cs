@@ -8,15 +8,21 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using Programowanie.Services;
 namespace Programowanie.ViewModels
+
 {
     public class MainViewModel : INotifyPropertyChanged
     {
         private readonly ProductServiceAPI _productService;
         private string _productName;
         private string _productBrand;
+        private string _errorMessage;
 
         public event PropertyChangedEventHandler PropertyChanged;
-
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set => SetProperty(ref _errorMessage, value);
+        }
         public string ProductName
         {
             get => _productName;
@@ -38,23 +44,45 @@ namespace Programowanie.ViewModels
 
         public async Task LoadProductByBarcode(string barcode)
         {
-            var product = await _productService.GetProductFromApiBarcode(barcode);
-            if (product != null)
+            try
             {
-                ProductBrand = product.brands;
-                ProductName = product.product_name;
-                OnPropertyChanged(null);
+                ErrorMessage = ""; // Resetowanie błędu
+                var product = await _productService.GetProductFromApiBarcode(barcode);
+                if (product != null)
+                {
+                    ProductBrand = product.brands;
+                    ProductName = product.product_name;
+                }
+                else
+                {
+                    ErrorMessage = "Product not found!";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "Error scanning barcode: " + ex.Message;
             }
         }
 
         public async Task LoadProductByName(string name)
         {
-            var product = await _productService.GetProductFromApiName(name);
-            if (product != null)
+            try
             {
-                ProductBrand = product.brands;
-                ProductName = product.product_name;
-                OnPropertyChanged(null);
+                ErrorMessage = ""; // Resetowanie błędu
+                var product = await _productService.GetProductFromApiName(name);
+                if (product != null)
+                {
+                    ProductBrand = product.brands;
+                    ProductName = product.product_name;
+                }
+                else
+                {
+                    ErrorMessage = "Product not found!";
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorMessage = "Error searching product: " + ex.Message;
             }
         }
 
