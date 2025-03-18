@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Programowanie"
         mc:Ignorable="d"
-        Title="Barcode Scanner" Height="400" Width="600">
+        Title="Barcode Scanner" Height="600" Width="600">
 
-    <Grid>
+    <Grid Margin="0,31,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -23,7 +23,7 @@
 
         <!-- Strona z formularzem do dodania produktu -->
         <StackPanel x:Name="InputPanel" Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="1" Visibility="Collapsed">
-            <TextBox Width="200" Height="40" Margin="10" Name="ProductName" TextChanged="ProductName_TextChanged"/>
+            <TextBox Width="200" Height="40" Margin="10" Name="ProductNameChange" TextChanged="ProductName_TextChanged"/>
         </StackPanel>
 
         <!-- Strzałka w lewym górnym rogu (tylko widoczna na formularzu) -->
@@ -36,9 +36,21 @@
         </Grid>
 
         <!-- Wynik zeskanowanego kodu -->
-        <TextBlock x:Name="ResultTextBlock" FontSize="16" Margin="10" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Row="3"/>
 
-        <TextBlock Name="BarcodeResult" FontSize="20" Foreground="Red" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="10" Grid.Row="3"/>
+        <TextBlock Name="BarcodeResult" FontSize="10" Foreground="Red" 
+           VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="10" 
+           Text="{Binding ProductName}"/>
+        <TextBlock Name="ErrorTextBlock" FontSize="12" Foreground="Red"
+   VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="10"
+   Text="{Binding ErrorMessage}" Visibility="{Binding ErrorMessage}"/>
+        <Grid Grid.Row="2">
+        </Grid>
+
+
+        <Grid Grid.Row="3">
+            <TextBlock Width="200" Height="40" Margin="10" Name="ProductName" 
+         Text="{Binding ProductName, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"/>
+        </Grid>
     </Grid>
 
     <Window.Resources>
@@ -58,7 +70,6 @@
                         <Storyboard>
                             <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="1.1" Duration="0:0:0.2"/>
                             <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="1.1" Duration="0:0:0.2"/>
-                            <ColorAnimation Storyboard.TargetProperty="(BorderBrush).(SolidColorBrush.Color)" To="Red" Duration="0:0:0.2"/>
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
@@ -67,7 +78,6 @@
                         <Storyboard>
                             <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.2"/>
                             <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.2"/>
-                            <ColorAnimation Storyboard.TargetProperty="(BorderBrush).(SolidColorBrush.Color)" To="Transparent" Duration="0:0:0.2"/>
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>

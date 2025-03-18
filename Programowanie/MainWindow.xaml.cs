@@ -11,205 +11,163 @@ using ZXing.QrCode;
 using ZXing.Common;
 using ZXing.Windows.Compatibility;
 using System.Windows.Controls;
-
+using System.Net.Http;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using System.Reflection.Emit;
+using System.Windows.Threading;
+using Programowanie.Services;
+using Programowanie.Interfaces;
+using Programowanie.ViewModels;
 
 namespace Programowanie
 {
-    
+
     public partial class MainWindow : Window
     {
-        private FilterInfoCollection videoDevices; // Lista kamer
-        private VideoCaptureDevice videoSource;   // Wybrana kamera
+
+        private ICameraService _cameraService; // Zmienna przechowująca instancję serwisu kamery
+
         private BarcodeReader<Bitmap> barcodeReader;      // Czytnik kodów kreskowych
+        private ProductServiceAPI _productService;
         private bool isBarcodeScanned = false;
+        private MainViewModel _viewModel;
+        private BarcodeReaderService _barcodeReaderService;
+        
+
         public MainWindow()
         {
             InitializeComponent();
-           
+            _productService = new ProductServiceAPI();
+            _viewModel = new MainViewModel();
+            DataContext = _viewModel;
+            _cameraService = new CameraService();
+            _cameraService.FrameReceived += CameraService_FrameReceived;
+            _barcodeReaderService = new BarcodeReaderService();
+            _barcodeReaderService.BarcodeDetected += OnBarcodeDetected;
         }
-
-
-        private void InitializeBarcodeReader()
+        private void CameraService_FrameReceived(object sender, System.Drawing.Bitmap e)
         {
-            barcodeReader = new BarcodeReader
+            // Kiedy otrzymujemy nową klatkę, aktualizujemy interfejs użytkownika
+            Dispatcher.Invoke(() =>
             {
-                AutoRotate = true,
-                Options = new DecodingOptions
-                {
-                    TryHarder = true,
-                    PossibleFormats = new List<BarcodeFormat>
+                CameraPreview.Source = _barcodeReaderService.ConvertBitmapToBitmapImage(e); // Aktualizacja obrazu
+                _barcodeReaderService.DecodeBarcode(e); // Wywołanie skanowania
+            });
+        }
+        private async void OnBarcodeDetected(object sender, string barcode)
+        {
+            _ = Dispatcher.Invoke(async () =>
             {
-                BarcodeFormat.EAN_13,
-                BarcodeFormat.QR_CODE,
-                BarcodeFormat.CODE_128,
-                BarcodeFormat.UPC_A
-            }
-                }
-            };
-            Console.WriteLine("BarcodeReader został zainicjalizowany.");
+                BarcodeResult.Text = "Kod: " + barcode;
+                await _viewModel.LoadProductByBarcode(barcode);
+                _cameraService.StopCamera();  
+            });
         }
 
         private void StartScanning_Click(object sender, RoutedEventArgs e)
         {
-            InitializeCamera();
+            _cameraService.StartCamera();
+            ResetUI("scan");
+            isBarcodeScanned = false;
+
+        }
+        public class Debouncer
+        {
+            private DispatcherTimer _timer;
+            private Action _action;
+
+            public Debouncer(int milliseconds)
+            {
+                _timer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromMilliseconds(milliseconds)
+                };
+                _timer.Tick += (s, e) =>
+                {
+                    _timer.Stop();
+                    _action?.Invoke();
+                };
+            }
+
+            public void Debounce(Action action)
+            {
+                _action = action;
+                _timer.Stop();
+                _timer.Start();
+            }
         }
 
 
 
-        private void ProductName_TextChanged(object sender, TextChangedEventArgs e)
+        //wzorce projektowe-----------------------------------------------------------------
+
+
+
+        private readonly Debouncer _debouncer = new Debouncer(500); // Opóźnienie 500ms
+
+        private async void ProductName_TextChanged(object sender, TextChangedEventArgs e)
         {
-            // Przypisujemy tekst z TextBox do TextBlock, aby wyświetlić na bieżąco to, co użytkownik wpisuje
-            ResultTextBlock.Visibility = Visibility.Visible;
-            ResultTextBlock.Text = "Wpisujesz: " + ProductName.Text;
+            ProductNameChange.Visibility = Visibility.Visible;
+            ProductName.Text = "Wpisujesz: " + ProductNameChange.Text;
+            _debouncer.Debounce(async () =>
+            {
+                string productName = ProductNameChange.Text.Trim();
+                if (productName.Length > 3)
+                {
+                    _ = _viewModel.LoadProductByName(productName);
+
+                }
+            });
+
+
+
         }
 
         private void AddProduct_Click(object sender, RoutedEventArgs e)
         {
-            // Przechodzimy na stronę formularza z "InputPanel"
-            startPanel.Visibility = Visibility.Collapsed;  
-            InputPanel.Visibility = Visibility.Visible;   
-            BackButton.Visibility = Visibility.Visible;     
+            ResetUI("add_product");
+            _cameraService.StopCamera();
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            // Cofamy do strony głównej
-            startPanel.Visibility = Visibility.Visible;    
-            InputPanel.Visibility = Visibility.Collapsed;  
-            BackButton.Visibility = Visibility.Collapsed;  
-            ProductName.Text = "";
-            ResultTextBlock.Visibility = Visibility.Collapsed;
-            
-
-
+            ResetUI("start");
         }
 
 
-
-
-        private void InitializeCamera()
+        private void ResetUI(string Int)
         {
-            try
+            if (Int == "add_product")
             {
-                videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
-                if (videoDevices.Count == 0)
-                {
-                    MessageBox.Show("Brak dostępnych kamer.");
-                    return;
-                }
-
-                videoSource = new VideoCaptureDevice(videoDevices[0].MonikerString);
-                videoSource.NewFrame += Video_NewFrame;
-                videoSource.Start();
-                InitializeBarcodeReader();
-                isBarcodeScanned = false; 
+                startPanel.Visibility = Visibility.Collapsed;
+                InputPanel.Visibility = Visibility.Visible;
+                BackButton.Visibility = Visibility.Visible;
+                BarcodeResult.Text = "";
+                CameraPreview.Visibility = Visibility.Collapsed;
 
 
-                
+
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Błąd: " + ex.Message);
-            }
-        }
-
-        private void Video_NewFrame(object sender, NewFrameEventArgs eventArgs)
-        {
-            try
-            {
-                using (Bitmap bitmap = (Bitmap)eventArgs.Frame.Clone())
-                {
-                    Bitmap grayBitmap = ConvertToGrayscale(bitmap);
-
-                    Dispatcher.Invoke(() =>
-                    {
-                        CameraPreview.Source = ConvertBitmapToBitmapImage(grayBitmap);
-                        DecodeBarcode(bitmap);
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Błąd w przetwarzaniu klatki: " + ex.Message);
-            }
-        }
-
-        private void DecodeBarcode(Bitmap bitmap)
-        {
-            try
+            else if (Int == "start")
             {
 
-                if (barcodeReader == null)
-                {
-                    InitializeBarcodeReader();
-                }
-                if (isBarcodeScanned)
-                    return;
-                var result = barcodeReader.Decode(bitmap);
-               
-                if (result != null)
-                {
-                    Dispatcher.Invoke(() =>
-                    {
-                        BarcodeResult.Text = "Kod: " + result.Text;
-                        Console.WriteLine("Zeskanowany kod: " + result.Text);
-                        isBarcodeScanned = true;
+                startPanel.Visibility = Visibility.Visible;
+                InputPanel.Visibility = Visibility.Collapsed;
+                BackButton.Visibility = Visibility.Collapsed;
+
+                BarcodeResult.Text = "";
 
 
-                        // Wyłączenie kamery po zeskanowaniu kodu
-
-                        if (videoSource != null && videoSource.IsRunning)
-                        {
-                            videoSource.SignalToStop();  // Zatrzymanie kamery
-                            videoSource = null;
-                        }
-                    });
-                    }
             }
-            catch (Exception ex)
+            else if (Int == "scan")
             {
-                Console.WriteLine("Błąd dekodowania kodu: " + ex.Message);
+                CameraPreview.Visibility = Visibility.Visible;
+                BarcodeResult.Text = "";
+
             }
-        }
-
-        private BitmapImage ConvertBitmapToBitmapImage(Bitmap bitmap)
-        {
-            using (MemoryStream memory = new MemoryStream())
-            {
-                bitmap.Save(memory, ImageFormat.Bmp);
-                memory.Position = 0;
-                BitmapImage bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-                return bitmapImage;
-            }
-        }
 
 
-        private Bitmap ConvertToGrayscale(Bitmap original)
-        {
-            // Utwórz nowy bitmap obiekt w odcieniach szarości
-            Bitmap grayscaleBitmap = new Bitmap(original.Width, original.Height);
-            using (Graphics g = Graphics.FromImage(grayscaleBitmap))
-            {
-                ColorMatrix colorMatrix = new ColorMatrix(new float[][]
-                {
-            new float[] {0.3f, 0.3f, 0.3f, 0, 0},
-            new float[] {0.59f, 0.59f, 0.59f, 0, 0},
-            new float[] {0.11f, 0.11f, 0.11f, 0, 0},
-            new float[] {0, 0, 0, 1, 0},
-            new float[] {0, 0, 0, 0, 1}
-                });
-
-                using (ImageAttributes attributes = new ImageAttributes())
-                {
-                    attributes.SetColorMatrix(colorMatrix);
-                    g.DrawImage(original, new Rectangle(0, 0, original.Width, original.Height), 0, 0, original.Width, original.Height, GraphicsUnit.Pixel, attributes);
-                }
-            }
-            return grayscaleBitmap;
         }
 
 
@@ -217,14 +175,12 @@ namespace Programowanie
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             base.OnClosing(e);
-            if (videoSource != null && videoSource.IsRunning)
+
+            // Zatrzymaj kamerę, jeśli jest aktywna
+            if (_cameraService != null)
             {
-                videoSource.SignalToStop();
-                videoSource = null;
+                _cameraService.StopCamera();
             }
-
-
-
         }
     }
 }
