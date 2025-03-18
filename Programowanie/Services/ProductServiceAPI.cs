@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace Programowanie
+namespace Programowanie.Services
 {
     public class ProductServiceAPI
     {

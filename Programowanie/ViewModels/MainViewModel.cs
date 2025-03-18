@@ -6,7 +6,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Threading.Tasks;
-namespace Programowanie
+using Programowanie.Services;
+namespace Programowanie.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged
     {
@@ -38,7 +39,7 @@ namespace Programowanie
         public async Task LoadProductByBarcode(string barcode)
         {
             var product = await _productService.GetProductFromApiBarcode(barcode);
-            if(product != null)
+            if (product != null)
             {
                 ProductBrand = product.brands;
                 ProductName = product.product_name;
