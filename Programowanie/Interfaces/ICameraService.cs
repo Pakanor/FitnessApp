@@ -14,8 +14,5 @@ namespace Programowanie.Interfaces
         void StopCamera();
         void ProcessFrame(Bitmap frame);
     }
-    public interface IBarcodeScannerService
-    {
-        string DecodeBarcode(Bitmap bitmap);
-    }
+    
 }
