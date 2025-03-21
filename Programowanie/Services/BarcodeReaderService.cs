@@ -11,7 +11,7 @@ using Programowanie.Interfaces;
 using Programowanie.ViewModels;
 using Programowanie.Services;
 
-public class BarcodeReaderService
+public class BarcodeReaderService : IBarcodeService
 {
     private BarcodeReader barcodeReader;
     private bool isBarcodeScanned = false;
@@ -23,7 +23,7 @@ public class BarcodeReaderService
         InitializeBarcodeReader();
     }
 
-    private void InitializeBarcodeReader()
+    public void InitializeBarcodeReader()
     {
         if (barcodeReader == null) // Zapobiega wielokrotnej inicjalizacji
         {
