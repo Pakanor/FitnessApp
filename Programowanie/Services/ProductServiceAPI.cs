@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows;
 using Newtonsoft.Json;
+using Programowanie.Models;
 
 namespace Programowanie.Services
 {
@@ -58,26 +59,19 @@ namespace Programowanie.Services
                 var response = await _client.GetStringAsync(url);
 
 
-                dynamic apiResponse = JsonConvert.DeserializeObject(response);
+                var apiResponse = JsonConvert.DeserializeObject<ApiSearchResponse>(response);
 
-                if (apiResponse != null && apiResponse.products != null && apiResponse.products.Count > 0)
+                if (apiResponse?.Products != null && apiResponse.Products.Any())
+
                 {
-                    dynamic mostPopularProduct = null;
 
-                    foreach (var product in apiResponse.products)
-                    {
-                        if (mostPopularProduct == null || (product.popularity_key != null && product.popularity_key > mostPopularProduct.popularity_key))
-                        {
-                            mostPopularProduct = product;
-                        }
-                    }
 
-                    return mostPopularProduct;
+                    return apiResponse.Products; // Zwracamy całą listę produktów
                 }
                 else
                 {
                     MessageBox.Show("Brak produktów w odpowiedzi API!", "Błąd");
-                    return null;
+                    return new List<Product>(); // Zwracamy pustą listę zamiast null
                 }
             }
             catch (Exception ex)
@@ -87,6 +81,17 @@ namespace Programowanie.Services
             }
         
     }
+        public class ApiResponse
+        {
+            [JsonProperty("product")]
+            public Product Product { get; set; }
+        }
+
+        public class ApiSearchResponse
+        {
+            [JsonProperty("products")]
+            public List<Product> Products { get; set; }
+        }
 
 
     }

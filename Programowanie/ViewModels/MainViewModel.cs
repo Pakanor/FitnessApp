@@ -9,22 +9,20 @@ using System.Threading.Tasks;
 using Programowanie.Services;
 using System.Windows;
 using Newtonsoft.Json;
+using System.Collections.ObjectModel;
+using Programowanie.Models;
 namespace Programowanie.ViewModels
 
 {
     public class MainViewModel : INotifyPropertyChanged
     {
+
         private readonly ProductServiceAPI _productService;
         private string _productName;
         private string _productBrand;
-        private string _errorMessage;
 
-        public event PropertyChangedEventHandler PropertyChanged;
-        public string ErrorMessage
-        {
-            get => _errorMessage;
-            set => SetProperty(ref _errorMessage, value);
-        }
+        private string _errorMessage;
+        private Product _selectedProduct;
         public string ProductName
         {
             get => _productName;
@@ -38,6 +36,30 @@ namespace Programowanie.ViewModels
         }
 
 
+
+        private ObservableCollection<Product> _products = new ObservableCollection<Product>();
+        public ObservableCollection<Product> Products
+        {
+            get => _products;
+            set
+            {
+                _products = value;
+                OnPropertyChanged(nameof(Products)); // Powiadomienie o zmianie listy
+            }
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
+        public string ErrorMessage
+        {
+            get => _errorMessage;
+            set => SetProperty(ref _errorMessage, value);
+        }
+        public Product SelectedProduct
+        {
+            get => _selectedProduct;
+            set => SetProperty(ref _selectedProduct, value);
+        }
+
+
         public MainViewModel()
         {
             _productService = new ProductServiceAPI();
@@ -46,6 +68,7 @@ namespace Programowanie.ViewModels
 
         public async Task LoadProductByBarcode(string barcode)
         {
+
             try
             {
                 ErrorMessage = ""; // Resetowanie błędu
@@ -71,25 +94,32 @@ namespace Programowanie.ViewModels
             try
             {
                 ErrorMessage = ""; // Resetowanie błędu
-                var product = await _productService.GetProductFromApiName(name);
+                var productList = await _productService.GetProductFromApiName(name);
 
-                if (product != null)
+                Products.Clear();
+                MessageBox.Show(JsonConvert.SerializeObject(productList, Formatting.Indented));
+
+                foreach (var product in productList)
+                {
+                    Products.Add(product);
+
+                }
+
+                if (Products.Any())
                 {
 
-                    ProductBrand = product.brands;
-                    ProductName = product.product_name;
-
+                    SelectedProduct = Products.First(); // Automatycznie wybieramy pierwszy produkt
                 }
                 else
                 {
-                    MessageBox.Show("Produkt nie znaleziony!", "Błąd");
                     ErrorMessage = "Product not found!";
+                    MessageBox.Show("Produkt nie znaleziony!", "Błąd");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Błąd w LoadProductByName:\n{ex.Message}", "Błąd");
                 ErrorMessage = "Error searching product: " + ex.Message;
+                MessageBox.Show($"Błąd w LoadProductByName:\n{ex.Message}", "Błąd");
             }
         }
 

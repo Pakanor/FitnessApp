@@ -22,7 +22,7 @@ namespace Programowanie.Controllers
         public MainWindowController(MainWindow view, MainViewModel viewModel)
         {
             _view = view;
-            _viewModel = new MainViewModel();
+            _viewModel = viewModel;
             _cameraService = new CameraService();
             _barcodeReaderService = new BarcodeReaderService();
 
@@ -34,7 +34,6 @@ namespace Programowanie.Controllers
         public void OnProductNameChanged()
         {
             _view.ProductNameChange.Visibility = Visibility.Visible;
-            _view.ProductName.Text = "Wpisujesz: " + _view.ProductNameChange.Text;
 
             _debouncer.Debounce(() =>
             {
