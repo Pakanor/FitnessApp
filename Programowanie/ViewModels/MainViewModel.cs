@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using Programowanie.Services;
+using System.Windows;
+using Newtonsoft.Json;
 namespace Programowanie.ViewModels
 
 {
@@ -70,18 +72,23 @@ namespace Programowanie.ViewModels
             {
                 ErrorMessage = ""; // Resetowanie błędu
                 var product = await _productService.GetProductFromApiName(name);
+
                 if (product != null)
                 {
+
                     ProductBrand = product.brands;
                     ProductName = product.product_name;
+
                 }
                 else
                 {
+                    MessageBox.Show("Produkt nie znaleziony!", "Błąd");
                     ErrorMessage = "Product not found!";
                 }
             }
             catch (Exception ex)
             {
+                MessageBox.Show($"Błąd w LoadProductByName:\n{ex.Message}", "Błąd");
                 ErrorMessage = "Error searching product: " + ex.Message;
             }
         }

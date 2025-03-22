@@ -19,8 +19,7 @@ namespace Programowanie.Controllers
         private bool _disposed = false;
         private readonly Debouncer _debouncer = new Debouncer(500); // Opóźnienie 500ms
 
-
-        public MainWindowController(MainWindow view)
+        public MainWindowController(MainWindow view, MainViewModel viewModel)
         {
             _view = view;
             _viewModel = new MainViewModel();
@@ -29,7 +28,29 @@ namespace Programowanie.Controllers
 
             _cameraService.FrameReceived += CameraService_FrameReceived;
             _barcodeReaderService.BarcodeDetected += OnBarcodeDetected;
+            _view.DataContext = _viewModel;
         }
+
+        public void OnProductNameChanged()
+        {
+            _view.ProductNameChange.Visibility = Visibility.Visible;
+            _view.ProductName.Text = "Wpisujesz: " + _view.ProductNameChange.Text;
+
+            _debouncer.Debounce(() =>
+            {
+                _view.Dispatcher.Invoke(async () =>
+                {
+
+                    string productName = _view.ProductNameChange.Text.Trim();
+                    if (productName.Length > 3)
+                    {
+                        _ = _viewModel.LoadProductByName(productName);
+
+                    }
+                });
+            });
+        }
+
 
         private void CameraService_FrameReceived(object sender, Bitmap e)
         {
@@ -67,6 +88,8 @@ namespace Programowanie.Controllers
             ResetUI("start");
         }
 
+        
+
         private void ResetUI(string mode)
         {
             _view.startPanel.Visibility = (mode == "start") ? Visibility.Visible : Visibility.Collapsed;
@@ -86,7 +109,6 @@ namespace Programowanie.Controllers
                 _disposed = true;
             }
         }
-        
-        
     }
+
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Windows;
 using Newtonsoft.Json;
 
 namespace Programowanie.Services
@@ -53,38 +54,39 @@ namespace Programowanie.Services
             {
                 string url = $"https://world.openfoodfacts.org/cgi/search.pl?search_terms={Uri.EscapeDataString(productName)}&search_simple=1&action=process&json=1";
 
+
                 var response = await _client.GetStringAsync(url);
 
 
-                // Zdeserializowanie odpowiedzi JSON do obiektu dynamicznego
                 dynamic apiResponse = JsonConvert.DeserializeObject(response);
 
                 if (apiResponse != null && apiResponse.products != null && apiResponse.products.Count > 0)
                 {
                     dynamic mostPopularProduct = null;
-                    List<dynamic> popularProducts = new List<dynamic>();
 
                     foreach (var product in apiResponse.products)
                     {
-                        if (mostPopularProduct == null || product.popularity_key > mostPopularProduct.popularity_key)
+                        if (mostPopularProduct == null || (product.popularity_key != null && product.popularity_key > mostPopularProduct.popularity_key))
                         {
                             mostPopularProduct = product;
                         }
                     }
+
                     return mostPopularProduct;
                 }
                 else
                 {
-                    Console.WriteLine("Brak danych produktu.");
-                    return null; // Brak danych, zwróć null
+                    MessageBox.Show("Brak produktów w odpowiedzi API!", "Błąd");
+                    return null;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Błąd: {ex.Message}"); // Obsługa błędów
-                return null; // Zwrócenie null w przypadku błędu
+                MessageBox.Show($"Błąd pobierania danych z API:\n{ex.Message}", "Błąd");
+                return null;
             }
-        }
+        
+    }
 
 
     }
