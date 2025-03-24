@@ -27,43 +27,17 @@ namespace Programowanie
 
     public partial class MainWindow : Window
     {
-        private ICameraService _cameraService; // Zmienna przechowująca instancję serwisu kamery
         private MainViewModel _viewModel;
-        private BarcodeReaderService _barcodeReaderService;
         private readonly MainWindowController _controller;
 
         public MainWindow()
         {
             InitializeComponent();
             _viewModel = new MainViewModel();
-            DataContext = _viewModel;
-            _cameraService = new CameraService();
-            _cameraService.FrameReceived += CameraService_FrameReceived;
-            _barcodeReaderService = new BarcodeReaderService();
-            _barcodeReaderService.BarcodeDetected += OnBarcodeDetected;
             _controller = new MainWindowController(this, _viewModel);
         }
 
-        private void CameraService_FrameReceived(object sender, System.Drawing.Bitmap e)
-        {
-            // Kiedy otrzymujemy nową klatkę, aktualizujemy interfejs użytkownika
-            Dispatcher.Invoke(() =>
-            {
-                CameraPreview.Source = _barcodeReaderService.ConvertBitmapToBitmapImage(e); // Aktualizacja obrazu
-                _barcodeReaderService.DecodeBarcode(e); // Wywołanie skanowania
-            });
-        }
-
-        private async void OnBarcodeDetected(object sender, string barcode)
-        {
-            // Wywołanie po wykryciu kodu kreskowego
-            await Dispatcher.Invoke(async () =>
-            {
-                BarcodeResult.Text = "Kod: " + barcode;
-                await _viewModel.LoadProductByBarcode(barcode);
-                _cameraService.StopCamera();  // Zatrzymanie kamery
-            });
-        }
+       
 
         // Przycisk uruchamiający skanowanie
         private void StartScanning_Click(object sender, RoutedEventArgs e)
@@ -88,14 +62,7 @@ namespace Programowanie
         }
 
         // Zatrzymanie kamery przy zamknięciu aplikacji
-        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
-        {
-            base.OnClosing(e);
-            if (_cameraService != null)
-            {
-                _cameraService.StopCamera();  // Zatrzymaj kamerę, jeśli jest aktywna
-            }
-        }
+        
     }
 
 
