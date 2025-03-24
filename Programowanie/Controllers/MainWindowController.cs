@@ -85,6 +85,7 @@ namespace Programowanie.Controllers
         public void BackToStart()
         {
             ResetUI("start");
+            _cameraService.StopCamera();
         }
 
         
@@ -94,7 +95,7 @@ namespace Programowanie.Controllers
             _view.startPanel.Visibility = (mode == "start") ? Visibility.Visible : Visibility.Collapsed;
             _view.InputPanel.Visibility = (mode == "add_product") ? Visibility.Visible : Visibility.Collapsed;
             _view.CameraPreview.Visibility = (mode == "scan") ? Visibility.Visible : Visibility.Collapsed;
-            _view.BackButton.Visibility = (mode == "add_product") ? Visibility.Visible : Visibility.Collapsed;
+            _view.BackButton.Visibility = (mode == "add_product" || mode == "scan") ? Visibility.Visible : Visibility.Collapsed;
             _view.BarcodeResult.Text = "";
         }
 
