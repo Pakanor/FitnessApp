@@ -49,20 +49,23 @@
 
         <Grid Grid.Row="3">
             <ListBox x:Name="ProductList" ItemsSource="{Binding Products}" 
-             Margin="10,50,10,10" Height="200"
-             ScrollViewer.VerticalScrollBarVisibility="Auto">
+         SelectedItem="{Binding SelectedProduct, Mode=TwoWay}"
+         Margin="10,50,10,10" Height="200"
+         ScrollViewer.VerticalScrollBarVisibility="Auto"
+         Visibility="Collapsed"
+         SelectionChanged="ProductList_SelectionChanged"
+                     PreviewMouseLeftButtonDown="ProductList_PreviewMouseLeftButtonDown">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Vertical">
                             <TextBlock Text="{Binding ProductName}" FontWeight="Bold" />
                             <TextBlock Text="{Binding Brands}" FontStyle="Italic"/>
                             <TextBlock Text="{Binding Nutriments.Energy}" FontStyle="Italic" />
-
-
                         </StackPanel>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+
         </Grid>
     </Grid>
 

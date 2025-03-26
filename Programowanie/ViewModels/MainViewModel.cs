@@ -14,7 +14,7 @@ using Programowanie.Models;
 namespace Programowanie.ViewModels
 
 {
-    public class MainViewModel : INotifyPropertyChanged
+    public class MainViewModel : BaseViewModel
     {
 
         private readonly ProductServiceAPI _productService;
@@ -23,11 +23,15 @@ namespace Programowanie.ViewModels
 
         private string _errorMessage;
         private Product _selectedProduct;
+
+        //For binding
         public string ProductName
         {
             get => _productName;
             set => SetProperty(ref _productName, value);
         }
+        //For binding
+
 
         public string ProductBrand
         {
@@ -36,7 +40,7 @@ namespace Programowanie.ViewModels
         }
 
 
-
+        //Using for List in UI
         private ObservableCollection<Product> _products = new ObservableCollection<Product>();
         public ObservableCollection<Product> Products
         {
@@ -71,7 +75,7 @@ namespace Programowanie.ViewModels
 
             try
             {
-                ErrorMessage = ""; // Resetowanie błędu
+                ErrorMessage = ""; 
                 var product = await _productService.GetProductFromApiBarcode(barcode);
                 if (product != null)
                 {
@@ -93,7 +97,7 @@ namespace Programowanie.ViewModels
         {
             try
             {
-                ErrorMessage = ""; // Resetowanie błędu
+                ErrorMessage = ""; 
                 var productList = await _productService.GetProductFromApiName(name);
 
                 Products.Clear();
@@ -108,7 +112,7 @@ namespace Programowanie.ViewModels
                 if (Products.Any())
                 {
 
-                    SelectedProduct = Products.First(); // Automatycznie wybieramy pierwszy produkt
+                    SelectedProduct = Products.First(); 
                 }
                 else
                 {
@@ -128,18 +132,8 @@ namespace Programowanie.ViewModels
 
 
 
-        private void SetProperty<T>(ref T field, T value, [System.Runtime.CompilerServices.CallerMemberName] string propertyName = null)
-        {
-            if (!Equals(field, value))
-            {
-                field = value;
-                OnPropertyChanged(propertyName);
-            }
-        }
-        protected void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
+        // Setting the 
+       
 
     }
 }
