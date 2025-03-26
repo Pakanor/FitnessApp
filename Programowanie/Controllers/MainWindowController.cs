@@ -7,6 +7,9 @@ using ZXing;
 using System.Windows.Threading;
 using Programowanie.Helpers;
 using System.Windows.Controls;
+using Programowanie.Models;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Programowanie.Controllers
 {
@@ -18,6 +21,7 @@ namespace Programowanie.Controllers
         private readonly BarcodeReaderService _barcodeReaderService;
         private bool _disposed = false;
         private readonly Debouncer _debouncer = new Debouncer(500); // Opóźnienie 500ms
+        private bool _userClicked = false;
 
         public MainWindowController(MainWindow view, MainViewModel viewModel)
         {
@@ -29,6 +33,7 @@ namespace Programowanie.Controllers
             _cameraService.FrameReceived += CameraService_FrameReceived;
             _barcodeReaderService.BarcodeDetected += OnBarcodeDetected;
             _view.DataContext = _viewModel;
+
         }
 
         public void OnProductNameChanged()
@@ -51,6 +56,7 @@ namespace Programowanie.Controllers
         }
 
 
+        //For working of the camera
         private void CameraService_FrameReceived(object sender, Bitmap e)
         {
             _view.Dispatcher.Invoke(() =>
@@ -60,6 +66,7 @@ namespace Programowanie.Controllers
             });
         }
 
+        //For working of the BarcodeDetection
         private async void OnBarcodeDetected(object sender, string barcode)
         {
             await _view.Dispatcher.Invoke(async () =>
@@ -70,6 +77,7 @@ namespace Programowanie.Controllers
             });
         }
 
+        //UI
         public void StartScanning()
         {
             _cameraService.StartCamera();
@@ -88,7 +96,41 @@ namespace Programowanie.Controllers
             _cameraService.StopCamera();
         }
 
-        
+        public void ProductList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!_userClicked || e.AddedItems.Count == 0) return; // Ignorujemy zmiany, jeśli nie było kliknięcia
+
+            if (_view.ProductList.SelectedItem is Product selectedProduct)
+            {
+                var detailsWindow = new ProductDetailsWindow(selectedProduct);
+
+                if (detailsWindow.ShowDialog() == true)
+                {
+                    MessageBox.Show($"Wybrano: {selectedProduct.ProductName}, Ilość: {detailsWindow.Grams}g");
+                }
+
+                _view.ProductList.SelectedItem = null; // Wyczyść zaznaczenie po zamknięciu okna
+            }
+
+            _userClicked = false; // Resetujemy flagę po wyborze
+        }
+
+        public void ProductList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // Sprawdzenie, czy kliknięto na element listy
+            var source = e.OriginalSource as DependencyObject;
+            while (source != null && !(source is ListBoxItem))
+            {
+                source = VisualTreeHelper.GetParent(source);
+            }
+
+            if (source != null)
+            {
+                _userClicked = true; // Ustawiamy flagę tylko jeśli kliknięto w element listy
+            }
+        }
+
+
 
         private void ResetUI(string mode)
         {
@@ -96,6 +138,8 @@ namespace Programowanie.Controllers
             _view.InputPanel.Visibility = (mode == "add_product") ? Visibility.Visible : Visibility.Collapsed;
             _view.CameraPreview.Visibility = (mode == "scan") ? Visibility.Visible : Visibility.Collapsed;
             _view.BackButton.Visibility = (mode == "add_product" || mode == "scan") ? Visibility.Visible : Visibility.Collapsed;
+            _view.ProductList.Visibility = (mode == "add_product") ? Visibility.Visible : Visibility.Collapsed;
+
             _view.BarcodeResult.Text = "";
         }
 

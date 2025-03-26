@@ -21,6 +21,7 @@ using Programowanie.Interfaces;
 using Programowanie.ViewModels;
 using Programowanie.Controllers;
 using Programowanie.Helpers;
+using System.Windows.Input;
 
 namespace Programowanie
 {
@@ -37,31 +38,38 @@ namespace Programowanie
             _controller = new MainWindowController(this, _viewModel);
         }
 
-       
+        public void ProductList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _controller.ProductList_SelectionChanged(sender, e);
+        }
 
-        // Przycisk uruchamiający skanowanie
+        public void ProductList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            _controller.ProductList_PreviewMouseLeftButtonDown(sender, e);
+        }
+        // Buttons to start scanning
         private void StartScanning_Click(object sender, RoutedEventArgs e)
         {
-            _controller.StartScanning();  // Wywołanie logiki skanowania w kontrolerze
+            _controller.StartScanning();  
         }
 
-        // Obsługuje zmiany w polu tekstowym
+        // Text changes 
         private async void ProductName_TextChanged(object sender, TextChangedEventArgs e)
         {
-            _controller.OnProductNameChanged();  // Zlecenie obsługi w kontrolerze
+            _controller.OnProductNameChanged();  
         }
 
+        //Turns on the UI for adding product
         private void AddProduct_Click(object sender, RoutedEventArgs e)
         {
-            _controller.AddProduct();  // Dodanie produktu
+            _controller.AddProduct();  
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            _controller.BackToStart();  // Powrót do ekranu startowego
+            _controller.BackToStart();  
         }
 
-        // Zatrzymanie kamery przy zamknięciu aplikacji
         
     }
 
