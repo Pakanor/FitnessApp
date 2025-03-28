@@ -5,7 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Programowanie"
         mc:Ignorable="d"
-        Title="Barcode Scanner" Height="600" Width="600">
+                xmlns:Programowanie="clr-Programowanie:WpfApp.ViewModels" 
+    Title="Barcode Scanner" Height="600" Width="600"
+       
+        >
+   
 
     <Grid Margin="0,31,0,0">
         <Grid.RowDefinitions>
@@ -16,45 +20,44 @@
         </Grid.RowDefinitions>
 
         <!-- Strona startowa (przyciski) -->
-        <StackPanel x:Name="startPanel" Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="0">
-            <Button Content="Zeskanuj produkt" Click="StartScanning_Click" Width="150" Height="40" Margin="10"/>
+        <!-- Strona startowa (przyciski) -->
+        <StackPanel x:Name="startPanel" Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="0" Visibility="{Binding UIStateManager.StartPanelVisibility}">
+            <Button Content="Start Scanning" Command="{Binding StartScanningCommand}" Width="150" Height="50" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10" />
             <Button Content="Wpisz nazwę produktu" Click="AddProduct_Click" Width="150" Height="40" Margin="10"/>
         </StackPanel>
-
         <!-- Strona z formularzem do dodania produktu -->
-        <StackPanel x:Name="InputPanel" Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="1" Visibility="Collapsed">
+        <StackPanel x:Name="InputPanel" Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="1" Visibility="Visible">
             <TextBox Width="200" Height="40" Margin="10" Name="ProductNameChange" TextChanged="ProductName_TextChanged"/>
         </StackPanel>
 
+
         <!-- Strzałka w lewym górnym rogu (tylko widoczna na formularzu) -->
         <Button x:Name="BackButton" Content="←" Click="BackButton_Click" Width="50" Height="50" Margin="10" 
-            HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="20" Background="Transparent" BorderBrush="Transparent" Visibility="Collapsed"/>
+            HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="20" Background="Transparent" BorderBrush="Transparent" Visibility="{Binding UIStateManager.BackButtonVisibility}"/>
 
         <!-- Strona dla kamery -->
         <Grid Grid.Row="2">
-            <Image Name="CameraPreview" Width="500" Height="300" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+            <Image Source="{Binding CameraViewModel.CameraPreviewImage}" Width="640" Height="480" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="10,80,10,10"  Visibility="{Binding UIStateManager.ScanVisibility}"/>
         </Grid>
 
         <!-- Wynik zeskanowanego kodu -->
+        <TextBlock Text="{Binding CameraViewModel.BarcodeResult}" FontSize="16" VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="10,10,10,50"  Visibility="{Binding UIStateManager.ScanVisibility}"/>
 
-        <TextBlock Name="BarcodeResult" FontSize="10" Foreground="Red" 
-           VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="10" 
-           Text="{Binding ProductName}"/>
         <TextBlock Name="ErrorTextBlock" FontSize="12" Foreground="Red"
    VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="10"
    Text="{Binding ErrorMessage}" Visibility="{Binding ErrorMessage}"/>
         <Grid Grid.Row="2">
         </Grid>
 
-
         <Grid Grid.Row="3">
-            <ListBox x:Name="ProductList" ItemsSource="{Binding Products}" 
-         SelectedItem="{Binding SelectedProduct, Mode=TwoWay}"
+            <ListBox x:Name="ProductList"
+         ItemsSource="{Binding Products}"
+         SelectedItem="{Binding ProductViewModel.SelectedProduct, Mode=TwoWay}"
          Margin="10,50,10,10" Height="200"
          ScrollViewer.VerticalScrollBarVisibility="Auto"
-         Visibility="Collapsed"
          SelectionChanged="ProductList_SelectionChanged"
-                     PreviewMouseLeftButtonDown="ProductList_PreviewMouseLeftButtonDown">
+         PreviewMouseLeftButtonDown="ProductList_PreviewMouseLeftButtonDown"
+         Visibility="{Binding UIStateManager.InputVisibility}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Vertical">
@@ -65,7 +68,6 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-
         </Grid>
     </Grid>
 

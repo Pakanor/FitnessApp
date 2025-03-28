@@ -1,139 +1,89 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.ComponentModel;
-using System.Threading.Tasks;
-using Programowanie.Services;
+﻿using Programowanie.Helpers;
+using Programowanie.Interfaces;
 using System.Windows;
-using Newtonsoft.Json;
-using System.Collections.ObjectModel;
-using Programowanie.Models;
-namespace Programowanie.ViewModels
+using System.Windows.Input;
+using System.Windows.Threading;
 
+namespace Programowanie.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
+        private readonly CameraViewModel _cameraViewModel;
 
-        private readonly ProductServiceAPI _productService;
-        private string _productName;
-        private string _productBrand;
-
-        private string _errorMessage;
-        private Product _selectedProduct;
-
-        //For binding
-        public string ProductName
-        {
-            get => _productName;
-            set => SetProperty(ref _productName, value);
-        }
-        //For binding
+        private readonly ProductViewModel _productViewModel;
+        private readonly Debouncer _debouncer = new Debouncer(500); // Opóźnienie 500ms
+        private readonly UIStateManager _uiStateManager;
+        private Dispatcher _dispatcher; // Nowa zmienna na Dispatcher
 
 
-        public string ProductBrand
-        {
-            get => _productBrand;
-            set => SetProperty(ref _productBrand, value);
-        }
 
 
-        //Using for List in UI
-        private ObservableCollection<Product> _products = new ObservableCollection<Product>();
-        public ObservableCollection<Product> Products
-        {
-            get => _products;
-            set
-            {
-                _products = value;
-                OnPropertyChanged(nameof(Products)); // Powiadomienie o zmianie listy
-            }
-        }
-        public event PropertyChangedEventHandler PropertyChanged;
-        public string ErrorMessage
-        {
-            get => _errorMessage;
-            set => SetProperty(ref _errorMessage, value);
-        }
-        public Product SelectedProduct
-        {
-            get => _selectedProduct;
-            set => SetProperty(ref _selectedProduct, value);
-        }
+        public CameraViewModel CameraViewModel => _cameraViewModel;
+        public ProductViewModel ProductViewModel => _productViewModel;
+        public UIStateManager UIStateManager => _uiStateManager;
 
-
+        public ICommand StartScanningCommand { get; }
+        public ICommand AddProductCommand { get; }
+        public ICommand BackToStartCommand { get; }
         public MainViewModel()
         {
-            _productService = new ProductServiceAPI();
+            ICameraService cameraService = new CameraService();
+            BarcodeReaderService barcodeReaderService = new BarcodeReaderService();
 
+            _cameraViewModel = new CameraViewModel(cameraService, barcodeReaderService);
+            _productViewModel = new ProductViewModel();
+            _uiStateManager = new UIStateManager();
+
+
+            // Subskrypcja na zdarzenie BarcodeDetected z CameraViewModel
+            _cameraViewModel.BarcodeDetected += OnBarcodeDetected;
+
+            // Komendy
+            StartScanningCommand = new RelayCommand(StartScanning);
+            AddProductCommand = new RelayCommand(AddProduct);
+            BackToStartCommand = new RelayCommand(BackToStart);
         }
 
-        public async Task LoadProductByBarcode(string barcode)
+        // Obsługuje zdarzenie, gdy kod kreskowy zostanie wykryty
+        private void OnBarcodeDetected(object sender, string barcode)
         {
-
-            try
-            {
-                ErrorMessage = ""; 
-                var product = await _productService.GetProductFromApiBarcode(barcode);
-                if (product != null)
-                {
-                    ProductBrand = product.brands;
-                    ProductName = product.product_name;
-                }
-                else
-                {
-                    ErrorMessage = "Product not found!";
-                }
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = "Error scanning barcode: " + ex.Message;
-            }
+            // Załadowanie produktu po zeskanowanym kodzie
+            _productViewModel.LoadProductByBarcode(barcode);
         }
-
-        public async Task LoadProductByName(string name)
+       
+        public void SetDispatcher(Dispatcher dispatcher)
         {
-            try
-            {
-                ErrorMessage = ""; 
-                var productList = await _productService.GetProductFromApiName(name);
-
-                Products.Clear();
-                MessageBox.Show(JsonConvert.SerializeObject(productList, Formatting.Indented));
-
-                foreach (var product in productList)
-                {
-                    Products.Add(product);
-
-                }
-
-                if (Products.Any())
-                {
-
-                    SelectedProduct = Products.First(); 
-                }
-                else
-                {
-                    ErrorMessage = "Product not found!";
-                    MessageBox.Show("Produkt nie znaleziony!", "Błąd");
-                }
-            }
-            catch (Exception ex)
-            {
-                ErrorMessage = "Error searching product: " + ex.Message;
-                MessageBox.Show($"Błąd w LoadProductByName:\n{ex.Message}", "Błąd");
-            }
+            _dispatcher = dispatcher;
         }
-
-
-
-
-
-
-        // Setting the 
        
 
+        // Rozpoczęcie skanowania
+        public void StartScanning()
+        {
+            CameraViewModel.StartCamera();
+            UIStateManager.SetScanMode(); // Przełączamy na tryb skanowania
+
+        }
+
+        // Zatrzymanie skanowania
+        public void StopScanning()
+        {
+            CameraViewModel.StopCamera();
+        }
+        public void AddProduct()
+        {
+            CameraViewModel.StopCamera();
+            UIStateManager.SetInputMode(); // Przełączamy na tryb wpisywania produktu
+
+        }
+        public void BackToStart()
+        {
+            CameraViewModel.StopCamera();
+            UIStateManager.SetStartMode(); // Przełączamy na tryb startowy
+
+        }
+
+
     }
+
 }

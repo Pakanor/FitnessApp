@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Programowanie.Interfaces
 {
-    internal interface ICameraService
+    public interface ICameraService
     {
         event EventHandler<Bitmap> FrameReceived;
         void StartCamera();
