@@ -1,77 +1,103 @@
-﻿using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Windows;
-using System.Windows.Media.Imaging;
-using AForge.Video;
-using AForge.Video.DirectShow;
-using ZXing;
-using ZXing.QrCode;
-using ZXing.Common;
-using ZXing.Windows.Compatibility;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using System.Reflection.Emit;
-using System.Windows.Threading;
-using Programowanie.Services;
-using Programowanie.Interfaces;
-using Programowanie.ViewModels;
-using Programowanie.Controllers;
-using Programowanie.Helpers;
 using System.Windows.Input;
+using System.Windows.Media;
+using Programowanie.Helpers;
+using Programowanie.Models;
+using Programowanie.ViewModels;
 
 namespace Programowanie
 {
-
     public partial class MainWindow : Window
     {
         private MainViewModel _viewModel;
-        private readonly MainWindowController _controller;
+        private bool _userClicked = false;
+        private ProductViewModel _Products;
+        private readonly Debouncer _debouncer = new Debouncer(500); // Opóźnienie 500ms
+
+
+
+
 
         public MainWindow()
         {
             InitializeComponent();
+
+            // Ustawienie DataContext dla MainWindow
             _viewModel = new MainViewModel();
-            _controller = new MainWindowController(this, _viewModel);
+            this.DataContext = _viewModel;
+            _viewModel.CameraViewModel.SetDispatcher(this.Dispatcher);
+            _Products = new ProductViewModel();
+
+
         }
 
+        // Przykładowe metody, które już nie będą potrzebne
         public void ProductList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            _controller.ProductList_SelectionChanged(sender, e);
+            if (!_userClicked || e.AddedItems.Count == 0) return; // Ignorujemy zmiany, jeśli nie było kliknięcia
+
+            if (ProductList.SelectedItem is Product selectedProduct)
+            {
+                var detailsWindow = new ProductDetailsWindow(selectedProduct);
+
+                if (detailsWindow.ShowDialog() == true)
+                {
+                    MessageBox.Show($"Wybrano: {selectedProduct.ProductName}, Ilość: {detailsWindow.Grams}g");
+                }
+
+                ProductList.SelectedItem = null; // Wyczyść zaznaczenie po zamknięciu okna
+            }
+
+            _userClicked = false; // Resetujemy flagę po wyborze
         }
 
         public void ProductList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            _controller.ProductList_PreviewMouseLeftButtonDown(sender, e);
+            // Sprawdzenie, czy kliknięto na element listy
+            var source = e.OriginalSource as DependencyObject;
+            while (source != null && !(source is ListBoxItem))
+            {
+                source = VisualTreeHelper.GetParent(source);
+            }
+
+            if (source != null)
+            {
+                _userClicked = true; // Ustawiamy flagę tylko jeśli kliknięto w element listy
+            }
         }
-        // Buttons to start scanning
+
+        // Przykładowe metody do przycisków, będą teraz obsługiwane przez komendy
         private void StartScanning_Click(object sender, RoutedEventArgs e)
         {
-            _controller.StartScanning();  
-        }
-
-        // Text changes 
-        private async void ProductName_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            _controller.OnProductNameChanged();  
-        }
-
-        //Turns on the UI for adding product
-        private void AddProduct_Click(object sender, RoutedEventArgs e)
-        {
-            _controller.AddProduct();  
-        }
-
-        private void BackButton_Click(object sender, RoutedEventArgs e)
-        {
-            _controller.BackToStart();  
+            _viewModel.StartScanning(); // Komenda powiązana z przyciskiem
         }
 
         
+
+        private void AddProduct_Click(object sender, RoutedEventArgs e)
+        {
+            _viewModel.AddProduct();  // Komenda powiązana z przyciskiem
+        }
+        private async void ProductName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            _debouncer.Debounce(() =>
+            {
+                Dispatcher.Invoke(async () =>
+                {
+
+                    string productName = ProductNameChange.Text.Trim();
+                    if (productName.Length > 3)
+                    {
+                        _ = _Products.LoadProductByName(productName);
+
+                    }
+                });
+            });
+        }
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            _viewModel.BackToStart();  // Komenda powiązana z przyciskiem
+        }
     }
-
-
 }
