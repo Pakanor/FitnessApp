@@ -1,5 +1,7 @@
 ﻿using Programowanie.Helpers;
 using Programowanie.Interfaces;
+using Programowanie.Models;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
@@ -11,15 +13,14 @@ namespace Programowanie.ViewModels
         private readonly CameraViewModel _cameraViewModel;
 
         private readonly ProductViewModel _productViewModel;
-        private readonly Debouncer _debouncer = new Debouncer(500); // Opóźnienie 500ms
         private readonly UIStateManager _uiStateManager;
-        private Dispatcher _dispatcher; // Nowa zmienna na Dispatcher
 
 
 
 
         public CameraViewModel CameraViewModel => _cameraViewModel;
         public ProductViewModel ProductViewModel => _productViewModel;
+
         public UIStateManager UIStateManager => _uiStateManager;
 
         public ICommand StartScanningCommand { get; }
@@ -51,10 +52,7 @@ namespace Programowanie.ViewModels
             _productViewModel.LoadProductByBarcode(barcode);
         }
        
-        public void SetDispatcher(Dispatcher dispatcher)
-        {
-            _dispatcher = dispatcher;
-        }
+       
        
 
         // Rozpoczęcie skanowania

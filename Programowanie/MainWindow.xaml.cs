@@ -27,8 +27,7 @@ namespace Programowanie
             _viewModel = new MainViewModel();
             this.DataContext = _viewModel;
             _viewModel.CameraViewModel.SetDispatcher(this.Dispatcher);
-            _Products = new ProductViewModel();
-
+            _Products = _viewModel.ProductViewModel;
 
         }
 
