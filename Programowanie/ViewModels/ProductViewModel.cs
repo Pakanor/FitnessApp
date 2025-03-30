@@ -16,6 +16,7 @@ namespace Programowanie.ViewModels
         private Product _selectedProduct;
         private string _errorMessage;
         private string _productName;
+       
 
         public string ProductName
         {
@@ -31,12 +32,16 @@ namespace Programowanie.ViewModels
         }
 
         // Metoda wyświetlająca MessageBox z tekstem
-       
+
 
         public ObservableCollection<Product> Products
         {
             get => _products;
-            set => SetProperty(ref _products, value);
+            set
+            {
+                _products = value;
+                OnPropertyChanged(nameof(Products)); // Powiadomienie o zmianie listy
+            }
         }
 
         public Product SelectedProduct
@@ -54,7 +59,7 @@ namespace Programowanie.ViewModels
         public ProductViewModel()
         {
             _productService = new ProductServiceAPI();
-            _products = new ObservableCollection<Product>();
+            Products = new ObservableCollection<Product> { };
         }
 
         // Ładowanie produktu po kodzie kreskowym
@@ -87,21 +92,33 @@ namespace Programowanie.ViewModels
             try
             {
                 ErrorMessage = "";
+
                 var productList = await _productService.GetProductFromApiName(name);
 
-                Products.Clear();
-                MessageBox.Show(JsonConvert.SerializeObject(productList, Formatting.Indented));
-
-                foreach (var product in productList)
+                if (productList != null)
                 {
-                    Products.Add(product);
+                    // Pokazujemy komunikat, ile produktów zwróciło API
+                    MessageBox.Show($"API zwróciło {productList.Count} produktów.", "Informacja");
 
-                }
+                    // Użyj Dispatcher, aby zaktualizować kolekcję w głównym wątku UI
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        // Czyścimy dotychczasowe produkty
+                        Products.Clear();
 
-                if (Products.Any())
-                {
+                        // Dodajemy wszystkie nowe produkty
+                        foreach (var product in productList)
+                        {
+                            Products.Add(product);
+                            // MessageBox.Show(product.ProductName);
 
-                    SelectedProduct = Products.First();
+                        }
+                        MessageBox.Show($"Liczba produktów w kolekcji: {Products.Count}");
+
+
+                        // Jeśli produkty zostały dodane, ustawiamy pierwszy jako wybrany
+                        SelectedProduct =Products.FirstOrDefault();
+                    });
                 }
                 else
                 {
