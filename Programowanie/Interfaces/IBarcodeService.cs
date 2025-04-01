@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
 
-namespace Programowanie.Interfaces
+namespace FitnessApp.Interfaces
 {
     internal interface IBarcodeService
     {

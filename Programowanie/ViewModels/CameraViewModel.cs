@@ -1,9 +1,10 @@
-﻿using Programowanie.Interfaces;
+﻿using FitnessApp.Interfaces;
 using System.Drawing;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using FitnessApp.Services;
 
-namespace Programowanie.ViewModels
+namespace FitnessApp.ViewModels
 {
     public class CameraViewModel : BaseViewModel
     {

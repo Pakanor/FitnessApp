@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Programowanie.Interfaces
+namespace FitnessApp.Interfaces
 {
     public interface ICameraService
     {

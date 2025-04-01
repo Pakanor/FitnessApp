@@ -1,4 +1,4 @@
-﻿using Programowanie.ViewModels;
+﻿using FitnessApp.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace Programowanie.Helpers
+namespace FitnessApp.Helpers
 {
     public class UIStateManager : BaseViewModel
     {

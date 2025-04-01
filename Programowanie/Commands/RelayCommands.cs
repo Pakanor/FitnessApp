@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace Programowanie.ViewModels
+namespace FitnessApp.ViewModels
 {
     public class RelayCommand : ICommand
     {

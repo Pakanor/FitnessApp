@@ -1,12 +1,14 @@
-﻿using Programowanie.Helpers;
-using Programowanie.Interfaces;
-using Programowanie.Models;
+﻿using FitnessApp.Helpers;
+using FitnessApp.Interfaces;
+using FitnessApp.Models;
+using FitnessApp.ViewModels;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
+using FitnessApp.Services;
 
-namespace Programowanie.ViewModels
+namespace FitnessApp.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {

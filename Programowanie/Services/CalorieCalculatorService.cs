@@ -1,12 +1,12 @@
-﻿using Programowanie.Interfaces;
-using Programowanie.Models;
+﻿using FitnessApp.Interfaces;
+using FitnessApp.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Programowanie.Services
+namespace FitnessApp.Services
 {
     public class CalorieCalculatorService : ICalorieCalculatorService
     {

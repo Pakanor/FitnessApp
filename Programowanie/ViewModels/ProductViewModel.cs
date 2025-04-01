@@ -2,12 +2,12 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Programowanie.Models;
-using Programowanie.Services;
+using FitnessApp.Models;
+using FitnessApp.Services;
 using System.Windows;
 using Newtonsoft.Json;
 
-namespace Programowanie.ViewModels
+namespace FitnessApp.ViewModels
 {
     public class ProductViewModel : BaseViewModel
     {
