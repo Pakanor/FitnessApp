@@ -1,5 +1,7 @@
 ﻿using System.Windows;
 using Programowanie.Models; // Upewnij się, że masz dostęp do klasy Product
+using Programowanie.ViewModels;
+using Programowanie.Services;
 
 namespace Programowanie
 {
@@ -12,23 +14,10 @@ namespace Programowanie
         {
             InitializeComponent();
             SelectedProduct = product;
-            DataContext = product; // Powiązanie danych z UI
+            DataContext = new ProductDetailsViewModel(new CalorieCalculatorService(), product);
             MessageBox.Show(product.ProductName);
         }
 
-        private void ConfirmButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (int.TryParse(GramsTextBox.Text, out int grams))
-            {
-                Grams = grams;
-                DialogResult = true;
-
-                Close();
-            }
-            else
-            {
-                MessageBox.Show("Podaj poprawną liczbę gramów.");
-            }
-        }
+        
     }
 }
