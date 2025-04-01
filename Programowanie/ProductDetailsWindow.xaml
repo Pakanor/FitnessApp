@@ -11,8 +11,7 @@
 
 
             <TextBlock Text="Wpisz ilość (gramy):" FontSize="14"/>
-            <TextBox Text="{Binding UserWeight, UpdateSourceTrigger=PropertyChanged}" Width="100"/>
-
+            <TextBox Text="{Binding UserWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Width="100"/>
             <Button Content="Oblicz" Command="{Binding CalculateCommand}" Margin="5"/>
             <TextBlock Text="{Binding CalculatedNutriments.Energy, StringFormat='Kalorie: {0:F1} kcal'}"/>
             <TextBlock Text="{Binding CalculatedNutriments.Proteins, StringFormat='Białko: {0:F1} g'}"/>

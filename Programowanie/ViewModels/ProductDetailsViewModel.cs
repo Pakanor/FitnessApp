@@ -27,16 +27,23 @@ namespace Programowanie.ViewModels
         public double UserWeight
         {
             get => _userWeight;
-            set { _userWeight = value; OnPropertyChanged(nameof(UserWeight)); }
+            set
+            {
+                if (_userWeight != value)
+                {
+                    _userWeight = value;
+                    OnPropertyChanged(nameof(UserWeight));
+                    CalculateNutrition(); // Automatycznie obliczaj po zmianie wartości!
+                }
+            }
         }
-
-        public ICommand CalculateCommand { get; }
 
         public ProductDetailsViewModel(ICalorieCalculatorService calorieService, Product selectedProduct)
         {
             _calorieService = calorieService;
-            Product = selectedProduct;
-            CalculateCommand = new RelayCommand(CalculateNutrition);
+            Product = selectedProduct ?? new Product { Nutriments = new Nutriments() };
+            _userWeight = 100; // Domyślna wartość dla przeliczeń
+            CalculateNutrition();
         }
 
         private void CalculateNutrition()
