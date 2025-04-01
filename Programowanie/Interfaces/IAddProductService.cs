@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace FitnessApp.Interfaces
 {
-    public interface ICalorieCalculatorService
+    public interface IAddProductService
     {
-        Nutriments CalculateForWeight(Product product, double grams);
-
+        void AddProduct(Product product);
     }
+
 }

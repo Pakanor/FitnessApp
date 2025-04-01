@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Programowanie.Models
+namespace FitnessApp.Models
 {
     public class Product
     {

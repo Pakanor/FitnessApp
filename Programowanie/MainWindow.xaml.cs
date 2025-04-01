@@ -2,11 +2,11 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using Programowanie.Helpers;
-using Programowanie.Models;
-using Programowanie.ViewModels;
+using FitnessApp.Helpers;
+using FitnessApp.Models;
+using FitnessApp.ViewModels;
 
-namespace Programowanie
+namespace FitnessApp
 {
     public partial class MainWindow : Window
     {

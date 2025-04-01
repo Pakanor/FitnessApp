@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 
-namespace Programowanie.Helpers
+namespace FitnessApp.Helpers
 {
     internal class Debouncer
     {

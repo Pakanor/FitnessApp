@@ -1,9 +1,10 @@
 ﻿using System.Windows;
-using Programowanie.Models; // Upewnij się, że masz dostęp do klasy Product
-using Programowanie.ViewModels;
-using Programowanie.Services;
+using FitnessApp.Models;
+using FitnessApp.ViewModels;
+using FitnessApp.Services;
+using FitnessApp.Services;
 
-namespace Programowanie
+namespace FitnessApp
 {
     public partial class ProductDetailsWindow : Window
     {
@@ -13,8 +14,10 @@ namespace Programowanie
         public ProductDetailsWindow(Product product)
         {
             InitializeComponent();
+            var calorieService = new CalorieCalculatorService();
+            var addProductService = new AddProductService();
             SelectedProduct = product;
-            DataContext = new ProductDetailsViewModel(new CalorieCalculatorService(), product);
+            DataContext = new ProductDetailsViewModel(calorieService, product, addProductService);
             MessageBox.Show(product.ProductName);
         }
 

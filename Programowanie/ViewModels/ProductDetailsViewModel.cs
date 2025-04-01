@@ -1,9 +1,12 @@
-﻿using System.Windows.Input;
-using Programowanie.Interfaces;
-using Programowanie.Models;
-using Programowanie.Services;
+﻿using System.Windows;
+using System.Windows.Input;
+using FitnessApp.Interfaces;
+using FitnessApp.Services;
+using FitnessApp.Interfaces;
+using FitnessApp.Models;
+using FitnessApp.Services;
 
-namespace Programowanie.ViewModels
+namespace FitnessApp.ViewModels
 {
     public class ProductDetailsViewModel : BaseViewModel
     {
@@ -11,7 +14,11 @@ namespace Programowanie.ViewModels
         private Product _product;
         private Nutriments _calculatedNutriments;
         private double _userWeight;
+        private readonly IAddProductService _addProductService;
 
+        public Product NewProduct { get; set; } = new Product(); // Tworzymy nowy produkt do edycji
+
+        public ICommand AddProductCommand { get; }
         public Product Product
         {
             get => _product;
@@ -27,16 +34,25 @@ namespace Programowanie.ViewModels
         public double UserWeight
         {
             get => _userWeight;
-            set { _userWeight = value; OnPropertyChanged(nameof(UserWeight)); }
+            set
+            {
+                if (_userWeight != value)
+                {
+                    _userWeight = value;
+                    OnPropertyChanged(nameof(UserWeight));
+                    CalculateNutrition(); // Automatycznie obliczaj po zmianie wartości!
+                }
+            }
         }
 
-        public ICommand CalculateCommand { get; }
-
-        public ProductDetailsViewModel(ICalorieCalculatorService calorieService, Product selectedProduct)
+        public ProductDetailsViewModel(ICalorieCalculatorService calorieService, Product selectedProduct, IAddProductService addProductService)
         {
             _calorieService = calorieService;
-            Product = selectedProduct;
-            CalculateCommand = new RelayCommand(CalculateNutrition);
+            Product = selectedProduct ?? new Product { Nutriments = new Nutriments() };
+            _userWeight = 100; // Domyślna wartość dla przeliczeń
+            _addProductService = addProductService;
+            AddProductCommand = new RelayCommand(AddProduct);
+            CalculateNutrition();
         }
 
         private void CalculateNutrition()
@@ -45,6 +61,13 @@ namespace Programowanie.ViewModels
             {
                 CalculatedNutriments = _calorieService.CalculateForWeight(Product, UserWeight);
             }
+        }
+        private void AddProduct()
+        {
+            _addProductService.AddProduct(NewProduct);
+            NewProduct = new Product(); // Czyścimy produkt po dodaniu
+            OnPropertyChanged(nameof(NewProduct));
+            MessageBox.Show("dodano");
         }
     }
 }

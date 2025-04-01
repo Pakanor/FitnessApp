@@ -3,9 +3,9 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows;
 using Newtonsoft.Json;
-using Programowanie.Models;
+using FitnessApp.Models;
 
-namespace Programowanie.Services
+namespace FitnessApp.Services
 {
     public class ProductServiceAPI
     {

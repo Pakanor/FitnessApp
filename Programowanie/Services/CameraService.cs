@@ -1,92 +1,95 @@
 ﻿using AForge.Video.DirectShow;
 using AForge.Video;
-using Programowanie.Interfaces;
+using FitnessApp.Interfaces;
 using System.Drawing.Imaging;
 using System.Drawing;
-using Programowanie.Services;
+using FitnessApp.Services;
 using System.Windows.Threading;
 
-public class CameraService : ICameraService
+namespace FitnessApp.Services
 {
-    private FilterInfoCollection videoDevices;
-    private VideoCaptureDevice videoSource;
-
-    public event EventHandler<Bitmap> FrameReceived;
-
-    public void StartCamera()
+    public class CameraService : ICameraService
     {
-        try
+        private FilterInfoCollection videoDevices;
+        private VideoCaptureDevice videoSource;
+
+        public event EventHandler<Bitmap> FrameReceived;
+
+        public void StartCamera()
         {
-            videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
-            if (videoDevices.Count == 0)
+            try
             {
-                throw new Exception("Brak dostępnych kamer.");
+                videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+                if (videoDevices.Count == 0)
+                {
+                    throw new Exception("Brak dostępnych kamer.");
+                }
+
+                videoSource = new VideoCaptureDevice(videoDevices[0].MonikerString);
+                videoSource.NewFrame += Video_NewFrame;
+                videoSource.Start();
             }
-
-            videoSource = new VideoCaptureDevice(videoDevices[0].MonikerString);
-            videoSource.NewFrame += Video_NewFrame;
-            videoSource.Start();
-        }
-        catch (Exception ex)
-        {
-            throw new Exception("Błąd inicjalizacji kamery: " + ex.Message);
-        }
-    }
-
-    public void StopCamera()
-    {
-        if (videoSource != null && videoSource.IsRunning)
-        {
-            videoSource.SignalToStop();  // Zatrzymanie kamery
-            videoSource = null;
-        }
-    }
-
-    public void ProcessFrame(Bitmap frame)
-    {
-        // Konwersja obrazu do odcieni szarości
-        Bitmap grayscaleBitmap = ConvertToGrayscale(frame);
-
-        // Emitowanie zdarzenia z przetworzoną klatką
-        FrameReceived?.Invoke(this, grayscaleBitmap);
-    }
-
-    private void Video_NewFrame(object sender, NewFrameEventArgs eventArgs)
-    {
-        try
-        {
-            using (Bitmap bitmap = (Bitmap)eventArgs.Frame.Clone())
+            catch (Exception ex)
             {
-                // Procesowanie klatki
-                ProcessFrame(bitmap);
+                throw new Exception("Błąd inicjalizacji kamery: " + ex.Message);
             }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Błąd przetwarzania klatki: " + ex.Message);
-        }
-    }
 
-    private Bitmap ConvertToGrayscale(Bitmap original)
-    {
-        Bitmap grayscaleBitmap = new Bitmap(original.Width, original.Height);
-        using (Graphics g = Graphics.FromImage(grayscaleBitmap))
+        public void StopCamera()
         {
-            ColorMatrix colorMatrix = new ColorMatrix(new float[][]
+            if (videoSource != null && videoSource.IsRunning)
             {
+                videoSource.SignalToStop();  // Zatrzymanie kamery
+                videoSource = null;
+            }
+        }
+
+        public void ProcessFrame(Bitmap frame)
+        {
+            // Konwersja obrazu do odcieni szarości
+            Bitmap grayscaleBitmap = ConvertToGrayscale(frame);
+
+            // Emitowanie zdarzenia z przetworzoną klatką
+            FrameReceived?.Invoke(this, grayscaleBitmap);
+        }
+
+        private void Video_NewFrame(object sender, NewFrameEventArgs eventArgs)
+        {
+            try
+            {
+                using (Bitmap bitmap = (Bitmap)eventArgs.Frame.Clone())
+                {
+                    // Procesowanie klatki
+                    ProcessFrame(bitmap);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Błąd przetwarzania klatki: " + ex.Message);
+            }
+        }
+
+        private Bitmap ConvertToGrayscale(Bitmap original)
+        {
+            Bitmap grayscaleBitmap = new Bitmap(original.Width, original.Height);
+            using (Graphics g = Graphics.FromImage(grayscaleBitmap))
+            {
+                ColorMatrix colorMatrix = new ColorMatrix(new float[][]
+                {
                 new float[] {0.3f, 0.3f, 0.3f, 0, 0},
                 new float[] {0.59f, 0.59f, 0.59f, 0, 0},
                 new float[] {0.11f, 0.11f, 0.11f, 0, 0},
                 new float[] {0, 0, 0, 1, 0},
                 new float[] {0, 0, 0, 0, 1}
-            });
+                });
 
-            using (ImageAttributes attributes = new ImageAttributes())
-            {
-                attributes.SetColorMatrix(colorMatrix);
-                g.DrawImage(original, new Rectangle(0, 0, original.Width, original.Height), 0, 0, original.Width, original.Height, GraphicsUnit.Pixel, attributes);
+                using (ImageAttributes attributes = new ImageAttributes())
+                {
+                    attributes.SetColorMatrix(colorMatrix);
+                    g.DrawImage(original, new Rectangle(0, 0, original.Width, original.Height), 0, 0, original.Width, original.Height, GraphicsUnit.Pixel, attributes);
+                }
             }
+            return grayscaleBitmap;
         }
-        return grayscaleBitmap;
     }
 }

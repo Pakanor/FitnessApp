@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Programowanie.ViewModels
+namespace FitnessApp.ViewModels
 {
     public class BaseViewModel : INotifyPropertyChanged
     {
