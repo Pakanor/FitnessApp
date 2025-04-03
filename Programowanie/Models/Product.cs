@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,8 @@ namespace FitnessApp.Models
 {
     public class Product
     {
+        public int Id { get; set; } 
+
         [JsonProperty("product_name")]
         public string ProductName { get; set; }
 
@@ -21,8 +24,10 @@ namespace FitnessApp.Models
         public Nutriments Nutriments { get; set; }
 
     }
+    [Owned]
     public class Nutriments
     {
+
         [JsonProperty("energy")]
         public double Energy { get; set; }
 
