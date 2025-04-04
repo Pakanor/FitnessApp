@@ -10,7 +10,9 @@ namespace FitnessApp.Models
 {
     public class Product
     {
-        public int Id { get; set; } 
+        [JsonIgnore]
+        public int Id { get; set; }
+
 
         [JsonProperty("product_name")]
         public string ProductName { get; set; }
@@ -21,7 +23,9 @@ namespace FitnessApp.Models
         [JsonProperty("energy_value")]
         public string EnergyValue { get; set; }
         [JsonProperty("nutriments")]
+
         public Nutriments Nutriments { get; set; }
+
 
     }
     [Owned]
@@ -45,5 +49,34 @@ namespace FitnessApp.Models
 
         [JsonProperty("salt")]
         public double Salt { get; set; }
+    }
+
+
+    public class ProductLogEntry
+    {
+        public int Id { get; set; }
+
+        public string ProductName { get; set; }
+        public string Brands { get; set; }
+
+        public double Grams { get; set; }
+
+        public double Energy { get; set; }
+        public double Fat { get; set; }
+        public double Sugars { get; set; }
+        public double Proteins { get; set; }
+        public double Salt { get; set; }
+        public string EnergyUnit { get; set; }
+
+        public DateTime LoggedAt { get; set; } = DateTime.UtcNow;
+
+        // przygotowane pod przyszłego usera
+        public int? UserId { get; set; }
+    }
+
+
+    public class User
+    {
+        public int ID { get; set; }
     }
 }

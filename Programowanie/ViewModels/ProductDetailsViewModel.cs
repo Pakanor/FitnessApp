@@ -5,6 +5,7 @@ using FitnessApp.Services;
 using FitnessApp.Interfaces;
 using FitnessApp.Models;
 using FitnessApp.Services;
+using FitnessApp.DataAccess;
 
 namespace FitnessApp.ViewModels
 {
@@ -15,6 +16,7 @@ namespace FitnessApp.ViewModels
         private Nutriments _calculatedNutriments;
         private double _userWeight;
         private readonly IAddProductService _addProductService;
+        private readonly ProductLogRepository _repository;
 
         public Product NewProduct { get; set; } = new Product(); // Tworzymy nowy produkt do edycji
 
@@ -53,6 +55,8 @@ namespace FitnessApp.ViewModels
             _addProductService = addProductService;
             AddProductCommand = new RelayCommand(AddProduct);
             CalculateNutrition();
+            _repository = new ProductLogRepository(new AppDbContext()); 
+
         }
 
         private void CalculateNutrition()
@@ -62,12 +66,26 @@ namespace FitnessApp.ViewModels
                 CalculatedNutriments = _calorieService.CalculateForWeight(Product, UserWeight);
             }
         }
-        private void AddProduct()
+        private async void AddProduct()
         {
-            _addProductService.AddProduct(NewProduct);
-            NewProduct = new Product(); // Czyścimy produkt po dodaniu
-            OnPropertyChanged(nameof(NewProduct));
-            MessageBox.Show("dodano");
+            if (Product == null || CalculatedNutriments == null)
+            {
+                MessageBox.Show("Brakuje danych do zapisania.");
+                return;
+            }
+
+            await _addProductService.AddUserLogAsync(Product, UserWeight, CalculatedNutriments);
+
+            // czyszczenie
+            Product = null;
+            UserWeight = 0;
+            CalculatedNutriments = null;
+            OnPropertyChanged(nameof(Product));
+            OnPropertyChanged(nameof(UserWeight));
+            OnPropertyChanged(nameof(CalculatedNutriments));
+
+            MessageBox.Show("Produkt został dodany do dziennika.");
         }
+
     }
 }
