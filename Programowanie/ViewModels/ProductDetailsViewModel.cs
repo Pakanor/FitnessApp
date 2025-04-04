@@ -76,6 +76,7 @@ namespace FitnessApp.ViewModels
 
             await _addProductService.AddUserLogAsync(Product, UserWeight, CalculatedNutriments);
 
+
             // czyszczenie
             Product = null;
             UserWeight = 0;
