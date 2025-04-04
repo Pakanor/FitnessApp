@@ -1,4 +1,5 @@
-﻿using FitnessApp.Interfaces;
+﻿using FitnessApp.DataAccess;
+using FitnessApp.Interfaces;
 using FitnessApp.Models;
 using System;
 using System.Collections.Generic;
@@ -12,18 +13,38 @@ namespace FitnessApp.Services
     public class AddProductService : IAddProductService
     {
         private readonly List<Product> _products;
+        private readonly ProductLogRepository _repository;
+        public Product NewProduct { get; set; } = new Product();
+
+
 
         public AddProductService()
         {
+            var context = new AppDbContext(); 
+            _repository = new ProductLogRepository(context);
             _products = new List<Product>();
         }
 
-        public void AddProduct(Product product)
+        public async Task AddUserLogAsync(Product product, double grams, Nutriments calculated)
         {
-            if (product == null)
-                throw new ArgumentNullException(nameof(product));
+            if (product == null || calculated == null)
+                throw new ArgumentNullException();
 
-            _products.Add(product); //logika do bazy
+            var entry = new ProductLogEntry
+            {
+                ProductName = product.ProductName,
+                Brands = product.Brands,
+                Grams = grams,
+                Energy = calculated.Energy,
+                Fat = calculated.Fat,
+                Sugars = calculated.Sugars,
+                Proteins = calculated.Proteins,
+                Salt = calculated.Salt,
+                EnergyUnit = "Gr",
+                LoggedAt = DateTime.UtcNow
+            };
+
+            await _repository.AddLogEntryAsync(entry); 
         }
     }
 }

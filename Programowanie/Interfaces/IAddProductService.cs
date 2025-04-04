@@ -9,7 +9,7 @@ namespace FitnessApp.Interfaces
 {
     public interface IAddProductService
     {
-        void AddProduct(Product product);
+        Task AddUserLogAsync(Product product, double grams, Nutriments calculated);
     }
 
 }
