@@ -15,6 +15,7 @@
 
             <Button x:Name="AddProductButton" Content="Add Product"
                     Command="{Binding AddProductCommand}" 
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
                     VerticalAlignment="Bottom" Margin="10"/>
 
             <TextBlock Text="{Binding tCalculatedNutriments.Energy, StringFormat='Kalorie: {0:F1} kcal'}"/>

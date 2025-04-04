@@ -15,7 +15,7 @@ namespace FitnessApp
         {
             InitializeComponent();
             var calorieService = new CalorieCalculatorService();
-            var addProductService = new AddProductService();
+            var addProductService = new AddProductService(this);
             SelectedProduct = product;
             DataContext = new ProductDetailsViewModel(calorieService, product, addProductService);
             MessageBox.Show(product.ProductName);

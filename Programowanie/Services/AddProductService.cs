@@ -14,12 +14,16 @@ namespace FitnessApp.Services
     {
         private readonly List<Product> _products;
         private readonly ProductLogRepository _repository;
+        private readonly Window _window;
+
         public Product NewProduct { get; set; } = new Product();
 
 
 
-        public AddProductService()
+        public AddProductService(Window window)
         {
+            _window = window;
+
             var context = new AppDbContext(); 
             _repository = new ProductLogRepository(context);
             _products = new List<Product>();
@@ -44,7 +48,8 @@ namespace FitnessApp.Services
                 LoggedAt = DateTime.UtcNow
             };
 
-            await _repository.AddLogEntryAsync(entry); 
+            await _repository.AddLogEntryAsync(entry);
+            _window?.Close();
         }
     }
 }
