@@ -2,9 +2,13 @@
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using FitnessApp.DataAccess;
 using FitnessApp.Helpers;
+using FitnessApp.Interfaces;
 using FitnessApp.Models;
+using FitnessApp.Services;
 using FitnessApp.ViewModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace FitnessApp
 {
@@ -14,6 +18,7 @@ namespace FitnessApp
         private bool _userClicked = false;
         private ProductViewModel _Products;
         private readonly Debouncer _debouncer = new Debouncer(500); // Opóźnienie 500ms
+        private readonly IProductsCatalogeService _catalogeService;
 
 
 
@@ -24,10 +29,15 @@ namespace FitnessApp
             InitializeComponent();
 
             // Ustawienie DataContext dla MainWindow
-            _viewModel = new MainViewModel();
+            _catalogeService = new ProductsCatalogeService(new ProductLogRepository(new AppDbContext()));
+
+            _viewModel = new MainViewModel(_catalogeService);
             this.DataContext = _viewModel;
             _viewModel.CameraViewModel.SetDispatcher(this.Dispatcher);
             _Products = _viewModel.ProductViewModel;
+            LoadProducts();
+
+
 
         }
 
@@ -51,6 +61,10 @@ namespace FitnessApp
             _userClicked = false; // Resetujemy flagę po wyborze
         }
 
+        private async void LoadProducts()
+        {
+            await _viewModel.LoadProductsAsync();
+        }
         public void ProductList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             // Sprawdzenie, czy kliknięto na element listy

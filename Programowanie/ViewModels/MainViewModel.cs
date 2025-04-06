@@ -16,6 +16,11 @@ namespace FitnessApp.ViewModels
 
         private readonly ProductViewModel _productViewModel;
         private readonly UIStateManager _uiStateManager;
+        private readonly IProductsCatalogeService _catalogeService;
+        public string EmptyMessage { get; set; }
+
+
+
 
 
 
@@ -24,11 +29,19 @@ namespace FitnessApp.ViewModels
         public ProductViewModel ProductViewModel => _productViewModel;
 
         public UIStateManager UIStateManager => _uiStateManager;
+        public ObservableCollection<ProductLogEntry> ProductLogs { get; set; } = new();
+
+        private bool _isLoading;
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set => SetProperty(ref _isLoading, value);
+        }
 
         public ICommand StartScanningCommand { get; }
         public ICommand AddProductCommand { get; }
         public ICommand BackToStartCommand { get; }
-        public MainViewModel()
+        public MainViewModel(IProductsCatalogeService catalogeService)
         {
             ICameraService cameraService = new CameraService();
             BarcodeReaderService barcodeReaderService = new BarcodeReaderService();
@@ -36,6 +49,7 @@ namespace FitnessApp.ViewModels
             _cameraViewModel = new CameraViewModel(cameraService, barcodeReaderService);
             _productViewModel = new ProductViewModel();
             _uiStateManager = new UIStateManager();
+            _catalogeService = catalogeService;
 
 
             // Subskrypcja na zdarzenie BarcodeDetected z CameraViewModel
@@ -82,6 +96,29 @@ namespace FitnessApp.ViewModels
             UIStateManager.SetStartMode(); // Przełączamy na tryb startowy
 
         }
+
+        public async Task LoadProductsAsync()
+        {
+            IsLoading = true;
+            EmptyMessage = string.Empty;
+
+            var logs = await _catalogeService.GetRecentLogsAsync();
+
+            ProductLogs.Clear();
+
+            if (logs.Any())
+            {
+                foreach (var log in logs)
+                    ProductLogs.Add(log);
+            }
+            else
+            {
+                EmptyMessage = "Brak zapisanych produktów.";
+            }
+
+            IsLoading = false;
+        }
+
 
 
     }
