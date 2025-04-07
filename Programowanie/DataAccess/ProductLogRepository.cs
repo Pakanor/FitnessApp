@@ -29,5 +29,10 @@ namespace FitnessApp.DataAccess
         {
             return await _context.ProductLogEntries.OrderByDescending(e => e.LoggedAt).ToListAsync();
         }
+        public async Task DeleteAsync(ProductLogEntry entry)
+        {
+            _context.ProductLogEntries.Remove(entry);
+            await _context.SaveChangesAsync();
+        }
     }
 }

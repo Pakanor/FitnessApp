@@ -41,8 +41,8 @@ namespace FitnessApp.Models
         [JsonProperty("fat")]
         public double Fat { get; set; } 
 
-        [JsonProperty("sugars")]
-        public double Sugars { get; set; } 
+        [JsonProperty("carbohydrates")]
+        public double Carbs { get; set; } 
 
         [JsonProperty("proteins")]
         public double Proteins { get; set; } 

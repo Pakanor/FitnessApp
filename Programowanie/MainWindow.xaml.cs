@@ -91,6 +91,8 @@ namespace FitnessApp
         private void AddProduct_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.AddProduct();  // Komenda powiązana z przyciskiem
+            LoadProducts();
+
         }
         private async void ProductName_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -111,6 +113,8 @@ namespace FitnessApp
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
             _viewModel.BackToStart();  // Komenda powiązana z przyciskiem
+            LoadProducts();
+
         }
     }
 }

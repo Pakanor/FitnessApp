@@ -71,16 +71,68 @@
         </Grid>
         <Grid Grid.Row="3" >
             <ListBox ItemsSource="{Binding ProductLogs}" 
-         Margin="10"
-         ScrollViewer.VerticalScrollBarVisibility="Auto">
+          Margin="10,50,10,10" Height="350"
+ ScrollViewer.VerticalScrollBarVisibility="Auto"
+ SelectionChanged="ProductList_SelectionChanged"
+ PreviewMouseLeftButtonDown="ProductList_PreviewMouseLeftButtonDown"
+                    Visibility="{Binding UIStateManager.StartPanelVisibility}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel>
-                            <TextBlock Text="{Binding ProductName}" FontWeight="Bold" />
+                        <Border BorderThickness="0,0,0,1" BorderBrush="LightGray" Padding="5">
+
+                            <StackPanel>
+                            <TextBlock FontWeight="Bold">
+                                <Run Text="Produkt: " />
+                                <Run Text="{Binding ProductName}" />            
+                            </TextBlock>
+                           
+
+                            <TextBlock >
+                                 <Run Text="Marka: " />
                             <TextBlock Text="{Binding Brands}" FontStyle="Italic"/>
-                            <TextBlock Text="{Binding Energy}" />
-                            <TextBlock Text="{Binding Grams}" />
+                            </TextBlock>
+
+                            <Grid Margin="0,5,0,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <!-- Nagłówki -->
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="gramy" FontWeight="Bold" Margin="0,0,10,0"/>
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="kcal" FontWeight="Bold" Margin="0,0,10,0"/>
+                                <TextBlock Grid.Row="0" Grid.Column="2" Text="bialko" FontWeight="Bold" Margin="0,0,10,0"/>
+                                <TextBlock Grid.Row="0" Grid.Column="3" Text="tluszcze" FontWeight="Bold" Margin="0,0,10,0"/>
+                                <TextBlock Grid.Row="0" Grid.Column="4" Text="weglowodany" FontWeight="Bold" Margin="0,0,10,0"/>
+
+                                <!-- Wartości -->
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="{Binding Grams}" Margin="0,2,10,0"/>
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Energy}" Margin="0,2,10,0"/>
+                                <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Proteins}" Margin="0,2,10,0"/>
+                                <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Fat}" Margin="0,2,10,0"/>
+                                <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding Carbs}" Margin="0,2,10,0"/>
+                            </Grid>
+
+
+                            <StackPanel Orientation="Horizontal" Margin="0,8,-100,10" HorizontalAlignment="Right">
+                                <Button Content="Edytuj" Margin="0,0,5,0"
+                                        Background="Snow"
+                                Command="{Binding EditCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                CommandParameter="{Binding}" />
+                                <Button Content="Usuń"
+                                Command="{Binding DeleteCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
+                                CommandParameter="{Binding}" />
+                            </StackPanel>
                         </StackPanel>
+                        </Border>
+
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>

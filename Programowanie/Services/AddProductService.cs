@@ -41,7 +41,7 @@ namespace FitnessApp.Services
                 Grams = grams,
                 Energy = calculated.Energy,
                 Fat = calculated.Fat,
-                Sugars = calculated.Sugars,
+                Sugars = calculated.Carbs,
                 Proteins = calculated.Proteins,
                 Salt = calculated.Salt,
                 EnergyUnit = "Gr",
