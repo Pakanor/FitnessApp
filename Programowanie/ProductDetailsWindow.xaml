@@ -20,7 +20,7 @@
 
             <TextBlock Text="{Binding tCalculatedNutriments.Energy, StringFormat='Kalorie: {0:F1} kcal'}"/>
             <TextBlock Text="{Binding CalculatedNutriments.Proteins, StringFormat='Białko: {0:F1} g'}"/>
-            <TextBlock Text="{Binding CalculatedNutriments.Sugars, StringFormat='Cukry: {0:F1} g'}"/>
+            <TextBlock Text="{Binding CalculatedNutriments.Carbs, StringFormat='Węglowodany: {0:F1} g'}"/>
             <TextBlock Text="{Binding CalculatedNutriments.Fat, StringFormat='Tłuszcz: {0:F1} g'}"/>
             <TextBlock Text="{Binding CalculatedNutriments.Salt, StringFormat='Sól: {0:F1} g'}"/>
         </StackPanel>

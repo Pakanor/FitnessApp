@@ -20,7 +20,7 @@ namespace FitnessApp.Services
             {
                 Energy = product.Nutriments.Energy * factor,
                 Fat = product.Nutriments.Fat * factor,
-                Sugars = product.Nutriments.Sugars * factor,
+                Carbs = product.Nutriments.Carbs * factor,
                 Proteins = product.Nutriments.Proteins * factor,
                 Salt = product.Nutriments.Salt * factor,
                 EnergyUnit = product.Nutriments.EnergyUnit

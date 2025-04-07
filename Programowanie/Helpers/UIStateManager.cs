@@ -39,6 +39,7 @@ namespace FitnessApp.Helpers
             set => SetProperty(ref _startPanelVisibility, value);
         }
 
+
         // Inicjalizacja początkowych stanów
         public UIStateManager()
         {
