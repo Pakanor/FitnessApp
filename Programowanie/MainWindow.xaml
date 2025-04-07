@@ -3,9 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:FitnessApp.ViewModels"
         Title="MainWindow" Height="550" Width="525">
-   
-
-
+  
     <Grid Margin="0,31,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -13,12 +11,15 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
+        
+        
+        
 
         <!-- Strona startowa (przyciski) -->
         <!-- Strona startowa (przyciski) -->
         <StackPanel x:Name="startPanel" Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="0" Visibility="{Binding UIStateManager.StartPanelVisibility}">
-            <Button Content="Start Scanning" Command="{Binding StartScanningCommand}" Width="150" Height="50" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10" />
-            <Button Content="Wpisz nazwę produktu" Click="AddProduct_Click" Width="150" Height="40" Margin="10"/>
+            <Button Content="Start Scanning" Command="{Binding StartScanningCommand}"/>
+            <Button Content="Wpisz nazwę produktu" Click="AddProduct_Click" Margin="10,0,0,0"/>
         </StackPanel>
         <!-- Strona z formularzem do dodania produktu -->
         <StackPanel x:Name="InputPanel" Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="1" Visibility="Visible">
@@ -27,7 +28,7 @@
 
 
         <!-- Strzałka w lewym górnym rogu (tylko widoczna na formularzu) -->
-        <Button x:Name="BackButton" Content="←" Click="BackButton_Click" Width="50" Height="50" Margin="10" 
+        <Button x:Name="BackButton" Content="←" Click="BackButton_Click" 
             HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="20" Background="Transparent" BorderBrush="Transparent" Visibility="{Binding UIStateManager.BackButtonVisibility}"/>
 
         <!-- Strona dla kamery -->
@@ -50,9 +51,10 @@
 
         <Grid Grid.Row="3">
             <ListBox x:Name="ProductList"
+                      Margin="10,50,10,10" Height="350"
          ItemsSource="{Binding ProductViewModel.Products}" 
          SelectedItem="{Binding ProductViewModel.SelectedProduct, Mode=TwoWay}"
-         Margin="10,50,10,10" Height="200"
+         
          ScrollViewer.VerticalScrollBarVisibility="Auto"
          SelectionChanged="ProductList_SelectionChanged"
          PreviewMouseLeftButtonDown="ProductList_PreviewMouseLeftButtonDown"
@@ -75,11 +77,13 @@
  ScrollViewer.VerticalScrollBarVisibility="Auto"
  SelectionChanged="ProductList_SelectionChanged"
  PreviewMouseLeftButtonDown="ProductList_PreviewMouseLeftButtonDown"
-                    Visibility="{Binding UIStateManager.StartPanelVisibility}">
+                    Visibility="{Binding UIStateManager.StartPanelVisibility}"
+                     >
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderThickness="0,0,0,1" BorderBrush="LightGray" Padding="5">
-
+                        <Border
+                            Margin="10"
+       >
                             <StackPanel>
                             <TextBlock FontWeight="Bold">
                                 <Run Text="Produkt: " />
@@ -126,10 +130,10 @@
                                         Background="Snow"
                                 Command="{Binding EditCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                                 CommandParameter="{Binding}" />
-                                <Button Content="Usuń"
-                                Command="{Binding DeleteCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                                CommandParameter="{Binding}" />
-                            </StackPanel>
+                                    <Button Content="Usuń"
+       
+        />
+                                </StackPanel>
                         </StackPanel>
                         </Border>
 
@@ -142,33 +146,62 @@
 
     <Window.Resources>
         <Style TargetType="Button">
-            <Setter Property="Background" Value="LightGray"/>
+            <!-- Ustawienia tła, tekstu i obramowania -->
+            <Setter Property="Background" Value="#4CAF50"/>
+            <!-- Zielony kolor -->
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <!-- Większy padding, aby tekst nie był przyciśnięty -->
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <!-- Zaokrąglone rogi -->
             <Setter Property="RenderTransformOrigin" Value="0.5,0.5"/>
             <Setter Property="RenderTransform">
                 <Setter.Value>
                     <ScaleTransform ScaleX="1" ScaleY="1"/>
                 </Setter.Value>
             </Setter>
-            <Setter Property="BorderThickness" Value="0"/>
 
+            <!-- Dodanie ciekawego cienia -->
+            <Setter Property="Effect">
+                <Setter.Value>
+                    <DropShadowEffect Color="Black" Direction="270" ShadowDepth="4" Opacity="0.3" BlurRadius="8"/>
+                </Setter.Value>
+            </Setter>
+
+            <!-- Zmiana kolorów i efektów po najechaniu myszką -->
             <Style.Triggers>
+                <!-- Zmiana tła i skalowanie przy najechaniu myszką -->
                 <EventTrigger RoutedEvent="MouseEnter">
                     <BeginStoryboard>
                         <Storyboard>
                             <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="1.1" Duration="0:0:0.2"/>
                             <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="1.1" Duration="0:0:0.2"/>
+                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="#45A049" Duration="0:0:0.2"/>
+                            <!-- Ciemniejszy odcień zielonego -->
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
+
+                <!-- Przywrócenie oryginalnego tła po opuszczeniu przycisku -->
                 <EventTrigger RoutedEvent="MouseLeave">
                     <BeginStoryboard>
                         <Storyboard>
                             <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleX)" To="1" Duration="0:0:0.2"/>
                             <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(ScaleTransform.ScaleY)" To="1" Duration="0:0:0.2"/>
+                            <ColorAnimation Storyboard.TargetProperty="(Button.Background).(SolidColorBrush.Color)" To="#4CAF50" Duration="0:0:0.2"/>
+                            <!-- Powrót do pierwotnego koloru -->
                         </Storyboard>
                     </BeginStoryboard>
                 </EventTrigger>
             </Style.Triggers>
         </Style>
+
+        <Style x:Key="GreenButtonStyle" TargetType="Button">
+</Style>
     </Window.Resources>
 </Window>

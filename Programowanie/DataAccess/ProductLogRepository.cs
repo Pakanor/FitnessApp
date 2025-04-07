@@ -17,14 +17,12 @@ namespace FitnessApp.DataAccess
             _context = context;
         }
 
-        //adding product to db
         public async Task AddLogEntryAsync(ProductLogEntry entry)
         {
             _context.ProductLogEntries.Add(entry);
             await _context.SaveChangesAsync();
         }
 
-        //selecting product from db
         public async Task<List<ProductLogEntry>> GetAllAsync()
         {
             return await _context.ProductLogEntries.OrderByDescending(e => e.LoggedAt).ToListAsync();
