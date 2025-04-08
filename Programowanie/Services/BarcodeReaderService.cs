@@ -67,6 +67,8 @@ namespace FitnessApp.Services
                 if (result != null)
                 {
                     isBarcodeScanned = true;
+                    System.Windows.MessageBox.Show($"Zeskanowano kod: {result.Text}");
+
                     BarcodeDetected?.Invoke(this, result.Text); // Powiadomienie UI o zeskanowanym kodzie
                 }
             }
