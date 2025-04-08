@@ -4,6 +4,15 @@
              xmlns:local="clr-namespace:FitnessApp"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/Buttons.xaml"/>
+                <ResourceDictionary Source="Styles/AddProductListBox.xaml"/>
+                <ResourceDictionary Source="Styles/AddedProductsListBox.xaml"/>
+
+
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
          
     </Application.Resources>
 </Application>
