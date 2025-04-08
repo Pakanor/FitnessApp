@@ -2,7 +2,9 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:FitnessApp.ViewModels"
+        
         Title="MainWindow" Height="550" Width="525">
+    
   
     <Grid Margin="0,31,0,0">
         <Grid.RowDefinitions>
@@ -66,8 +68,6 @@
          Margin="10,50,10,10"
          Height="350"
          ScrollViewer.VerticalScrollBarVisibility="Auto"
-         SelectionChanged="ProductList_SelectionChanged"
-         PreviewMouseLeftButtonDown="ProductList_PreviewMouseLeftButtonDown"
          Visibility="{Binding UIStateManager.StartPanelVisibility}" />
         </Grid>
 

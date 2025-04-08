@@ -9,6 +9,8 @@
                 <ResourceDictionary Source="Styles/Buttons.xaml"/>
                 <ResourceDictionary Source="Styles/AddProductListBox.xaml"/>
                 <ResourceDictionary Source="Styles/AddedProductsListBox.xaml"/>
+                <ResourceDictionary Source="Styles/ListBoxItemStyle.xaml"/>
+
 
 
             </ResourceDictionary.MergedDictionaries>

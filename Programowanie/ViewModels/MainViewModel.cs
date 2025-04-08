@@ -7,27 +7,21 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using FitnessApp.Services;
+using System.Windows.Controls;
 
 namespace FitnessApp.ViewModels
 {
     public class MainViewModel : BaseViewModel
     {
         private readonly CameraViewModel _cameraViewModel;
+        private bool _userClicked = false;
 
         private readonly ProductViewModel _productViewModel;
         private readonly UIStateManager _uiStateManager;
         private readonly IProductsCatalogeService _catalogeService;
         public string EmptyMessage { get; set; }
-
-
-
-
-
-
-
         public CameraViewModel CameraViewModel => _cameraViewModel;
         public ProductViewModel ProductViewModel => _productViewModel;
-
         public UIStateManager UIStateManager => _uiStateManager;
         public ObservableCollection<ProductLogEntry> ProductLogs { get; set; } = new();
 
@@ -38,9 +32,34 @@ namespace FitnessApp.ViewModels
             set => SetProperty(ref _isLoading, value);
         }
 
+
+        private Product _selectedProduct;
+        public Product SelectedProduct
+        {
+            get => _selectedProduct;
+            set
+            {
+                if (_selectedProduct != value)
+                {
+                    _selectedProduct = value;
+                    OnPropertyChanged(nameof(SelectedProduct));
+
+                    if (_userClicked && _selectedProduct != null)
+                    {
+                        ShowDetails(_selectedProduct);
+                    }
+                }
+            }
+        }
+
         public ICommand StartScanningCommand { get; }
+
         public ICommand AddProductCommand { get; }
+
         public ICommand BackToStartCommand { get; }
+
+
+
         public MainViewModel(IProductsCatalogeService catalogeService)
         {
             ICameraService cameraService = new CameraService();
@@ -67,9 +86,23 @@ namespace FitnessApp.ViewModels
             // Załadowanie produktu po zeskanowanym kodzie
             _productViewModel.LoadProductByBarcode(barcode);
         }
-       
-       
-       
+
+
+
+        private void ShowDetails(Product product)
+        {
+            var detailsWindow = new ProductDetailsWindow(product);
+
+            if (detailsWindow.ShowDialog() == true)
+            {
+                MessageBox.Show($"Wybrano: {product.ProductName}, Ilość: {detailsWindow.Grams}g");
+            }
+
+            SelectedProduct = null;
+            _userClicked = false;
+        }
+
+
 
         // Rozpoczęcie skanowania
         public void StartScanning()

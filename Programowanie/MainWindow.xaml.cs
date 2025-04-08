@@ -65,20 +65,46 @@ namespace FitnessApp
         {
             await _viewModel.LoadProductsAsync();
         }
-        public void ProductList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+       public void ProductList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+{
+    var listBox = sender as ListBox;
+
+    var clickedItem = GetListBoxItemUnderMouse(listBox, e);
+    if (clickedItem != null)
+    {
+        var clickedProduct = clickedItem.DataContext as Product;
+
+        if (clickedProduct != null && clickedProduct == listBox.SelectedItem)
         {
-            // Sprawdzenie, czy kliknięto na element listy
-            var source = e.OriginalSource as DependencyObject;
-            while (source != null && !(source is ListBoxItem))
+            // Kliknięto na już zaznaczony element -> ręcznie otwórz
+            var detailsWindow = new ProductDetailsWindow(clickedProduct);
+            if (detailsWindow.ShowDialog() == true)
             {
-                source = VisualTreeHelper.GetParent(source);
+                MessageBox.Show($"Wybrano: {clickedProduct.ProductName}, Ilość: {detailsWindow.Grams}g");
             }
 
-            if (source != null)
-            {
-                _userClicked = true; // Ustawiamy flagę tylko jeśli kliknięto w element listy
-            }
+            listBox.SelectedItem = null;
+            e.Handled = true;
         }
+        else
+        {
+            _userClicked = true; // Zwykłe kliknięcie — pozwól SelectionChanged to obsłużyć
+        }
+    }
+}
+
+private ListBoxItem GetListBoxItemUnderMouse(ListBox listBox, MouseButtonEventArgs e)
+{
+    var point = e.GetPosition(listBox);
+    var element = listBox.InputHitTest(point) as DependencyObject;
+
+    while (element != null && !(element is ListBoxItem))
+    {
+        element = VisualTreeHelper.GetParent(element);
+    }
+
+    return element as ListBoxItem;
+}
 
         // Przykładowe metody do przycisków, będą teraz obsługiwane przez komendy
         private void StartScanning_Click(object sender, RoutedEventArgs e)
