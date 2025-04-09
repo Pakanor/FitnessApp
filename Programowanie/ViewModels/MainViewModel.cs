@@ -25,6 +25,8 @@ namespace FitnessApp.ViewModels
         public UIStateManager UIStateManager => _uiStateManager;
         public ObservableCollection<ProductLogEntry> ProductLogs { get; set; } = new();
 
+
+
         private bool _isLoading;
         public bool IsLoading
         {
@@ -57,6 +59,7 @@ namespace FitnessApp.ViewModels
         public ICommand AddProductCommand { get; }
 
         public ICommand BackToStartCommand { get; }
+        public ICommand ShowProductLogCommand { get; }
 
 
 
@@ -69,6 +72,7 @@ namespace FitnessApp.ViewModels
             _productViewModel = new ProductViewModel();
             _uiStateManager = new UIStateManager();
             _catalogeService = catalogeService;
+            ShowProductLogCommand = new RelayCommand<ProductLogEntry>(ShowProductLog);
 
 
             // Subskrypcja na zdarzenie BarcodeDetected z CameraViewModel
@@ -87,7 +91,18 @@ namespace FitnessApp.ViewModels
             _productViewModel.LoadProductByBarcode(barcode);
         }
 
+        private void ShowProductLog(ProductLogEntry log)
+        {
+            if (log != null)
+            {
+                MessageBox.Show($"Log: {log.ProductName}");
+            }
+            else
+            {
+                MessageBox.Show("blad");
 
+            }
+        }
 
         private void ShowDetails(Product product)
         {

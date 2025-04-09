@@ -6,6 +6,7 @@ using FitnessApp.Models;
 using FitnessApp.Services;
 using System.Windows;
 using Newtonsoft.Json;
+using System.Windows.Input;
 
 namespace FitnessApp.ViewModels
 {
@@ -55,11 +56,12 @@ namespace FitnessApp.ViewModels
             get => _errorMessage;
             set => SetProperty(ref _errorMessage, value);
         }
-        
+
         public ProductViewModel()
         {
             _productService = new ProductServiceAPI();
             Products = new ObservableCollection<Product> { };
+
         }
 
         // Ładowanie produktu po kodzie kreskowym
@@ -85,6 +87,9 @@ namespace FitnessApp.ViewModels
                 MessageBox.Show($"Error scanning barcode: {ex.Message}");
             }
         }
+
+       
+
 
         // Ładowanie produktów po nazwie
         public async Task LoadProductByName(string name)

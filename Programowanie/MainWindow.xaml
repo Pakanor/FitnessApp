@@ -61,6 +61,7 @@
              Visibility="{Binding UIStateManager.InputVisibility}"/>
         </Grid>
         
+        
        
         <Grid Grid.Row="3" >
             <ListBox ItemsSource="{Binding ProductLogs}" 
@@ -68,7 +69,9 @@
          Margin="10,50,10,10"
          Height="350"
          ScrollViewer.VerticalScrollBarVisibility="Auto"
-         Visibility="{Binding UIStateManager.StartPanelVisibility}" />
+         Visibility="{Binding UIStateManager.StartPanelVisibility}"
+                     SelectedItem="{Binding ProductViewModel.SelectedProduct}"
+                     />
         </Grid>
 
     </Grid>

@@ -54,7 +54,10 @@
                             Command="{Binding EditCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
                             CommandParameter="{Binding}"/>
 
-                    <Button Content="Usuń" Padding="8,4" Background="#FFEBEE" BorderBrush="#E53935" Foreground="#B71C1C"/>
+                    <Button Content="Usuń" Padding="8,4" Background="#FFEBEE" BorderBrush="#E53935" Foreground="#B71C1C"  Command="{Binding DataContext.ShowProductLogCommand, 
+                        RelativeSource={RelativeSource AncestorType=Window}}"
+    CommandParameter="{Binding}" 
+                    />
                 </StackPanel>
             </StackPanel>
         </Border>
