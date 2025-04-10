@@ -17,10 +17,14 @@ namespace FitnessApp.ViewModels
         private double _userWeight;
         private readonly ProductOperationsService _productOperationsService;
         private readonly ProductLogRepository _repository;
+        private MainViewModel _viewModel;
+        private readonly IProductsCatalogeService _catalogeService;
+
 
         public Product NewProduct { get; set; } = new Product(); // Tworzymy nowy produkt do edycji
         public bool IsEditMode { get; set; }
 
+        public event Action ProductSaved;
 
         public ICommand SaveCommand { get; }
 
@@ -63,6 +67,10 @@ namespace FitnessApp.ViewModels
                     IsEditMode = isEditMode;
             UserWeight = grams > 0 ? grams : 100;
             SaveCommand = new RelayCommand(SaveProduct);
+                        _catalogeService = new ProductsCatalogeService(new ProductLogRepository(new AppDbContext()));
+
+            _viewModel = new MainViewModel(_catalogeService);
+
 
 
         }
@@ -102,6 +110,7 @@ namespace FitnessApp.ViewModels
             {
                 await _repository.UpdateAsync(entry);
                 MessageBox.Show("edycja");
+
             }
             else
             {
@@ -109,7 +118,6 @@ namespace FitnessApp.ViewModels
                 MessageBox.Show("dodanie");
             }
 
-           
         }
 
     }

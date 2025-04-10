@@ -132,6 +132,8 @@ namespace FitnessApp.ViewModels
 
             var window = new ProductDetailsWindow(product, selectedEntry.Grams); // <- przekaż też gramy
 
+            
+
             if (window.ShowDialog() == true)
             {
                 // aktualizacja wpisu w bazie i w liście

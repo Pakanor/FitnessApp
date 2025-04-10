@@ -17,7 +17,7 @@ namespace FitnessApp
         {
             InitializeComponent();
             var calorieService = new CalorieCalculatorService();
-            var addProductService = new ProductOperationsService();
+            var productOperationsService = new ProductOperationsService();
             if (product == null)
             {
                 IsEditMode = false; // tryb dodawania
@@ -29,7 +29,7 @@ namespace FitnessApp
                 SelectedProduct = product; // Edytujemy przekazany produkt
             }
 
-            DataContext = new ProductDetailsViewModel(calorieService, SelectedProduct, addProductService, IsEditMode, grams);
+            DataContext = new ProductDetailsViewModel(calorieService, SelectedProduct, productOperationsService, IsEditMode, grams);
             MessageBox.Show(product?.ProductName ?? "Nowy produkt");
         }
     }
