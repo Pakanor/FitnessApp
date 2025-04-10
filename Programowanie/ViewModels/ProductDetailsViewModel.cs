@@ -15,10 +15,14 @@ namespace FitnessApp.ViewModels
         private Product _product;
         private Nutriments _calculatedNutriments;
         private double _userWeight;
-        private readonly ProductOperationsService _addProductService;
+        private readonly ProductOperationsService _productOperationsService;
         private readonly ProductLogRepository _repository;
 
         public Product NewProduct { get; set; } = new Product(); // Tworzymy nowy produkt do edycji
+        public bool IsEditMode { get; set; }
+
+
+        public ICommand SaveCommand { get; }
 
         public ICommand AddProductCommand { get; }
         public Product Product
@@ -47,15 +51,19 @@ namespace FitnessApp.ViewModels
             }
         }
 
-        public ProductDetailsViewModel(ICalorieCalculatorService calorieService, Product selectedProduct, ProductOperationsService addProductService)
+        public ProductDetailsViewModel(ICalorieCalculatorService calorieService, Product selectedProduct, ProductOperationsService productOperationsService, bool isEditMode, double grams)
         {
             _calorieService = calorieService;
             Product = selectedProduct ?? new Product { Nutriments = new Nutriments() };
             _userWeight = 100; // Domyślna wartość dla przeliczeń
-            _addProductService = addProductService;
-            AddProductCommand = new RelayCommand(AddProduct);
+            _productOperationsService = productOperationsService;
+
             CalculateNutrition();
             _repository = new ProductLogRepository(new AppDbContext()); 
+                    IsEditMode = isEditMode;
+            UserWeight = grams > 0 ? grams : 100;
+            SaveCommand = new RelayCommand(SaveProduct);
+
 
         }
 
@@ -66,26 +74,42 @@ namespace FitnessApp.ViewModels
                 CalculatedNutriments = _calorieService.CalculateForWeight(Product, UserWeight);
             }
         }
-        private async void AddProduct()
+       
+
+        private async void SaveProduct()
         {
             if (Product == null || CalculatedNutriments == null)
             {
-                MessageBox.Show("Brakuje danych do zapisania.");
+                MessageBox.Show("Brakuje danych.");
                 return;
             }
 
-            await _addProductService.AddUserLogAsync(Product, UserWeight, CalculatedNutriments);
+            var entry = new ProductLogEntry
+            {
+                Id = Product.Id,
+                ProductName = Product.ProductName,
+                Brands = Product.Brands,
+                Grams = UserWeight,
+                Energy = CalculatedNutriments.Energy,
+                Fat = CalculatedNutriments.Fat,
+                Sugars = CalculatedNutriments.Carbs,
+                Proteins = CalculatedNutriments.Proteins,
+                Salt = CalculatedNutriments.Salt,
+                EnergyUnit = CalculatedNutriments.EnergyUnit
+            };
 
+            if (IsEditMode && entry.Id > 0)
+            {
+                await _repository.UpdateAsync(entry);
+                MessageBox.Show("edycja");
+            }
+            else
+            {
+                await _productOperationsService.AddUserLogAsync(Product, UserWeight, CalculatedNutriments);
+                MessageBox.Show("dodanie");
+            }
 
-            // czyszczenie
-            Product = null;
-            UserWeight = 0;
-            CalculatedNutriments = null;
-            OnPropertyChanged(nameof(Product));
-            OnPropertyChanged(nameof(UserWeight));
-            OnPropertyChanged(nameof(CalculatedNutriments));
-
-            MessageBox.Show("Produkt został dodany do dziennika.");
+           
         }
 
     }

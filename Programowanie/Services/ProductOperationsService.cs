@@ -60,6 +60,28 @@ namespace FitnessApp.Services
 
 
         }
+        public async Task UpdateUserLogAsync(Product product, double grams, Nutriments calculated)
+        {
+            if (product == null || calculated == null)
+                throw new ArgumentNullException();
+
+            var entry = new ProductLogEntry
+            {
+                Id = product.Id, // Zakładając, że produkt ma Id (klucz główny)
+                ProductName = product.ProductName,
+                Brands = product.Brands,
+                Grams = grams,
+                Energy = calculated.Energy,
+                Fat = calculated.Fat,
+                Sugars = calculated.Carbs,
+                Proteins = calculated.Proteins,
+                Salt = calculated.Salt,
+                EnergyUnit = "Gr",
+                LoggedAt = DateTime.UtcNow
+            };
+
+            await _repository.UpdateAsync(entry);
+        }
 
 
     }

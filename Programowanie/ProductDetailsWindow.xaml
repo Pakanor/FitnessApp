@@ -14,7 +14,7 @@
             <TextBox Text="{Binding UserWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Width="100"/>
 
             <Button x:Name="AddProductButton" Content="Add Product"
-                    Command="{Binding AddProductCommand}" 
+                    Command="{Binding SaveCommand}" 
                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
                     VerticalAlignment="Bottom" Margin="10"/>
 
