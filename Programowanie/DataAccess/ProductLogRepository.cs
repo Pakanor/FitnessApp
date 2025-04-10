@@ -32,5 +32,30 @@ namespace FitnessApp.DataAccess
             _context.ProductLogEntries.Remove(entry);
             await _context.SaveChangesAsync();
         }
+
+        public async Task UpdateAsync(ProductLogEntry updatedEntry)
+        {
+            var existingEntry = await _context.ProductLogEntries
+                .FirstOrDefaultAsync(e => e.Id == updatedEntry.Id); 
+
+            if (existingEntry != null)
+            {
+                existingEntry.ProductName = updatedEntry.ProductName;
+                existingEntry.Brands = updatedEntry.Brands;
+                existingEntry.Grams = updatedEntry.Grams;
+                existingEntry.Energy = updatedEntry.Energy;
+                existingEntry.Fat = updatedEntry.Fat;
+                existingEntry.Sugars = updatedEntry.Sugars;
+                existingEntry.Proteins = updatedEntry.Proteins;
+                existingEntry.Salt = updatedEntry.Salt;
+                existingEntry.EnergyUnit = updatedEntry.EnergyUnit;
+
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                throw new ArgumentException("Nie znaleziono produktu do edycji.", nameof(updatedEntry));
+            }
+        }
     }
 }

@@ -24,6 +24,7 @@ namespace FitnessApp.ViewModels
         public ProductViewModel ProductViewModel => _productViewModel;
         public UIStateManager UIStateManager => _uiStateManager;
         public ObservableCollection<ProductLogEntry> ProductLogs { get; set; } = new();
+        private readonly ProductOperationsService _productOperationsSerice;
 
 
 
@@ -71,11 +72,13 @@ namespace FitnessApp.ViewModels
             BarcodeReaderService barcodeReaderService = new BarcodeReaderService();
 
             _cameraViewModel = new CameraViewModel(cameraService, barcodeReaderService);
+            _productOperationsSerice = new ProductOperationsService();
             _productViewModel = new ProductViewModel();
             _uiStateManager = new UIStateManager();
             _catalogeService = catalogeService;
             DeleteProductLogCommand = new RelayCommand<ProductLogEntry>(DeleteProductLog);
             EditProductLogCommand = new RelayCommand<ProductLogEntry>(EditProductLog);
+
 
 
 
@@ -95,17 +98,10 @@ namespace FitnessApp.ViewModels
             _productViewModel.LoadProductByBarcode(barcode);
         }
 
-        private void DeleteProductLog(ProductLogEntry log)
+        private async void DeleteProductLog(ProductLogEntry log)
         {
-            if (log != null)
-            {
-                MessageBox.Show($"Log: {log.ProductName}");
-            }
-            else
-            {
-                MessageBox.Show("blad");
-
-            }
+           await _productOperationsSerice.DeleteUserLogAsync(log);
+            ProductLogs.Remove(log);
         }
         private void EditProductLog(ProductLogEntry log)
         {

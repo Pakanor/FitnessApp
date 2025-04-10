@@ -10,13 +10,16 @@ namespace FitnessApp
     {
         public Product SelectedProduct { get; private set; }
         public int Grams { get; private set; } // Wartość wpisana przez użytkownika
+        public bool IsEditMode { get; set; } // Flaga trybu edycji
+
 
         public ProductDetailsWindow(Product product)
         {
             InitializeComponent();
             var calorieService = new CalorieCalculatorService();
-            var addProductService = new ProductOperationsService(this);
+            var addProductService = new ProductOperationsService();
             SelectedProduct = product;
+
             DataContext = new ProductDetailsViewModel(calorieService, product, addProductService);
             MessageBox.Show(product.ProductName);
         }
