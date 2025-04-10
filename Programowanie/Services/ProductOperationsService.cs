@@ -1,6 +1,6 @@
 ﻿using FitnessApp.DataAccess;
-using FitnessApp.Interfaces;
 using FitnessApp.Models;
+using FitnessApp.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ using System.Windows;
 
 namespace FitnessApp.Services
 {
-    public class AddProductService : IAddProductService
+    public class ProductOperationsService
     {
         private readonly List<Product> _products;
         private readonly ProductLogRepository _repository;
@@ -18,13 +18,10 @@ namespace FitnessApp.Services
 
         public Product NewProduct { get; set; } = new Product();
 
-
-
-        public AddProductService(Window window)
+        public ProductOperationsService()
         {
-            _window = window;
 
-            var context = new AppDbContext(); 
+            var context = new AppDbContext();
             _repository = new ProductLogRepository(context);
             _products = new List<Product>();
         }
@@ -49,7 +46,21 @@ namespace FitnessApp.Services
             };
 
             await _repository.AddLogEntryAsync(entry);
-            _window?.Close();
         }
+
+        public async Task DeleteUserLogAsync(ProductLogEntry log) {
+
+            if (log == null)
+                throw new ArgumentNullException(nameof(log));
+
+            // Ewentualnie dodatkowa logika, np. sprawdzenie uprawnień
+
+            await _repository.DeleteAsync(log);
+            MessageBox.Show("dzialaaa");
+
+
+        }
+
+
     }
 }
