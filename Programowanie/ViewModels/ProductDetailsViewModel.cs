@@ -15,7 +15,7 @@ namespace FitnessApp.ViewModels
         private Product _product;
         private Nutriments _calculatedNutriments;
         private double _userWeight;
-        private readonly IAddProductService _addProductService;
+        private readonly ProductOperationsService _addProductService;
         private readonly ProductLogRepository _repository;
 
         public Product NewProduct { get; set; } = new Product(); // Tworzymy nowy produkt do edycji
@@ -47,7 +47,7 @@ namespace FitnessApp.ViewModels
             }
         }
 
-        public ProductDetailsViewModel(ICalorieCalculatorService calorieService, Product selectedProduct, IAddProductService addProductService)
+        public ProductDetailsViewModel(ICalorieCalculatorService calorieService, Product selectedProduct, ProductOperationsService addProductService)
         {
             _calorieService = calorieService;
             Product = selectedProduct ?? new Product { Nutriments = new Nutriments() };

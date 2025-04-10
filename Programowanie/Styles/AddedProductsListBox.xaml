@@ -51,10 +51,11 @@
                             Padding="8,4"
                             Background="#E3F2FD" BorderBrush="#2196F3"
                             Foreground="#0D47A1"
-                            Command="{Binding EditCommand, RelativeSource={RelativeSource AncestorType=ListBox}}"
-                            CommandParameter="{Binding}"/>
+                             Command="{Binding DataContext.EditProductLogCommand, 
+                        RelativeSource={RelativeSource AncestorType=Window}}"
+    CommandParameter="{Binding}" />
 
-                    <Button Content="Usuń" Padding="8,4" Background="#FFEBEE" BorderBrush="#E53935" Foreground="#B71C1C"  Command="{Binding DataContext.ShowProductLogCommand, 
+                    <Button Content="Usuń" Padding="8,4" Background="#FFEBEE" BorderBrush="#E53935" Foreground="#B71C1C"  Command="{Binding DataContext.DeleteProductLogCommand, 
                         RelativeSource={RelativeSource AncestorType=Window}}"
     CommandParameter="{Binding}" 
                     />

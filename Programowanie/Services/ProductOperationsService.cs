@@ -1,5 +1,4 @@
 ﻿using FitnessApp.DataAccess;
-using FitnessApp.Interfaces;
 using FitnessApp.Models;
 using System;
 using System.Collections.Generic;
@@ -10,7 +9,7 @@ using System.Windows;
 
 namespace FitnessApp.Services
 {
-    public class AddProductService : IAddProductService
+    public class ProductOperationsService
     {
         private readonly List<Product> _products;
         private readonly ProductLogRepository _repository;
@@ -18,13 +17,11 @@ namespace FitnessApp.Services
 
         public Product NewProduct { get; set; } = new Product();
 
-
-
-        public AddProductService(Window window)
+        public ProductOperationsService(Window window)
         {
             _window = window;
 
-            var context = new AppDbContext(); 
+            var context = new AppDbContext();
             _repository = new ProductLogRepository(context);
             _products = new List<Product>();
         }
@@ -51,5 +48,7 @@ namespace FitnessApp.Services
             await _repository.AddLogEntryAsync(entry);
             _window?.Close();
         }
+
+
     }
 }
