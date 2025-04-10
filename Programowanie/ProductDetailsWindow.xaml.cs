@@ -13,17 +13,24 @@ namespace FitnessApp
         public bool IsEditMode { get; set; } // Flaga trybu edycji
 
 
-        public ProductDetailsWindow(Product product)
+        public ProductDetailsWindow(Product product, double grams = 100)
         {
             InitializeComponent();
             var calorieService = new CalorieCalculatorService();
-            var addProductService = new ProductOperationsService();
-            SelectedProduct = product;
+            var productOperationsService = new ProductOperationsService();
+            if (product == null)
+            {
+                IsEditMode = false; // tryb dodawania
+                SelectedProduct = new Product(); // Pusty produkt do dodania
+            }
+            else
+            {
+                IsEditMode = true; // tryb edycji
+                SelectedProduct = product; // Edytujemy przekazany produkt
+            }
 
-            DataContext = new ProductDetailsViewModel(calorieService, product, addProductService);
-            MessageBox.Show(product.ProductName);
+            DataContext = new ProductDetailsViewModel(calorieService, SelectedProduct, productOperationsService, IsEditMode, grams);
+            MessageBox.Show(product?.ProductName ?? "Nowy produkt");
         }
-
-        
     }
 }

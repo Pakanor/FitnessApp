@@ -14,11 +14,11 @@
             <TextBox Text="{Binding UserWeight, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}" Width="100"/>
 
             <Button x:Name="AddProductButton" Content="Add Product"
-                    Command="{Binding AddProductCommand}" 
+                    Command="{Binding SaveCommand}" 
                     CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
                     VerticalAlignment="Bottom" Margin="10"/>
 
-            <TextBlock Text="{Binding tCalculatedNutriments.Energy, StringFormat='Kalorie: {0:F1} kcal'}"/>
+            <TextBlock Text="{Binding CalculatedNutriments.Energy, StringFormat='Kalorie: {0:F1} kcal'}"/>
             <TextBlock Text="{Binding CalculatedNutriments.Proteins, StringFormat='Białko: {0:F1} g'}"/>
             <TextBlock Text="{Binding CalculatedNutriments.Carbs, StringFormat='Węglowodany: {0:F1} g'}"/>
             <TextBlock Text="{Binding CalculatedNutriments.Fat, StringFormat='Tłuszcz: {0:F1} g'}"/>

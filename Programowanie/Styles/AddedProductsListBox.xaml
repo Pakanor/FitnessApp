@@ -42,7 +42,7 @@
                     <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Energy}" HorizontalAlignment="Center"/>
                     <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Proteins}" HorizontalAlignment="Center"/>
                     <TextBlock Grid.Row="1" Grid.Column="3" Text="{Binding Fat}" HorizontalAlignment="Center"/>
-                    <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding Carbs}" HorizontalAlignment="Center"/>
+                    <TextBlock Grid.Row="1" Grid.Column="4" Text="{Binding Sugars}" HorizontalAlignment="Center"/>
                 </Grid>
 
                 <!-- Przyciski -->

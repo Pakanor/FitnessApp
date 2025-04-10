@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using FitnessApp.Services;
 using System.Windows.Controls;
+using FitnessApp.DataAccess;
 
 namespace FitnessApp.ViewModels
 {
@@ -25,6 +26,8 @@ namespace FitnessApp.ViewModels
         public UIStateManager UIStateManager => _uiStateManager;
         public ObservableCollection<ProductLogEntry> ProductLogs { get; set; } = new();
         private readonly ProductOperationsService _productOperationsSerice;
+        private readonly ProductLogRepository _repository;
+
 
 
 
@@ -78,6 +81,8 @@ namespace FitnessApp.ViewModels
             _catalogeService = catalogeService;
             DeleteProductLogCommand = new RelayCommand<ProductLogEntry>(DeleteProductLog);
             EditProductLogCommand = new RelayCommand<ProductLogEntry>(EditProductLog);
+            _repository = new ProductLogRepository(new AppDbContext());
+
 
 
 
@@ -103,16 +108,47 @@ namespace FitnessApp.ViewModels
            await _productOperationsSerice.DeleteUserLogAsync(log);
             ProductLogs.Remove(log);
         }
-        private void EditProductLog(ProductLogEntry log)
+        private async void EditProductLog(ProductLogEntry selectedEntry)
         {
-            if (log != null)
-            {
-                MessageBox.Show($"Log: {log.ProductName}");
-            }
-            else
-            {
-                MessageBox.Show("blad");
+            if (selectedEntry == null)
+                return;
 
+            // Skopiuj dane, żeby nie edytować od razu w liście
+            var product = new Product
+            {
+                Id = selectedEntry.Id,
+                ProductName = selectedEntry.ProductName,
+                Brands = selectedEntry.Brands,
+                Nutriments = new Nutriments
+                {
+                    Energy = selectedEntry.Energy,
+                    Fat = selectedEntry.Fat,
+                    Carbs = selectedEntry.Sugars,
+                    Proteins = selectedEntry.Proteins,
+                    Salt = selectedEntry.Salt,
+                    EnergyUnit = selectedEntry.EnergyUnit
+                }
+            };
+
+            var window = new ProductDetailsWindow(product, selectedEntry.Grams); // <- przekaż też gramy
+
+            
+
+            if (window.ShowDialog() == true)
+            {
+                // aktualizacja wpisu w bazie i w liście
+                selectedEntry.Grams = window.Grams;
+                selectedEntry.Energy = product.Nutriments.Energy;
+                selectedEntry.Fat = product.Nutriments.Fat;
+                selectedEntry.Sugars = product.Nutriments.Carbs;
+                selectedEntry.Proteins = product.Nutriments.Proteins;
+                selectedEntry.Salt = product.Nutriments.Salt;
+                selectedEntry.EnergyUnit = product.Nutriments.EnergyUnit;
+
+                await _repository.UpdateAsync(selectedEntry); // <- zaktualizuj w bazie
+
+                // odśwież listę jeśli trzeba
+                // await LoadProductLogs(); lub RaisePropertyChanged("ProductLogs");
             }
         }
 
