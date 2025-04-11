@@ -20,6 +20,8 @@ namespace FitnessApp.ViewModels
         private readonly ProductViewModel _productViewModel;
         private readonly UIStateManager _uiStateManager;
         private readonly IProductsCatalogeService _catalogeService;
+        private readonly Debouncer _debouncer = new Debouncer(500);
+
         public string EmptyMessage { get; set; }
         public CameraViewModel CameraViewModel => _cameraViewModel;
         public ProductViewModel ProductViewModel => _productViewModel;
@@ -29,6 +31,20 @@ namespace FitnessApp.ViewModels
         private readonly ProductLogRepository _repository;
 
 
+        private string _searchText;
+        public string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                if (_searchText != value)
+                {
+                    _searchText = value;
+                    OnPropertyChanged(nameof(SearchText));
+                    DebouncedSearch(_searchText);
+                }
+            }
+        }
 
 
         private bool _isLoading;
@@ -52,19 +68,21 @@ namespace FitnessApp.ViewModels
 
                     if (_userClicked && _selectedProduct != null)
                     {
-                        ShowDetails(_selectedProduct);
+                        ShowProductDetails(_selectedProduct);
                     }
                 }
             }
         }
 
         public ICommand StartScanningCommand { get; }
+       
 
         public ICommand AddProductCommand { get; }
 
         public ICommand BackToStartCommand { get; }
         public ICommand DeleteProductLogCommand { get; }
         public ICommand EditProductLogCommand { get; }
+        public ICommand ProductClickedCommand => new RelayCommand<Product>(OnProductClicked);
 
 
 
@@ -82,24 +100,39 @@ namespace FitnessApp.ViewModels
             DeleteProductLogCommand = new RelayCommand<ProductLogEntry>(DeleteProductLog);
             EditProductLogCommand = new RelayCommand<ProductLogEntry>(EditProductLog);
             _repository = new ProductLogRepository(new AppDbContext());
-
-
-
-
-
-            // Subskrypcja na zdarzenie BarcodeDetected z CameraViewModel
             _cameraViewModel.BarcodeDetected += OnBarcodeDetected;
 
-            // Komendy
             StartScanningCommand = new RelayCommand(StartScanning);
             AddProductCommand = new RelayCommand(AddProduct);
             BackToStartCommand = new RelayCommand(BackToStart);
         }
 
-        // Obsługuje zdarzenie, gdy kod kreskowy zostanie wykryty
+        private void OnProductClicked(Product clickedProduct)
+        {
+            if (clickedProduct == SelectedProduct)
+            {
+                SelectedProduct = null;
+            }
+            else
+            {
+                _userClicked = true;
+                SelectedProduct = clickedProduct;
+            }
+        }
+        private void ShowProductDetails(Product product)
+        {
+            var detailsWindow = new ProductDetailsWindow(product);
+            if (detailsWindow.ShowDialog() == true)
+            {
+                MessageBox.Show($"Wybrano: {product.ProductName}, Ilość: {detailsWindow.Grams}g");
+            }
+
+            _userClicked = false;
+            SelectedProduct = null;
+        }
+
         private void OnBarcodeDetected(object sender, string barcode)
         {
-            // Załadowanie produktu po zeskanowanym kodzie
             _productViewModel.LoadProductByBarcode(barcode);
         }
 
@@ -108,12 +141,25 @@ namespace FitnessApp.ViewModels
            await _productOperationsSerice.DeleteUserLogAsync(log);
             ProductLogs.Remove(log);
         }
+
+        private void DebouncedSearch(string text)
+        {
+            _debouncer.Debounce(() =>
+            {
+                Application.Current.Dispatcher.Invoke(async () =>
+                {
+                    if (text.Trim().Length > 3)
+                    {
+                        await _productViewModel.LoadProductByName(text.Trim());
+                    }
+                });
+            });
+        }
         private async void EditProductLog(ProductLogEntry selectedEntry)
         {
             if (selectedEntry == null)
                 return;
 
-            // Skopiuj dane, żeby nie edytować od razu w liście
             var product = new Product
             {
                 Id = selectedEntry.Id,
@@ -130,8 +176,7 @@ namespace FitnessApp.ViewModels
                 }
             };
 
-            var window = new ProductDetailsWindow(product, selectedEntry.Grams); // <- przekaż też gramy
-
+            var window = new ProductDetailsWindow(product, selectedEntry.Grams);
             
 
             if (window.ShowDialog() == true)
@@ -145,37 +190,23 @@ namespace FitnessApp.ViewModels
                 selectedEntry.Salt = product.Nutriments.Salt;
                 selectedEntry.EnergyUnit = product.Nutriments.EnergyUnit;
 
-                await _repository.UpdateAsync(selectedEntry); // <- zaktualizuj w bazie
+                await _repository.UpdateAsync(selectedEntry); 
 
-                // odśwież listę jeśli trzeba
-                // await LoadProductLogs(); lub RaisePropertyChanged("ProductLogs");
+                
             }
         }
 
-        private void ShowDetails(Product product)
-        {
-            var detailsWindow = new ProductDetailsWindow(product);
-
-            if (detailsWindow.ShowDialog() == true)
-            {
-                MessageBox.Show($"Wybrano: {product.ProductName}, Ilość: {detailsWindow.Grams}g");
-            }
-
-            SelectedProduct = null;
-            _userClicked = false;
-        }
+      
 
 
 
-        // Rozpoczęcie skanowania
         public void StartScanning()
         {
             CameraViewModel.StartCamera();
-            UIStateManager.SetScanMode(); // Przełączamy na tryb skanowania
+            UIStateManager.SetScanMode(); 
 
         }
 
-        // Zatrzymanie skanowania
         public void StopScanning()
         {
             CameraViewModel.StopCamera();
@@ -183,13 +214,15 @@ namespace FitnessApp.ViewModels
         public void AddProduct()
         {
             CameraViewModel.StopCamera();
-            UIStateManager.SetInputMode(); // Przełączamy na tryb wpisywania produktu
+            UIStateManager.SetInputMode(); 
 
         }
         public void BackToStart()
         {
             CameraViewModel.StopCamera();
-            UIStateManager.SetStartMode(); // Przełączamy na tryb startowy
+            UIStateManager.SetStartMode();
+            LoadProductsAsync();
+
 
         }
 

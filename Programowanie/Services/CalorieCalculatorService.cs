@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace FitnessApp.Services
 {
+
+    //calculator for calories
     public class CalorieCalculatorService : ICalorieCalculatorService
     {
         public Nutriments CalculateForWeight(Product product, double grams)

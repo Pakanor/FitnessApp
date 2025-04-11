@@ -39,17 +39,17 @@ namespace FitnessApp.Services
         {
             if (videoSource != null && videoSource.IsRunning)
             {
-                videoSource.SignalToStop();  // Zatrzymanie kamery
+                videoSource.SignalToStop(); 
                 videoSource = null;
             }
         }
 
         public void ProcessFrame(Bitmap frame)
         {
-            // Konwersja obrazu do odcieni szarości
+            // Convert the image black and white 
             Bitmap grayscaleBitmap = ConvertToGrayscale(frame);
 
-            // Emitowanie zdarzenia z przetworzoną klatką
+            // Emiting frameReceived
             FrameReceived?.Invoke(this, grayscaleBitmap);
         }
 
@@ -59,7 +59,6 @@ namespace FitnessApp.Services
             {
                 using (Bitmap bitmap = (Bitmap)eventArgs.Frame.Clone())
                 {
-                    // Procesowanie klatki
                     ProcessFrame(bitmap);
                 }
             }

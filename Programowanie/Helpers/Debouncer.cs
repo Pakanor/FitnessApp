@@ -9,6 +9,7 @@ namespace FitnessApp.Helpers
 {
     internal class Debouncer
     {
+        //for api 
         private DispatcherTimer _timer;
         private Action _action;
 

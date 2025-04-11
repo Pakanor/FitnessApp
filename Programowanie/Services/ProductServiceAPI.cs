@@ -4,48 +4,45 @@ using System.Threading.Tasks;
 using System.Windows;
 using Newtonsoft.Json;
 using FitnessApp.Models;
+using FitnessApp.Interfaces;
 
 namespace FitnessApp.Services
 {
-    public class ProductServiceAPI
+    public class ProductServiceAPI : IProductServiceAPI
     {
         private readonly HttpClient _client;
 
-        // Konstruktor, który tworzy jeden HttpClient dla całej klasy
         public ProductServiceAPI()
         {
             _client = new HttpClient();
         }
 
-        // Metoda do pobrania produktu z API na podstawie kodu kreskowego
+        // API
         public async Task<dynamic> GetProductFromApiBarcode(string barcode)
         {
             try
             {
-                // URL API, do którego wysyłamy zapytanie
                 string url = $"https://world.openfoodfacts.org/api/v0/product/{barcode}.json";
 
-                // Wykonanie zapytania i pobranie odpowiedzi
                 var response = await _client.GetStringAsync(url);
 
-                // Zdeserializowanie odpowiedzi JSON do obiektu dynamicznego
+                // deserialising Object
                 dynamic apiResponse = JsonConvert.DeserializeObject(response);
 
-                // Sprawdzenie, czy odpowiedź zawiera dane o produkcie
                 if (apiResponse != null && apiResponse.product != null)
                 {
-                    return apiResponse.product; // Zwrócenie danych produktu
+                    return apiResponse.product; 
                 }
                 else
                 {
                     Console.WriteLine("Brak danych produktu.");
-                    return null; // Brak danych, zwróć null
+                    return null;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Błąd: {ex.Message}"); // Obsługa błędów
-                return null; // Zwrócenie null w przypadku błędu
+                Console.WriteLine($"Błąd: {ex.Message}"); 
+                return null; 
             }
         }
 
@@ -66,12 +63,12 @@ namespace FitnessApp.Services
                 {
 
 
-                    return apiResponse.Products; // Zwracamy całą listę produktów
+                    return apiResponse.Products;
                 }
                 else
                 {
                     MessageBox.Show("Brak produktów w odpowiedzi API!", "Błąd");
-                    return new List<Product>(); // Zwracamy pustą listę zamiast null
+                    return new List<Product>();
                 }
             }
             catch (Exception ex)
@@ -81,12 +78,9 @@ namespace FitnessApp.Services
             }
         
     }
-        public class ApiResponse
-        {
-            [JsonProperty("product")]
-            public Product Product { get; set; }
-        }
+       
 
+        // for serializing
         public class ApiSearchResponse
         {
             [JsonProperty("products")]

@@ -21,7 +21,7 @@ namespace FitnessApp.ViewModels
         private readonly IProductsCatalogeService _catalogeService;
 
 
-        public Product NewProduct { get; set; } = new Product(); // Tworzymy nowy produkt do edycji
+        public Product NewProduct { get; set; } = new Product(); 
         public bool IsEditMode { get; set; }
 
         public event Action ProductSaved;
@@ -50,7 +50,7 @@ namespace FitnessApp.ViewModels
                 {
                     _userWeight = value;
                     OnPropertyChanged(nameof(UserWeight));
-                    CalculateNutrition(); // Automatycznie obliczaj po zmianie wartości!
+                    CalculateNutrition(); 
                 }
             }
         }
@@ -59,7 +59,7 @@ namespace FitnessApp.ViewModels
         {
             _calorieService = calorieService;
             Product = selectedProduct ?? new Product { Nutriments = new Nutriments() };
-            _userWeight = 100; // Domyślna wartość dla przeliczeń
+            _userWeight = 100; 
             _productOperationsService = productOperationsService;
 
             CalculateNutrition();
@@ -116,6 +116,16 @@ namespace FitnessApp.ViewModels
             {
                 await _productOperationsService.AddUserLogAsync(Product, UserWeight, CalculatedNutriments);
                 MessageBox.Show("dodanie");
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var productDetailsWindow = Application.Current.Windows
+       .OfType<ProductDetailsWindow>()
+       .FirstOrDefault();
+                    productDetailsWindow?.Close();
+
+                    Application.Current.MainWindow.Show();
+                });
+                _viewModel.LoadProductsAsync();
             }
 
         }

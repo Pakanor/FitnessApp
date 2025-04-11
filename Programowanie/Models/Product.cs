@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace FitnessApp.Models
 {
+    //Product for api ProductLogEntry for db
     public class Product
     {
         [JsonIgnore]
@@ -70,11 +71,11 @@ namespace FitnessApp.Models
 
         public DateTime LoggedAt { get; set; } = DateTime.UtcNow;
 
-        // przygotowane pod przyszłego usera
         public int? UserId { get; set; }
     }
 
 
+    //for future
     public class User
     {
         public int ID { get; set; }

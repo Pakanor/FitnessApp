@@ -9,24 +9,28 @@ using ZXing.Windows.Compatibility;
 using System.Threading.Tasks;
 using FitnessApp.Interfaces;
 using FitnessApp.ViewModels;
+using System.Windows;
+
 using FitnessApp.Services;
 namespace FitnessApp.Services
 {
     public class BarcodeReaderService : IBarcodeService
     {
-        private BarcodeReader barcodeReader;
-        private bool isBarcodeScanned = false;
 
-        public event EventHandler<string> BarcodeDetected; // Event, który powiadomi MainWindow
+        private BarcodeReader barcodeReader;
+        private CameraService _cameraService;
+
+        public event EventHandler<string> BarcodeDetected; 
 
         public BarcodeReaderService()
         {
             InitializeBarcodeReader();
+            _cameraService = new CameraService();
         }
 
         public void InitializeBarcodeReader()
         {
-            if (barcodeReader == null) // Zapobiega wielokrotnej inicjalizacji
+            if (barcodeReader == null) // Prevents multiple scnas
             {
                 var options = new DecodingOptions
                 {
@@ -46,14 +50,12 @@ namespace FitnessApp.Services
                     Options = options
                 };
 
-                Console.WriteLine("BarcodeReader został zainicjalizowany.");
             }
         }
 
         public void DecodeBarcode(Bitmap bitmap)
         {
-            if (isBarcodeScanned)
-                return;
+            
 
             if (barcodeReader == null)
             {
@@ -66,18 +68,24 @@ namespace FitnessApp.Services
 
                 if (result != null)
                 {
-                    isBarcodeScanned = true;
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        Application.Current.MainWindow.Hide();
+                    });
+                    _cameraService.StopCamera();
+
                     System.Windows.MessageBox.Show($"Zeskanowano kod: {result.Text}");
 
-                    BarcodeDetected?.Invoke(this, result.Text); // Powiadomienie UI o zeskanowanym kodzie
+                    BarcodeDetected?.Invoke(this, result.Text);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Błąd dekodowania kodu: " + ex.Message);
+                System.Windows.MessageBox.Show($"Zeskanowano kod: {ex.Message}");
             }
         }
 
+        //converting Bitmap to BitmapImage
         public BitmapImage ConvertBitmapToBitmapImage(Bitmap bitmap)
         {
             using (MemoryStream memory = new MemoryStream())
