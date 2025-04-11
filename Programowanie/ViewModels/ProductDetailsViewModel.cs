@@ -125,6 +125,7 @@ namespace FitnessApp.ViewModels
 
                     Application.Current.MainWindow.Show();
                 });
+                _viewModel.LoadProductsAsync();
             }
 
         }

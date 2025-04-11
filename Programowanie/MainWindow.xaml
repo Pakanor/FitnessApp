@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:FitnessApp.ViewModels"
         
-        Title="MainWindow" Height="550" Width="525">
+        Title="MainWindow" Height="550" Width="1000">
     
   
     <Grid Margin="0,31,0,0">
@@ -21,16 +21,16 @@
         <!-- Strona startowa (przyciski) -->
         <StackPanel x:Name="startPanel" Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="0" Visibility="{Binding UIStateManager.StartPanelVisibility}">
             <Button Content="Start Scanning" Command="{Binding StartScanningCommand}"/>
-            <Button Content="Wpisz nazwę produktu" Click="AddProduct_Click" Margin="10,0,0,0"/>
+            <Button Content="Wpisz nazwę produktu"  Command="{Binding AddProductCommand}"  Margin="10,0,0,0"/>
         </StackPanel>
         <!-- Strona z formularzem do dodania produktu -->
         <StackPanel x:Name="InputPanel" Orientation="Horizontal" HorizontalAlignment="Center" Grid.Row="1" Visibility="Visible">
-            <TextBox Width="200" Height="40" Margin="10" Name="ProductNameChange" TextChanged="ProductName_TextChanged"  Visibility="{Binding UIStateManager.InputVisibility}"/>
+            <TextBox Width="200" Height="40" Margin="10" Name="ProductNameChange" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"   Visibility="{Binding UIStateManager.InputVisibility}"/>
         </StackPanel>
 
 
         <!-- Strzałka w lewym górnym rogu (tylko widoczna na formularzu) -->
-        <Button x:Name="BackButton" Content="←" Click="BackButton_Click" 
+        <Button x:Name="BackButton" Content="←" Command="{Binding BackToStartCommand}"
             HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="20" Background="Transparent" BorderBrush="Transparent" Visibility="{Binding UIStateManager.BackButtonVisibility}"/>
 
         <!-- Strona dla kamery -->
@@ -52,26 +52,32 @@
 
         <Grid Grid.Row="3">
             <ListBox x:Name="ProductList"
-             Style="{StaticResource ProductListBoxStyle}"
-             ItemTemplate="{StaticResource ProductItemTemplate}"
-             ItemsSource="{Binding ProductViewModel.Products}" 
-             SelectedItem="{Binding ProductViewModel.SelectedProduct, Mode=TwoWay}"
-             SelectionChanged="ProductList_SelectionChanged"
-             PreviewMouseLeftButtonDown="ProductList_PreviewMouseLeftButtonDown"
-             Visibility="{Binding UIStateManager.InputVisibility}"/>
+         Style="{StaticResource ProductListBoxStyle}"
+         ItemTemplate="{StaticResource ProductItemTemplate}"
+         ItemsSource="{Binding ProductViewModel.Products}" 
+         SelectedItem="{Binding ProductViewModel.SelectedProduct, Mode=TwoWay}"
+         Visibility="{Binding UIStateManager.InputVisibility}">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ProductListItem_PreviewMouseLeftButtonDown"/>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
         </Grid>
         
         
        
         <Grid Grid.Row="3" >
-            <ListBox ItemsSource="{Binding ProductLogs}" 
-         ItemTemplate="{StaticResource ProductLogItemTemplate}"
-         Margin="10,50,10,10"
-         Height="350"
-         ScrollViewer.VerticalScrollBarVisibility="Auto"
-         Visibility="{Binding UIStateManager.StartPanelVisibility}"
-                     SelectedItem="{Binding ProductViewModel.SelectedProduct}"
-                     />
+            <Grid Grid.Row="3" >
+                <ListBox ItemsSource="{Binding ProductLogs}" 
+ ItemTemplate="{StaticResource ProductLogItemTemplate}"
+ Margin="10,50,10,10"
+ Height="350"
+ ScrollViewer.VerticalScrollBarVisibility="Auto"
+ Visibility="{Binding UIStateManager.StartPanelVisibility}"
+             SelectedItem="{Binding ProductViewModel.SelectedProduct}"
+             />
+            </Grid>
         </Grid>
 
     </Grid>
