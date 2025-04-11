@@ -17,7 +17,7 @@ namespace FitnessApp
         private MainViewModel _viewModel;
         private bool _userClicked = false;
         private ProductViewModel _Products;
-        private readonly Debouncer _debouncer = new Debouncer(500); // Opóźnienie 500ms
+        private readonly Debouncer _debouncer = new Debouncer(500);
         private readonly IProductsCatalogeService _catalogeService;
 
 
@@ -28,7 +28,6 @@ namespace FitnessApp
         {
             InitializeComponent();
 
-            // Ustawienie DataContext dla MainWindow
             _catalogeService = new ProductsCatalogeService(new ProductLogRepository(new AppDbContext()));
 
             _viewModel = new MainViewModel(_catalogeService);
@@ -41,10 +40,9 @@ namespace FitnessApp
 
         }
 
-        // Przykładowe metody, które już nie będą potrzebne
         public void ProductList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (!_userClicked || e.AddedItems.Count == 0) return; // Ignorujemy zmiany, jeśli nie było kliknięcia
+            if (!_userClicked || e.AddedItems.Count == 0) return; 
 
             if (ProductList.SelectedItem is Product selectedProduct)
             {
@@ -55,10 +53,10 @@ namespace FitnessApp
                     MessageBox.Show($"Wybrano: {selectedProduct.ProductName}, Ilość: {detailsWindow.Grams}g");
                 }
 
-                ProductList.SelectedItem = null; // Wyczyść zaznaczenie po zamknięciu okna
+                ProductList.SelectedItem = null; 
             }
 
-            _userClicked = false; // Resetujemy flagę po wyborze
+            _userClicked = false;
         }
 
         private async void LoadProducts()
@@ -76,7 +74,6 @@ namespace FitnessApp
 
         if (clickedProduct != null && clickedProduct == listBox.SelectedItem)
         {
-            // Kliknięto na już zaznaczony element -> ręcznie otwórz
             var detailsWindow = new ProductDetailsWindow(clickedProduct);
             if (detailsWindow.ShowDialog() == true)
             {
@@ -88,7 +85,7 @@ namespace FitnessApp
         }
         else
         {
-            _userClicked = true; // Zwykłe kliknięcie — pozwól SelectionChanged to obsłużyć
+            _userClicked = true; 
         }
     }
 }
@@ -106,17 +103,16 @@ private ListBoxItem GetListBoxItemUnderMouse(ListBox listBox, MouseButtonEventAr
     return element as ListBoxItem;
 }
 
-        // Przykładowe metody do przycisków, będą teraz obsługiwane przez komendy
         private void StartScanning_Click(object sender, RoutedEventArgs e)
         {
-            _viewModel.StartScanning(); // Komenda powiązana z przyciskiem
+            _viewModel.StartScanning();
         }
 
         
 
         private void AddProduct_Click(object sender, RoutedEventArgs e)
         {
-            _viewModel.AddProduct();  // Komenda powiązana z przyciskiem
+            _viewModel.AddProduct(); 
             LoadProducts();
 
         }
@@ -138,7 +134,7 @@ private ListBoxItem GetListBoxItemUnderMouse(ListBox listBox, MouseButtonEventAr
         }
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            _viewModel.BackToStart();  // Komenda powiązana z przyciskiem
+            _viewModel.BackToStart(); 
             LoadProducts();
 
         }

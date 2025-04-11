@@ -28,13 +28,12 @@ namespace FitnessApp.ViewModels
                 if (_productName != value)
                 {
                     _productName = value;
-                    OnPropertyChanged(nameof(ProductName)); // Powiadomienie o zmianie
+                    OnPropertyChanged(nameof(ProductName)); 
                 }
             }
         }
         public Product Product { get; set; }
 
-        // Metoda wyświetlająca MessageBox z tekstem
 
 
         public ObservableCollection<Product> Products
@@ -43,7 +42,7 @@ namespace FitnessApp.ViewModels
             set
             {
                 _products = value;
-                OnPropertyChanged(nameof(Products)); // Powiadomienie o zmianie listy
+                OnPropertyChanged(nameof(Products)); // ifno about changes
             }
         }
 
@@ -66,7 +65,6 @@ namespace FitnessApp.ViewModels
 
         }
 
-        // Ładowanie produktu po kodzie kreskowym
         public async Task LoadProductByBarcode(string barcode)
         {
             try
@@ -102,7 +100,6 @@ namespace FitnessApp.ViewModels
        
 
 
-        // Ładowanie produktów po nazwie
         public async Task LoadProductByName(string name)
         {
             try
@@ -113,26 +110,20 @@ namespace FitnessApp.ViewModels
 
                 if (productList != null)
                 {
-                    // Pokazujemy komunikat, ile produktów zwróciło API
                     MessageBox.Show($"API zwróciło {productList.Count} produktów.", "Informacja");
 
-                    // Użyj Dispatcher, aby zaktualizować kolekcję w głównym wątku UI
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        // Czyścimy dotychczasowe produkty
                         Products.Clear();
 
-                        // Dodajemy wszystkie nowe produkty
                         foreach (var product in productList)
                         {
                             Products.Add(product);
-                            // MessageBox.Show(product.ProductName);
 
                         }
                         MessageBox.Show($"Liczba produktów w kolekcji: {Products.Count}");
 
 
-                        // Jeśli produkty zostały dodane, ustawiamy pierwszy jako wybrany
                         SelectedProduct =Products.FirstOrDefault();
                     });
                 }

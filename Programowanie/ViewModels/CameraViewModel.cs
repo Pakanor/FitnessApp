@@ -12,7 +12,7 @@ namespace FitnessApp.ViewModels
         private readonly BarcodeReaderService _barcodeReaderService;
         private string _barcodeResult;
         private BitmapImage _cameraPreviewImage;
-        private Dispatcher _dispatcher; // Nowa zmienna na Dispatcher
+        private Dispatcher _dispatcher; 
 
 
         public string BarcodeResult
@@ -36,14 +36,12 @@ namespace FitnessApp.ViewModels
             _cameraService = cameraService;
             _barcodeReaderService = barcodeReaderService;
 
-            // Subskrypcja zdarzeń
             _cameraService.FrameReceived += CameraService_FrameReceived;
             _barcodeReaderService.BarcodeDetected += OnBarcodeDetected;
         }
 
         private void CameraService_FrameReceived(object sender, Bitmap e)
         {
-            // Wywołanie z Dispatcher.Invoke na głównym wątku, aby zaktualizować UI
             _dispatcher?.Invoke(() =>
             {
                 CameraPreviewImage = _barcodeReaderService.ConvertBitmapToBitmapImage(e);
@@ -55,11 +53,9 @@ namespace FitnessApp.ViewModels
         {
             BarcodeResult = "Kod: " + barcode;
 
-            // Tutaj przekazujesz informację do MainViewModel, zamiast do ProductViewModel
-            BarcodeDetected?.Invoke(this, barcode); // Wydarzenie informujące o znalezionym kodzie
+            BarcodeDetected?.Invoke(this, barcode); 
         }
 
-        // Komunikat o wykryciu kodu
         public event EventHandler<string> BarcodeDetected;
 
         public void StartCamera()

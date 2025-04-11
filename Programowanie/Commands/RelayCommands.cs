@@ -3,6 +3,9 @@ using System.Windows.Input;
 
 namespace FitnessApp.ViewModels
 {
+
+
+    //for binding 
     public class RelayCommand : ICommand
     {
         private readonly Action _execute;

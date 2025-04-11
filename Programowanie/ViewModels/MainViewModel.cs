@@ -87,19 +87,15 @@ namespace FitnessApp.ViewModels
 
 
 
-            // Subskrypcja na zdarzenie BarcodeDetected z CameraViewModel
             _cameraViewModel.BarcodeDetected += OnBarcodeDetected;
 
-            // Komendy
             StartScanningCommand = new RelayCommand(StartScanning);
             AddProductCommand = new RelayCommand(AddProduct);
             BackToStartCommand = new RelayCommand(BackToStart);
         }
 
-        // Obsługuje zdarzenie, gdy kod kreskowy zostanie wykryty
         private void OnBarcodeDetected(object sender, string barcode)
         {
-            // Załadowanie produktu po zeskanowanym kodzie
             _productViewModel.LoadProductByBarcode(barcode);
         }
 
@@ -113,7 +109,6 @@ namespace FitnessApp.ViewModels
             if (selectedEntry == null)
                 return;
 
-            // Skopiuj dane, żeby nie edytować od razu w liście
             var product = new Product
             {
                 Id = selectedEntry.Id,
@@ -130,8 +125,7 @@ namespace FitnessApp.ViewModels
                 }
             };
 
-            var window = new ProductDetailsWindow(product, selectedEntry.Grams); // <- przekaż też gramy
-
+            var window = new ProductDetailsWindow(product, selectedEntry.Grams);
             
 
             if (window.ShowDialog() == true)
@@ -145,10 +139,9 @@ namespace FitnessApp.ViewModels
                 selectedEntry.Salt = product.Nutriments.Salt;
                 selectedEntry.EnergyUnit = product.Nutriments.EnergyUnit;
 
-                await _repository.UpdateAsync(selectedEntry); // <- zaktualizuj w bazie
+                await _repository.UpdateAsync(selectedEntry); 
 
-                // odśwież listę jeśli trzeba
-                // await LoadProductLogs(); lub RaisePropertyChanged("ProductLogs");
+                
             }
         }
 
@@ -167,15 +160,13 @@ namespace FitnessApp.ViewModels
 
 
 
-        // Rozpoczęcie skanowania
         public void StartScanning()
         {
             CameraViewModel.StartCamera();
-            UIStateManager.SetScanMode(); // Przełączamy na tryb skanowania
+            UIStateManager.SetScanMode(); 
 
         }
 
-        // Zatrzymanie skanowania
         public void StopScanning()
         {
             CameraViewModel.StopCamera();
@@ -183,13 +174,13 @@ namespace FitnessApp.ViewModels
         public void AddProduct()
         {
             CameraViewModel.StopCamera();
-            UIStateManager.SetInputMode(); // Przełączamy na tryb wpisywania produktu
+            UIStateManager.SetInputMode(); 
 
         }
         public void BackToStart()
         {
             CameraViewModel.StopCamera();
-            UIStateManager.SetStartMode(); // Przełączamy na tryb startowy
+            UIStateManager.SetStartMode(); 
 
         }
 

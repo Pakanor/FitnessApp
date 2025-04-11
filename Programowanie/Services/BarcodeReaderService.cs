@@ -20,7 +20,7 @@ namespace FitnessApp.Services
         private BarcodeReader barcodeReader;
         private CameraService _cameraService;
 
-        public event EventHandler<string> BarcodeDetected; // Event, który powiadomi MainWindow
+        public event EventHandler<string> BarcodeDetected; 
 
         public BarcodeReaderService()
         {
@@ -30,7 +30,7 @@ namespace FitnessApp.Services
 
         public void InitializeBarcodeReader()
         {
-            if (barcodeReader == null) // Zapobiega wielokrotnej inicjalizacji
+            if (barcodeReader == null) // Prevents multiple scnas
             {
                 var options = new DecodingOptions
                 {
@@ -50,7 +50,6 @@ namespace FitnessApp.Services
                     Options = options
                 };
 
-                Console.WriteLine("BarcodeReader został zainicjalizowany.");
             }
         }
 
@@ -77,15 +76,16 @@ namespace FitnessApp.Services
 
                     System.Windows.MessageBox.Show($"Zeskanowano kod: {result.Text}");
 
-                    BarcodeDetected?.Invoke(this, result.Text); // Powiadomienie UI o zeskanowanym kodzie
+                    BarcodeDetected?.Invoke(this, result.Text);
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Błąd dekodowania kodu: " + ex.Message);
+                System.Windows.MessageBox.Show($"Zeskanowano kod: {ex.Message}");
             }
         }
 
+        //converting Bitmap to BitmapImage
         public BitmapImage ConvertBitmapToBitmapImage(Bitmap bitmap)
         {
             using (MemoryStream memory = new MemoryStream())

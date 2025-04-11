@@ -11,6 +11,7 @@ namespace FitnessApp.Services
 {
     internal class ProductsCatalogeService : IProductsCatalogeService
     {
+        //dipslaying all Products
         private readonly ProductLogRepository _logRepository;
         public ProductsCatalogeService(ProductLogRepository logRepository)
         {
