@@ -7,6 +7,7 @@ using FitnessApp.Services;
 using System.Windows;
 using Newtonsoft.Json;
 using System.Windows.Input;
+using static FitnessApp.Services.ProductServiceAPI;
 
 namespace FitnessApp.ViewModels
 {
@@ -31,6 +32,7 @@ namespace FitnessApp.ViewModels
                 }
             }
         }
+        public Product Product { get; set; }
 
         // Metoda wyświetlająca MessageBox z tekstem
 
@@ -70,10 +72,19 @@ namespace FitnessApp.ViewModels
             try
             {
                 ErrorMessage = "";
-                var product = await _productService.GetProductFromApiBarcode(barcode);
+                dynamic apiResponse = await _productService.GetProductFromApiBarcode(barcode);
+
+                string productJson = apiResponse.ToString();
+                Product product = JsonConvert.DeserializeObject<Product>(productJson);
                 if (product != null)
                 {
                     SelectedProduct = product;
+                    Product = product;
+
+                    double defaultGrams = 100;
+                    var window = new ProductDetailsWindow(product, defaultGrams);
+                    window.ShowDialog();
+
                 }
                 else
                 {

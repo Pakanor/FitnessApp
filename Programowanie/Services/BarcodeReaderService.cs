@@ -9,19 +9,23 @@ using ZXing.Windows.Compatibility;
 using System.Threading.Tasks;
 using FitnessApp.Interfaces;
 using FitnessApp.ViewModels;
+using System.Windows;
+
 using FitnessApp.Services;
 namespace FitnessApp.Services
 {
     public class BarcodeReaderService : IBarcodeService
     {
+
         private BarcodeReader barcodeReader;
-        private bool isBarcodeScanned = false;
+        private CameraService _cameraService;
 
         public event EventHandler<string> BarcodeDetected; // Event, który powiadomi MainWindow
 
         public BarcodeReaderService()
         {
             InitializeBarcodeReader();
+            _cameraService = new CameraService();
         }
 
         public void InitializeBarcodeReader()
@@ -52,8 +56,7 @@ namespace FitnessApp.Services
 
         public void DecodeBarcode(Bitmap bitmap)
         {
-            if (isBarcodeScanned)
-                return;
+            
 
             if (barcodeReader == null)
             {
@@ -66,7 +69,12 @@ namespace FitnessApp.Services
 
                 if (result != null)
                 {
-                    isBarcodeScanned = true;
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        Application.Current.MainWindow.Hide();
+                    });
+                    _cameraService.StopCamera();
+
                     System.Windows.MessageBox.Show($"Zeskanowano kod: {result.Text}");
 
                     BarcodeDetected?.Invoke(this, result.Text); // Powiadomienie UI o zeskanowanym kodzie

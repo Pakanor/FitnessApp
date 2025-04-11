@@ -116,6 +116,15 @@ namespace FitnessApp.ViewModels
             {
                 await _productOperationsService.AddUserLogAsync(Product, UserWeight, CalculatedNutriments);
                 MessageBox.Show("dodanie");
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var productDetailsWindow = Application.Current.Windows
+       .OfType<ProductDetailsWindow>()
+       .FirstOrDefault();
+                    productDetailsWindow?.Close();
+
+                    Application.Current.MainWindow.Show();
+                });
             }
 
         }
