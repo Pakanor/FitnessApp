@@ -11,6 +11,7 @@ namespace FitnessApp
         public Product SelectedProduct { get; private set; }
         public int Grams { get; private set; } // Wartość wpisana przez użytkownika
         public bool IsEditMode { get; set; } // Flaga trybu edycji
+        private MainWindow mainWindow;
 
 
         public ProductDetailsWindow(Product product, double grams = 100)
@@ -18,18 +19,21 @@ namespace FitnessApp
             InitializeComponent();
             var calorieService = new CalorieCalculatorService();
             var productOperationsService = new ProductOperationsService();
+            mainWindow = new MainWindow();
             if (product == null)
             {
-                IsEditMode = false; // tryb dodawania
-                SelectedProduct = new Product(); // Pusty produkt do dodania
+                IsEditMode = false;
+                SelectedProduct = new Product();
             }
             else
             {
-                IsEditMode = true; // tryb edycji
-                SelectedProduct = product; // Edytujemy przekazany produkt
+                IsEditMode = true;
+                SelectedProduct = product; 
             }
 
             DataContext = new ProductDetailsViewModel(calorieService, SelectedProduct, productOperationsService, IsEditMode, grams);
+
+
             MessageBox.Show(product?.ProductName ?? "Nowy produkt");
         }
     }

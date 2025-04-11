@@ -17,7 +17,6 @@
             <TextBlock Text="{Binding ProductName}" FontWeight="Bold" FontSize="16" Foreground="#212121"/>
             <TextBlock Text="{Binding Brands}" FontStyle="Italic" Foreground="#757575"/>
             <TextBlock Text="{Binding Nutriments.Energy}" Foreground="#009688"/>
-            <TextBlock Text="{Binding Products.Count}" FontWeight="SemiBold" Foreground="#3F51B5"/>
         </StackPanel>
     </DataTemplate>
 

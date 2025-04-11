@@ -19,12 +19,14 @@ namespace FitnessApp.ViewModels
         private readonly ProductLogRepository _repository;
         private MainViewModel _viewModel;
         private readonly IProductsCatalogeService _catalogeService;
+        public event Action ProductSaved;
+        private MainWindow window;
 
 
-        public Product NewProduct { get; set; } = new Product(); 
+
+
         public bool IsEditMode { get; set; }
 
-        public event Action ProductSaved;
 
         public ICommand SaveCommand { get; }
 
@@ -110,23 +112,29 @@ namespace FitnessApp.ViewModels
             {
                 await _repository.UpdateAsync(entry);
                 MessageBox.Show("edycja");
+                Application.Current.MainWindow = new MainWindow();
+                Application.Current.MainWindow.Show();
+
 
             }
             else
             {
                 await _productOperationsService.AddUserLogAsync(Product, UserWeight, CalculatedNutriments);
                 MessageBox.Show("dodanie");
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    var productDetailsWindow = Application.Current.Windows
-       .OfType<ProductDetailsWindow>()
-       .FirstOrDefault();
-                    productDetailsWindow?.Close();
-
-                    Application.Current.MainWindow.Show();
-                });
+               
                 _viewModel.LoadProductsAsync();
+                
             }
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var productDetailsWindow = Application.Current.Windows
+   .OfType<ProductDetailsWindow>()
+   .FirstOrDefault();
+               
+                productDetailsWindow?.Close();
+
+               
+            });
 
         }
 

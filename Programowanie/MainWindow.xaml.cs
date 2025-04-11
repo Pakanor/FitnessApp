@@ -44,15 +44,21 @@ namespace FitnessApp
 
         private void ProductListItem_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+           
             if (sender is ListBoxItem item && item.DataContext is Product product)
             {
+
                 if (DataContext is MainViewModel vm)
                 {
                     _viewModel.ProductClickedCommand.Execute(product);
+
                     e.Handled = true;
+                   
                 }
             }
+
         }
+
 
 
 
