@@ -1,13 +1,10 @@
 ﻿using FitnessApp.Helpers;
 using FitnessApp.Interfaces;
 using FitnessApp.Models;
-using FitnessApp.ViewModels;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Threading;
 using FitnessApp.Services;
-using System.Windows.Controls;
 using FitnessApp.DataAccess;
 
 namespace FitnessApp.ViewModels
@@ -22,6 +19,8 @@ namespace FitnessApp.ViewModels
         private readonly IProductsCatalogeService _catalogeService;
         private readonly Debouncer _debouncer = new Debouncer(500);
 
+
+
         public string EmptyMessage { get; set; }
         public CameraViewModel CameraViewModel => _cameraViewModel;
         public ProductViewModel ProductViewModel => _productViewModel;
@@ -29,6 +28,9 @@ namespace FitnessApp.ViewModels
         public ObservableCollection<ProductLogEntry> ProductLogs { get; set; } = new();
         private readonly ProductOperationsService _productOperationsSerice;
         private readonly ProductLogRepository _repository;
+
+
+
 
 
         private string _searchText;
@@ -105,10 +107,12 @@ namespace FitnessApp.ViewModels
             StartScanningCommand = new RelayCommand(StartScanning);
             AddProductCommand = new RelayCommand(AddProduct);
             BackToStartCommand = new RelayCommand(BackToStart);
+
         }
 
         private void OnProductClicked(Product clickedProduct)
         {
+
             if (clickedProduct == SelectedProduct)
             {
                 SelectedProduct = null;
@@ -117,15 +121,24 @@ namespace FitnessApp.ViewModels
             {
                 _userClicked = true;
                 SelectedProduct = clickedProduct;
+                
+
             }
+
         }
         private void ShowProductDetails(Product product)
         {
             var detailsWindow = new ProductDetailsWindow(product);
             if (detailsWindow.ShowDialog() == true)
             {
-                MessageBox.Show($"Wybrano: {product.ProductName}, Ilość: {detailsWindow.Grams}g");
+
+                MessageBox.Show($"eee: {product.Brands}, Ilość: {detailsWindow.Grams}g");
+
+               
+               
             }
+
+
 
             _userClicked = false;
             SelectedProduct = null;
@@ -157,6 +170,7 @@ namespace FitnessApp.ViewModels
         }
         private async void EditProductLog(ProductLogEntry selectedEntry)
         {
+
             if (selectedEntry == null)
                 return;
 
@@ -177,11 +191,15 @@ namespace FitnessApp.ViewModels
             };
 
             var window = new ProductDetailsWindow(product, selectedEntry.Grams);
-            
+            Application.Current.MainWindow.Close();
+
+
+
+
 
             if (window.ShowDialog() == true)
             {
-                // aktualizacja wpisu w bazie i w liście
+
                 selectedEntry.Grams = window.Grams;
                 selectedEntry.Energy = product.Nutriments.Energy;
                 selectedEntry.Fat = product.Nutriments.Fat;
@@ -190,9 +208,9 @@ namespace FitnessApp.ViewModels
                 selectedEntry.Salt = product.Nutriments.Salt;
                 selectedEntry.EnergyUnit = product.Nutriments.EnergyUnit;
 
-                await _repository.UpdateAsync(selectedEntry); 
+                await _repository.UpdateAsync(selectedEntry);
 
-                
+
             }
         }
 
@@ -222,6 +240,9 @@ namespace FitnessApp.ViewModels
             CameraViewModel.StopCamera();
             UIStateManager.SetStartMode();
             LoadProductsAsync();
+            _productViewModel.Products.Clear();
+            SearchText = string.Empty;
+
 
 
         }

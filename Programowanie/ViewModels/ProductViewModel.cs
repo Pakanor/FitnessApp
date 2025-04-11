@@ -124,8 +124,10 @@ namespace FitnessApp.ViewModels
                         MessageBox.Show($"Liczba produktów w kolekcji: {Products.Count}");
 
 
-                        SelectedProduct =Products.FirstOrDefault();
+
+                        SelectedProduct = Products.FirstOrDefault();
                     });
+
                 }
                 else
                 {
