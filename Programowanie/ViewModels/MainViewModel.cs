@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using FitnessApp.Services;
 using FitnessApp.DataAccess;
+using System.Net.Http;
 
 namespace FitnessApp.ViewModels
 {
@@ -13,13 +14,14 @@ namespace FitnessApp.ViewModels
     {
         private readonly CameraViewModel _cameraViewModel;
         private bool _userClicked = false;
+        private readonly ApiClient _apiClient = new ApiClient("http://localhost:5142");
 
         private readonly ProductViewModel _productViewModel;
         private readonly UIStateManager _uiStateManager;
         private readonly IProductsCatalogeService _catalogeService;
         private readonly Debouncer _debouncer = new Debouncer(500);
 
-
+        
 
         public string EmptyMessage { get; set; }
         public CameraViewModel CameraViewModel => _cameraViewModel;
@@ -91,6 +93,8 @@ namespace FitnessApp.ViewModels
 
         public MainViewModel(IProductsCatalogeService catalogeService)
         {
+
+           
             ICameraService cameraService = new CameraService();
             BarcodeReaderService barcodeReaderService = new BarcodeReaderService();
 
@@ -252,7 +256,7 @@ namespace FitnessApp.ViewModels
             IsLoading = true;
             EmptyMessage = string.Empty;
 
-            var logs = await _catalogeService.GetRecentLogsAsync();
+            var logs = await _apiClient.GetAsync<List<ProductLogEntry>>("/api/ProductsCataloge/recent");
 
             ProductLogs.Clear();
 
