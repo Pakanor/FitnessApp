@@ -21,8 +21,7 @@ namespace FitnessApp.Models
         [JsonProperty("brands")]
         public string Brands { get; set; }
 
-        [JsonProperty("energy_value")]
-        public string EnergyValue { get; set; }
+       
         [JsonProperty("nutriments")]
 
         public Nutriments Nutriments { get; set; }
@@ -51,7 +50,11 @@ namespace FitnessApp.Models
         [JsonProperty("salt")]
         public double Salt { get; set; }
     }
-
+    public class CalculationRequest
+    {
+        public Product Product { get; set; }
+        public double Grams { get; set; }
+    }
 
     public class ProductLogEntry
     {
