@@ -34,6 +34,7 @@ public class ApiClient
     public async Task<TResult> PostAsync<TRequest, TResult>(string endpoint, TRequest data)
     {
         var json = JsonSerializer.Serialize(data);
+
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         var response = await _httpClient.PostAsync(endpoint, content);

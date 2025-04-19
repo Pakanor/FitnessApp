@@ -22,6 +22,7 @@ namespace FitnessApp.ViewModels
         public event Action ProductSaved;
         private MainWindow window;
 
+        private readonly ApiClient _apiClient = new ApiClient("http://localhost:5142");
 
 
 
@@ -77,14 +78,28 @@ namespace FitnessApp.ViewModels
 
         }
 
-        private void CalculateNutrition()
+        private async void CalculateNutrition()
         {
             if (Product != null)
             {
-                CalculatedNutriments = _calorieService.CalculateForWeight(Product, UserWeight);
+                var request = new CalculationRequest
+                {
+                    Product = Product,
+                    Grams = UserWeight
+                };
+
+                try
+                {
+                    CalculatedNutriments = await _apiClient.PostAsync<CalculationRequest, Nutriments>("api/caloriecalculator/calculate", request);
+                }
+                catch (Exception ex)
+                {
+                    // obsłuż błąd (np. wyświetl MessageBox)
+                    MessageBox.Show($"Błąd podczas obliczania kalorii: {ex.Message}");
+                }
             }
         }
-       
+
 
         private async void SaveProduct()
         {

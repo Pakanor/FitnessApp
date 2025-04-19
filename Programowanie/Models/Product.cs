@@ -50,7 +50,11 @@ namespace FitnessApp.Models
         [JsonProperty("salt")]
         public double Salt { get; set; }
     }
-
+    public class CalculationRequest
+    {
+        public Product Product { get; set; }
+        public double Grams { get; set; }
+    }
 
     public class ProductLogEntry
     {
