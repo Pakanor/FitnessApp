@@ -12,18 +12,16 @@ namespace FitnessApp
     public partial class MainWindow : Window
     {
         private MainViewModel _viewModel;
-        private readonly IProductsCatalogeService _catalogeService;
 
         public MainWindow()
         {
             InitializeComponent();
 
-            _catalogeService = new ProductsCatalogeService(new ProductLogRepository(new AppDbContext()));
 
-            _viewModel = new MainViewModel(_catalogeService);
+            _viewModel = new MainViewModel();
             this.DataContext = _viewModel;
             _viewModel.CameraViewModel.SetDispatcher(this.Dispatcher);
-            _viewModel.LoadProductsAsync();
+            _= _viewModel.LoadProductsAsync();
 
 
 

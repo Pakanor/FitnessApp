@@ -17,7 +17,6 @@ namespace FitnessApp
         public ProductDetailsWindow(Product product, double grams = 100)
         {
             InitializeComponent();
-            var calorieService = new CalorieCalculatorService();
             var productOperationsService = new ProductOperationsService();
             mainWindow = new MainWindow();
             if (product == null)
@@ -31,7 +30,7 @@ namespace FitnessApp
                 SelectedProduct = product; 
             }
 
-            DataContext = new ProductDetailsViewModel(calorieService, SelectedProduct, productOperationsService, IsEditMode, grams);
+            DataContext = new ProductDetailsViewModel(SelectedProduct, productOperationsService, IsEditMode, grams);
 
 
             MessageBox.Show(product?.ProductName ?? "Nowy produkt");

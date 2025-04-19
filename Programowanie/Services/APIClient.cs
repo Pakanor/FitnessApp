@@ -38,7 +38,7 @@ public class ApiClient
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         var response = await _httpClient.PostAsync(endpoint, content);
-        response.EnsureSuccessStatusCode(); // To rzuci wyjątek, jeśli status będzie inny niż 2xx
+        response.EnsureSuccessStatusCode();
 
         var responseJson = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<TResult>(responseJson, new JsonSerializerOptions
@@ -49,5 +49,5 @@ public class ApiClient
 
 
 }
-// Można dodać PUT, DELETE itd.
+//  PUT, DELETE 
 

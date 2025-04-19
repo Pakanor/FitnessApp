@@ -11,14 +11,12 @@ namespace FitnessApp.ViewModels
 {
     public class ProductDetailsViewModel : BaseViewModel
     {
-        private readonly ICalorieCalculatorService _calorieService;
         private Product _product;
         private Nutriments _calculatedNutriments;
         private double _userWeight;
         private readonly ProductOperationsService _productOperationsService;
         private readonly ProductLogRepository _repository;
         private MainViewModel _viewModel;
-        private readonly IProductsCatalogeService _catalogeService;
         public event Action ProductSaved;
         private MainWindow window;
 
@@ -58,9 +56,8 @@ namespace FitnessApp.ViewModels
             }
         }
 
-        public ProductDetailsViewModel(ICalorieCalculatorService calorieService, Product selectedProduct, ProductOperationsService productOperationsService, bool isEditMode, double grams)
+        public ProductDetailsViewModel( Product selectedProduct, ProductOperationsService productOperationsService, bool isEditMode, double grams)
         {
-            _calorieService = calorieService;
             Product = selectedProduct ?? new Product { Nutriments = new Nutriments() };
             _userWeight = 100; 
             _productOperationsService = productOperationsService;
@@ -70,9 +67,9 @@ namespace FitnessApp.ViewModels
                     IsEditMode = isEditMode;
             UserWeight = grams > 0 ? grams : 100;
             SaveCommand = new RelayCommand(SaveProduct);
-                        _catalogeService = new ProductsCatalogeService(new ProductLogRepository(new AppDbContext()));
+                       
 
-            _viewModel = new MainViewModel(_catalogeService);
+            _viewModel = new MainViewModel();
 
 
 
@@ -94,7 +91,6 @@ namespace FitnessApp.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    // obsłuż błąd (np. wyświetl MessageBox)
                     MessageBox.Show($"Błąd podczas obliczania kalorii: {ex.Message}");
                 }
             }
