@@ -5,29 +5,32 @@ using Newtonsoft.Json;
 namespace BackendLogicApi.Models
 {
     //Product for api ProductLogEntry for db
+    public class CalculationRequest
+    {
+        [JsonProperty("product")]
+        public Product Product { get; set; }
+
+        [JsonProperty("grams")]
+        public double Grams { get; set; }
+    }
+
     public class Product
     {
+
         [JsonIgnore]
         public int Id { get; set; }
-
-
         [JsonProperty("product_name")]
         public string ProductName { get; set; }
 
         [JsonProperty("brands")]
         public string Brands { get; set; }
 
-       
         [JsonProperty("nutriments")]
-
         public Nutriments Nutriments { get; set; }
-
-
     }
-    [Owned]
+
     public class Nutriments
     {
-
         [JsonProperty("energy")]
         public double Energy { get; set; }
 
@@ -35,19 +38,19 @@ namespace BackendLogicApi.Models
         public string EnergyUnit { get; set; }
 
         [JsonProperty("fat")]
-        public double Fat { get; set; } 
+        public double Fat { get; set; }
 
         [JsonProperty("carbohydrates")]
-        public double Carbs { get; set; } 
+        public double Carbs { get; set; }
 
         [JsonProperty("proteins")]
-        public double Proteins { get; set; } 
+        public double Proteins { get; set; }
 
         [JsonProperty("salt")]
         public double Salt { get; set; }
     }
 
-   
+
     public class ProductLogEntry
     {
         public int Id { get; set; }
