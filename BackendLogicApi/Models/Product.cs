@@ -17,8 +17,7 @@ namespace BackendLogicApi.Models
         [JsonProperty("brands")]
         public string Brands { get; set; }
 
-        [JsonProperty("energy_value")]
-        public string EnergyValue { get; set; }
+       
         [JsonProperty("nutriments")]
 
         public Nutriments Nutriments { get; set; }
@@ -48,7 +47,7 @@ namespace BackendLogicApi.Models
         public double Salt { get; set; }
     }
 
-
+   
     public class ProductLogEntry
     {
         public int Id { get; set; }

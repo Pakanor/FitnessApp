@@ -4,8 +4,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-
+using System.Threading.Tasks;  
+using System.Net.Http;        
+using System.Text.Json;        
 public class ApiClient
 {
     private readonly HttpClient _httpClient;
@@ -30,14 +31,22 @@ public class ApiClient
         });
     }
 
-    public async Task PostAsync<T>(string endpoint, T data)
+    public async Task<TResult> PostAsync<TRequest, TResult>(string endpoint, TRequest data)
     {
         var json = JsonSerializer.Serialize(data);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         var response = await _httpClient.PostAsync(endpoint, content);
-        response.EnsureSuccessStatusCode();
+        response.EnsureSuccessStatusCode(); // To rzuci wyjątek, jeśli status będzie inny niż 2xx
+
+        var responseJson = await response.Content.ReadAsStringAsync();
+        return JsonSerializer.Deserialize<TResult>(responseJson, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
     }
 
-    // Można dodać PUT, DELETE itd.
+
 }
+// Można dodać PUT, DELETE itd.
+
