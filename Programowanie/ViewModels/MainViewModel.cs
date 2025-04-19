@@ -18,7 +18,6 @@ namespace FitnessApp.ViewModels
 
         private readonly ProductViewModel _productViewModel;
         private readonly UIStateManager _uiStateManager;
-        private readonly IProductsCatalogeService _catalogeService;
         private readonly Debouncer _debouncer = new Debouncer(500);
 
         
@@ -91,7 +90,7 @@ namespace FitnessApp.ViewModels
 
 
 
-        public MainViewModel(IProductsCatalogeService catalogeService)
+        public MainViewModel()
         {
 
            
@@ -102,7 +101,6 @@ namespace FitnessApp.ViewModels
             _productOperationsSerice = new ProductOperationsService();
             _productViewModel = new ProductViewModel();
             _uiStateManager = new UIStateManager();
-            _catalogeService = catalogeService;
             DeleteProductLogCommand = new RelayCommand<ProductLogEntry>(DeleteProductLog);
             EditProductLogCommand = new RelayCommand<ProductLogEntry>(EditProductLog);
             _repository = new ProductLogRepository(new AppDbContext());
