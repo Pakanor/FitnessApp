@@ -98,7 +98,6 @@ namespace FitnessApp.ViewModels
             BarcodeReaderService barcodeReaderService = new BarcodeReaderService();
 
             _cameraViewModel = new CameraViewModel(cameraService, barcodeReaderService);
-            _productOperationsSerice = new ProductOperationsService();
             _productViewModel = new ProductViewModel();
             _uiStateManager = new UIStateManager();
             DeleteProductLogCommand = new RelayCommand<ProductLogEntry>(DeleteProductLog);
@@ -254,7 +253,7 @@ namespace FitnessApp.ViewModels
             IsLoading = true;
             EmptyMessage = string.Empty;
 
-            var logs = await _apiClient.GetAsync<List<ProductLogEntry>>("/api/ProductsCataloge/recent");
+            var logs = await _apiClient.GetAsync<List<ProductLogEntry>>("/api/productsoperation/recent");
 
             ProductLogs.Clear();
 

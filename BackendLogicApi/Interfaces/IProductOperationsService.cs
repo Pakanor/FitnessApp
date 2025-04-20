@@ -7,6 +7,8 @@ namespace BackendLogicApi.Interfaces
         Task AddUserLogAsync(Product product, double grams, Nutriments calculated);
 
         Task DeleteUserLogAsync(ProductLogEntry log);
+        Task<List<ProductLogEntry>> GetRecentLogsAsync();
+        Task<bool> HasAnyLogsAsync();
 
     }
 }

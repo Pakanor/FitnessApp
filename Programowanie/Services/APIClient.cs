@@ -41,6 +41,12 @@ public class ApiClient
         response.EnsureSuccessStatusCode();
 
         var responseJson = await response.Content.ReadAsStringAsync();
+
+        if (typeof(TResult) == typeof(string))
+        {
+            return (TResult)(object)responseJson;
+        }
+
         return JsonSerializer.Deserialize<TResult>(responseJson, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true

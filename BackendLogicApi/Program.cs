@@ -11,9 +11,8 @@ builder.Services.AddControllersWithViews();
 // Rejestracja serwisów
 builder.Services.AddScoped<IProductOperationsService, ProductOperationsService>();
 builder.Services.AddScoped<ICalorieCalculatorService, CalorieCalculatorService>();
-builder.Services.AddScoped<IProductsCatalogeService, ProductsCatalogeService>();
 builder.Services.AddScoped<IProductServiceAPI, ProductServiceAPI>();
-
+builder.Services.AddLogging();
 // Rejestracja repozytoriów i DbContext
 builder.Services.AddScoped<ProductLogRepository>();
 builder.Services.AddScoped<AppDbContext>();
@@ -27,6 +26,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddControllers();
 
 var app = builder.Build();
+app.UseAuthorization();
 
 // Mapa routingu
 app.MapControllerRoute(

@@ -77,7 +77,11 @@ namespace FitnessApp.Models
         public int? UserId { get; set; }
     }
 
-
+    public class AddLogRequest
+    {
+        public Product Product { get; set; }
+        public double Grams { get; set; }
+    }
     //for future
     public class User
     {

@@ -99,6 +99,11 @@ namespace FitnessApp.ViewModels
 
         private async void SaveProduct()
         {
+            var logRequest = new AddLogRequest
+            {
+                Product = Product,
+                Grams = UserWeight
+            };
             if (Product == null || CalculatedNutriments == null)
             {
                 MessageBox.Show("Brakuje danych.");
@@ -130,9 +135,9 @@ namespace FitnessApp.ViewModels
             }
             else
             {
-                await _productOperationsService.AddUserLogAsync(Product, UserWeight, CalculatedNutriments);
-                MessageBox.Show("dodanie");
-               
+                var result = await _apiClient.PostAsync<AddLogRequest, string>("api/productsoperation/add", logRequest);
+                MessageBox.Show(result);  // Wyświetlamy komunikat zwrócony z backendu
+
                 _viewModel.LoadProductsAsync();
                 
             }
@@ -147,7 +152,9 @@ namespace FitnessApp.ViewModels
                
             });
 
+            
         }
+
 
     }
 }
