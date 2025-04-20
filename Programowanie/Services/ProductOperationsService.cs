@@ -11,11 +11,12 @@ using System.Windows;
 
 namespace FitnessApp.Services
 {
-    public class ProductOperationsService: IProductOperationsService
+    public class ProductOperationsService
     {
         private readonly List<Product> _products;
         private readonly ProductLogRepository _repository;
         private readonly Window _window;
+        private readonly ProductLogRepository _logRepository;
 
         public Product NewProduct { get; set; } = new Product();
 
@@ -25,6 +26,7 @@ namespace FitnessApp.Services
             var context = new AppDbContext();
             _repository = new ProductLogRepository(context);
             _products = new List<Product>();
+
         }
 
         public async Task AddUserLogAsync(Product product, double grams, Nutriments calculated)
@@ -60,7 +62,16 @@ namespace FitnessApp.Services
 
 
         }
-        
+        public async Task<List<ProductLogEntry>> GetRecentLogsAsync()
+        {
+            return await _logRepository.GetAllAsync();
+        }
+
+        public async Task<bool> HasAnyLogsAsync()
+        {
+            var logs = await _logRepository.GetAllAsync();
+            return logs.Any();
+        }
 
     }
 }
