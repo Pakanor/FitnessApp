@@ -4,15 +4,7 @@ using Newtonsoft.Json;
 
 namespace BackendLogicApi.Models
 {
-    //Product for api ProductLogEntry for db
-    public class CalculationRequest
-    {
-        [JsonProperty("product")]
-        public Product Product { get; set; }
-
-        [JsonProperty("grams")]
-        public double Grams { get; set; }
-    }
+    
 
     public class Product
     {
@@ -70,6 +62,11 @@ namespace BackendLogicApi.Models
         public DateTime LoggedAt { get; set; } = DateTime.UtcNow;
 
         public int? UserId { get; set; }
+    }
+    public class CalculationRequest
+    {
+        public Product Product { get; set; }
+        public double Grams { get; set; }
     }
 
     public class AddLogRequest

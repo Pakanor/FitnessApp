@@ -1,12 +1,10 @@
 ﻿using FitnessApp.Helpers;
 using FitnessApp.Interfaces;
-using FitnessApp.Models;
+using BackendLogicApi.Models;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using FitnessApp.Services;
-using FitnessApp.DataAccess;
-using System.Net.Http;
 
 namespace FitnessApp.ViewModels
 {
@@ -27,7 +25,6 @@ namespace FitnessApp.ViewModels
         public ProductViewModel ProductViewModel => _productViewModel;
         public UIStateManager UIStateManager => _uiStateManager;
         public ObservableCollection<ProductLogEntry> ProductLogs { get; set; } = new();
-        private readonly ProductLogRepository _repository;
 
 
 
@@ -77,8 +74,6 @@ namespace FitnessApp.ViewModels
         }
 
         public ICommand StartScanningCommand { get; }
-       
-
         public ICommand AddProductCommand { get; }
 
         public ICommand BackToStartCommand { get; }
@@ -101,7 +96,6 @@ namespace FitnessApp.ViewModels
             _uiStateManager = new UIStateManager();
             DeleteProductLogCommand = new RelayCommand<ProductLogEntry>(DeleteProductLog);
             EditProductLogCommand = new RelayCommand<ProductLogEntry>(EditProductLog);
-            _repository = new ProductLogRepository(new AppDbContext());
             _cameraViewModel.BarcodeDetected += OnBarcodeDetected;
 
             StartScanningCommand = new RelayCommand(StartScanning);
@@ -133,17 +127,14 @@ namespace FitnessApp.ViewModels
             {
 
                 MessageBox.Show($"eee: {product.Brands}, Ilość: {detailsWindow.Grams}g");
-
-               
-               
             }
             _userClicked = false;
             SelectedProduct = null;
         }
 
-        private void OnBarcodeDetected(object sender, string barcode)
+        private async void OnBarcodeDetected(object sender, string barcode)
         {
-            _productViewModel.LoadProductByBarcode(barcode);
+           await _productViewModel.LoadProductByBarcode(barcode);
         }
 
         private async void DeleteProductLog(ProductLogEntry log)
@@ -155,8 +146,7 @@ namespace FitnessApp.ViewModels
             }
             catch (Exception ex)
             {
-                // Obsługa błędu np. logowanie albo pokazanie komunikatu
-                Console.WriteLine($"Error deleting log: {ex.Message}");
+                MessageBox.Show("unable to delete");
             }
         }
 

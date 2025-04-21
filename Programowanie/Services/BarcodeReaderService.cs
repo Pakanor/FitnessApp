@@ -1,14 +1,10 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.IO;
 using System.Windows.Media.Imaging;
-using System.Collections.Generic;
 using ZXing;
 using ZXing.Common;
 using ZXing.Windows.Compatibility;
-using System.Threading.Tasks;
 using FitnessApp.Interfaces;
-using FitnessApp.ViewModels;
 using System.Windows;
 
 using FitnessApp.Services;

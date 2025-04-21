@@ -3,8 +3,6 @@ using AForge.Video;
 using FitnessApp.Interfaces;
 using System.Drawing.Imaging;
 using System.Drawing;
-using FitnessApp.Services;
-using System.Windows.Threading;
 
 namespace FitnessApp.Services
 {

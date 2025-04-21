@@ -1,11 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Input;
-using FitnessApp.Interfaces;
-using FitnessApp.Services;
-using FitnessApp.Interfaces;
-using FitnessApp.Models;
-using FitnessApp.Services;
-using FitnessApp.DataAccess;
+using BackendLogicApi.Models;
 
 namespace FitnessApp.ViewModels
 {
@@ -14,7 +9,6 @@ namespace FitnessApp.ViewModels
         private Product _product;
         private Nutriments _calculatedNutriments;
         private double _userWeight;
-        private readonly ProductLogRepository _repository;
         private MainViewModel _viewModel;
         public event Action ProductSaved;
         private MainWindow window;
@@ -61,7 +55,6 @@ namespace FitnessApp.ViewModels
             _userWeight = 100; 
 
             CalculateNutrition();
-            _repository = new ProductLogRepository(new AppDbContext()); 
                     IsEditMode = isEditMode;
             UserWeight = grams > 0 ? grams : 100;
             SaveCommand = new RelayCommand(SaveProduct);
@@ -130,7 +123,7 @@ namespace FitnessApp.ViewModels
                 {
                     MessageBox.Show(response); // Api response
                 }
-                MessageBox.Show("edycja");
+                MessageBox.Show("Produkt zedytowany!");
                 Application.Current.MainWindow = new MainWindow();
                 Application.Current.MainWindow.Show();
 
@@ -141,7 +134,7 @@ namespace FitnessApp.ViewModels
                 var result = await _apiClient.PostAsync<AddLogRequest, string>("api/productsoperation/add", logRequest);
                 MessageBox.Show(result);  // backend communication
 
-                _viewModel.LoadProductsAsync();
+                await _viewModel.LoadProductsAsync();
                 
             }
             Application.Current.Dispatcher.Invoke(() =>

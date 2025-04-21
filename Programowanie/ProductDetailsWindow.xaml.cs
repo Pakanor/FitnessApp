@@ -1,16 +1,14 @@
 ﻿using System.Windows;
-using FitnessApp.Models;
+using BackendLogicApi.Models;
 using FitnessApp.ViewModels;
-using FitnessApp.Services;
-using FitnessApp.Services;
 
 namespace FitnessApp
 {
     public partial class ProductDetailsWindow : Window
     {
         public Product SelectedProduct { get; private set; }
-        public int Grams { get; private set; } // Wartość wpisana przez użytkownika
-        public bool IsEditMode { get; set; } // Flaga trybu edycji
+        public int Grams { get; private set; } 
+        public bool IsEditMode { get; set; } 
         private MainWindow mainWindow;
 
 
