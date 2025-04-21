@@ -52,6 +52,34 @@ public class ApiClient
             PropertyNameCaseInsensitive = true
         });
     }
+    public async Task DeleteAsync(string endpoint)
+    {
+        var response = await _httpClient.DeleteAsync(endpoint);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task<TResult> PutAsync<TRequest, TResult>(string endpoint, TRequest data)
+    {
+        var json = JsonSerializer.Serialize(data);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.PutAsync(endpoint, content);
+        response.EnsureSuccessStatusCode();
+
+        var responseJson = await response.Content.ReadAsStringAsync();
+
+        if (typeof(TResult) == typeof(string))
+        {
+            return (TResult)(object)responseJson;
+        }
+
+        return JsonSerializer.Deserialize<TResult>(responseJson, new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        });
+    }
+
+
 
 
 }

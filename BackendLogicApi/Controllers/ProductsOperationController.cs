@@ -32,15 +32,10 @@ namespace BackendLogicApi.Controllers
             return Ok(products); // Zwraca dane w formacie JSON
         }
 
-        public class ResponseMessage
-        {
-            public string Message { get; set; }
-        }
+        
         [HttpPost("add")]
         public async Task<IActionResult> AddUserLog([FromBody] AddLogRequest request)
         {
-           
-
                 var calculated = _caloreieCalculatorService.CalculateForWeight(request.Product, request.Grams);
 
                 if (calculated == null)
@@ -54,9 +49,29 @@ namespace BackendLogicApi.Controllers
 
             return Ok("Product added to log.");
         }
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> DeleteUserLog(int id)
+        {
+            await _productsOperationService.DeleteUserLogAsync(id);
+            return Ok("Product log deleted.");
+        }
+        [HttpPut("update")]
+        public async Task<IActionResult> UpdateUserLog([FromBody] ProductLogEntry updatedEntry)
+        {
+            try
+            {
+                await _productsOperationService.UpdateUserLogAsync(updatedEntry);
+                return Ok("Product log updated.");
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
 
     }
-    }
+}
 
 
 

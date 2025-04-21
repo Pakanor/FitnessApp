@@ -12,6 +12,10 @@ namespace BackendLogicApi.DataAccess
         {
             _context = context;
         }
+        public async Task<ProductLogEntry?> GetByIdAsync(int id)
+        {
+            return await _context.ProductLogEntries.FindAsync(id);
+        }
 
         public async Task AddLogEntryAsync(ProductLogEntry entry)
         {

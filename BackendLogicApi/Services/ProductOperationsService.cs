@@ -46,24 +46,18 @@ namespace BackendLogicApi.Services
                 EnergyUnit = calculated.EnergyUnit,
                 LoggedAt = DateTime.UtcNow
             };
-
-           
-
             await _repository.AddLogEntryAsync(entry);
         }
 
 
 
-        public async Task DeleteUserLogAsync(ProductLogEntry log)
+        public async Task DeleteUserLogAsync(int id)
         {
-
+            var log = await _repository.GetByIdAsync(id); // Musisz mieć tę metodę!
             if (log == null)
-                throw new ArgumentNullException(nameof(log));
-
+                throw new Exception($"Log with ID {id} not found.");
 
             await _repository.DeleteAsync(log);
-
-
         }
         public async Task<List<ProductLogEntry>> GetRecentLogsAsync()
         {
@@ -74,6 +68,10 @@ namespace BackendLogicApi.Services
         {
             var logs = await _repository.GetAllAsync();
             return logs.Any();
+        }
+        public async Task UpdateUserLogAsync(ProductLogEntry updatedEntry)
+        {
+            await _repository.UpdateAsync(updatedEntry);
         }
 
     }

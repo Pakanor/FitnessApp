@@ -27,7 +27,6 @@ namespace FitnessApp.ViewModels
         public ProductViewModel ProductViewModel => _productViewModel;
         public UIStateManager UIStateManager => _uiStateManager;
         public ObservableCollection<ProductLogEntry> ProductLogs { get; set; } = new();
-        private readonly ProductOperationsService _productOperationsSerice;
         private readonly ProductLogRepository _repository;
 
 
@@ -138,9 +137,6 @@ namespace FitnessApp.ViewModels
                
                
             }
-
-
-
             _userClicked = false;
             SelectedProduct = null;
         }
@@ -152,8 +148,16 @@ namespace FitnessApp.ViewModels
 
         private async void DeleteProductLog(ProductLogEntry log)
         {
-           await _productOperationsSerice.DeleteUserLogAsync(log);
-            ProductLogs.Remove(log);
+            try
+            {
+                await _apiClient.DeleteAsync($"api/productsoperation/delete/{log.Id}");
+                ProductLogs.Remove(log);
+            }
+            catch (Exception ex)
+            {
+                // Obsługa błędu np. logowanie albo pokazanie komunikatu
+                Console.WriteLine($"Error deleting log: {ex.Message}");
+            }
         }
 
         private void DebouncedSearch(string text)
@@ -171,6 +175,7 @@ namespace FitnessApp.ViewModels
         }
         private async void EditProductLog(ProductLogEntry selectedEntry)
         {
+            //logic for clicking the edit button
 
             if (selectedEntry == null)
                 return;
@@ -193,11 +198,6 @@ namespace FitnessApp.ViewModels
 
             var window = new ProductDetailsWindow(product, selectedEntry.Grams);
             Application.Current.MainWindow.Close();
-
-
-
-
-
             if (window.ShowDialog() == true)
             {
 
@@ -208,10 +208,6 @@ namespace FitnessApp.ViewModels
                 selectedEntry.Proteins = product.Nutriments.Proteins;
                 selectedEntry.Salt = product.Nutriments.Salt;
                 selectedEntry.EnergyUnit = product.Nutriments.EnergyUnit;
-
-                await _repository.UpdateAsync(selectedEntry);
-
-
             }
         }
 
