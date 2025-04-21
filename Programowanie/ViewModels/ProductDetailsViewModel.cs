@@ -14,7 +14,6 @@ namespace FitnessApp.ViewModels
         private Product _product;
         private Nutriments _calculatedNutriments;
         private double _userWeight;
-        private readonly ProductOperationsService _productOperationsService;
         private readonly ProductLogRepository _repository;
         private MainViewModel _viewModel;
         public event Action ProductSaved;
@@ -56,11 +55,10 @@ namespace FitnessApp.ViewModels
             }
         }
 
-        public ProductDetailsViewModel( Product selectedProduct, ProductOperationsService productOperationsService, bool isEditMode, double grams)
+        public ProductDetailsViewModel( Product selectedProduct, bool isEditMode, double grams)
         {
             Product = selectedProduct ?? new Product { Nutriments = new Nutriments() };
             _userWeight = 100; 
-            _productOperationsService = productOperationsService;
 
             CalculateNutrition();
             _repository = new ProductLogRepository(new AppDbContext()); 
@@ -126,7 +124,12 @@ namespace FitnessApp.ViewModels
 
             if (IsEditMode && entry.Id > 0)
             {
-                await _repository.UpdateAsync(entry);
+                var response = await _apiClient.PutAsync<ProductLogEntry, string>("api/productsoperation/update", entry);
+
+                if (response != null)
+                {
+                    MessageBox.Show(response); // Api response
+                }
                 MessageBox.Show("edycja");
                 Application.Current.MainWindow = new MainWindow();
                 Application.Current.MainWindow.Show();
@@ -136,7 +139,7 @@ namespace FitnessApp.ViewModels
             else
             {
                 var result = await _apiClient.PostAsync<AddLogRequest, string>("api/productsoperation/add", logRequest);
-                MessageBox.Show(result);  // Wyświetlamy komunikat zwrócony z backendu
+                MessageBox.Show(result);  // backend communication
 
                 _viewModel.LoadProductsAsync();
                 
