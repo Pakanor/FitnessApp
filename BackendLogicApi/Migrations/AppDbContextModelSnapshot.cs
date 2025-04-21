@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace FitnessApp.Migrations
+namespace BackendLogicApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     partial class AppDbContextModelSnapshot : ModelSnapshot
@@ -16,12 +16,12 @@ namespace FitnessApp.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.3")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("FitnessApp.Models.Product", b =>
+            modelBuilder.Entity("BackendLogicApi.Models.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -33,20 +33,16 @@ namespace FitnessApp.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("EnergyValue")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("ProductName")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products");
+                    b.ToTable("Product");
                 });
 
-            modelBuilder.Entity("FitnessApp.Models.ProductLogEntry", b =>
+            modelBuilder.Entity("BackendLogicApi.Models.ProductLogEntry", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -95,12 +91,15 @@ namespace FitnessApp.Migrations
                     b.ToTable("ProductLogEntries");
                 });
 
-            modelBuilder.Entity("FitnessApp.Models.Product", b =>
+            modelBuilder.Entity("BackendLogicApi.Models.Product", b =>
                 {
-                    b.OwnsOne("FitnessApp.Models.Nutriments", "Nutriments", b1 =>
+                    b.OwnsOne("BackendLogicApi.Models.Nutriments", "Nutriments", b1 =>
                         {
                             b1.Property<int>("ProductId")
                                 .HasColumnType("integer");
+
+                            b1.Property<double>("Carbs")
+                                .HasColumnType("double precision");
 
                             b1.Property<double>("Energy")
                                 .HasColumnType("double precision");
@@ -118,12 +117,9 @@ namespace FitnessApp.Migrations
                             b1.Property<double>("Salt")
                                 .HasColumnType("double precision");
 
-                            b1.Property<double>("Sugars")
-                                .HasColumnType("double precision");
-
                             b1.HasKey("ProductId");
 
-                            b1.ToTable("Products");
+                            b1.ToTable("Product");
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");

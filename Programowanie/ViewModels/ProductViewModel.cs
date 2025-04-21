@@ -104,7 +104,6 @@ namespace FitnessApp.ViewModels
 
                 if (productList != null)
                 {
-                    MessageBox.Show($"API zwróciło {productList.Count} produktów.", "Informacja");
 
                     Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -115,7 +114,6 @@ namespace FitnessApp.ViewModels
                             Products.Add(product);
 
                         }
-                        MessageBox.Show($"Liczba produktów w kolekcji: {Products.Count}");
 
 
 
@@ -131,7 +129,6 @@ namespace FitnessApp.ViewModels
             }
             catch (Exception ex)
             {
-                ErrorMessage = "Error searching product: " + ex.Message;
                 MessageBox.Show($"Błąd w LoadProductByName:\n{ex.Message}", "Błąd");
             }
         }

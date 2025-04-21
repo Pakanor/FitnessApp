@@ -74,8 +74,6 @@ namespace FitnessApp.ViewModels
         }
 
         public ICommand StartScanningCommand { get; }
-       
-
         public ICommand AddProductCommand { get; }
 
         public ICommand BackToStartCommand { get; }
@@ -129,17 +127,14 @@ namespace FitnessApp.ViewModels
             {
 
                 MessageBox.Show($"eee: {product.Brands}, Ilość: {detailsWindow.Grams}g");
-
-               
-               
             }
             _userClicked = false;
             SelectedProduct = null;
         }
 
-        private void OnBarcodeDetected(object sender, string barcode)
+        private async void OnBarcodeDetected(object sender, string barcode)
         {
-            _productViewModel.LoadProductByBarcode(barcode);
+           await _productViewModel.LoadProductByBarcode(barcode);
         }
 
         private async void DeleteProductLog(ProductLogEntry log)
@@ -151,8 +146,7 @@ namespace FitnessApp.ViewModels
             }
             catch (Exception ex)
             {
-                // Obsługa błędu np. logowanie albo pokazanie komunikatu
-                Console.WriteLine($"Error deleting log: {ex.Message}");
+                MessageBox.Show("unable to delete");
             }
         }
 

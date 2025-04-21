@@ -123,7 +123,7 @@ namespace FitnessApp.ViewModels
                 {
                     MessageBox.Show(response); // Api response
                 }
-                MessageBox.Show("edycja");
+                MessageBox.Show("Produkt zedytowany!");
                 Application.Current.MainWindow = new MainWindow();
                 Application.Current.MainWindow.Show();
 
@@ -134,7 +134,7 @@ namespace FitnessApp.ViewModels
                 var result = await _apiClient.PostAsync<AddLogRequest, string>("api/productsoperation/add", logRequest);
                 MessageBox.Show(result);  // backend communication
 
-                _viewModel.LoadProductsAsync();
+                await _viewModel.LoadProductsAsync();
                 
             }
             Application.Current.Dispatcher.Invoke(() =>

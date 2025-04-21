@@ -1,20 +1,13 @@
-﻿using BackendLogicApi.Controllers;
-using BackendLogicApi.DataAccess;
+﻿using BackendLogicApi.DataAccess;
 using BackendLogicApi.Interfaces;
 using BackendLogicApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+
 
 namespace BackendLogicApi.Services
 {
     public class ProductOperationsService : IProductOperationsService
     {
         private readonly List<Product> _products;
-        private readonly ILogger<ProductsOperationController> _logger; // Logger
         private readonly ProductLogRepository _repository;
 
 
@@ -40,7 +33,7 @@ namespace BackendLogicApi.Services
                 Grams = grams,
                 Energy = calculated.Energy,
                 Fat = calculated.Fat,
-                Sugars = calculated.Carbs, // może być null, sprawdzaj to
+                Sugars = calculated.Carbs, 
                 Proteins = calculated.Proteins,
                 Salt = calculated.Salt,
                 EnergyUnit = calculated.EnergyUnit,
@@ -53,7 +46,7 @@ namespace BackendLogicApi.Services
 
         public async Task DeleteUserLogAsync(int id)
         {
-            var log = await _repository.GetByIdAsync(id); // Musisz mieć tę metodę!
+            var log = await _repository.GetByIdAsync(id); 
             if (log == null)
                 throw new Exception($"Log with ID {id} not found.");
 

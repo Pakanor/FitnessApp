@@ -1,7 +1,6 @@
 ﻿using BackendLogicApi.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using BackendLogicApi.Models;
-using BackendLogicApi.DataAccess;
 
 namespace BackendLogicApi.Controllers
 {
@@ -11,7 +10,6 @@ namespace BackendLogicApi.Controllers
     {
         private readonly IProductOperationsService _productsOperationService;
         private readonly ICalorieCalculatorService _caloreieCalculatorService;
-        private readonly ILogger<ProductsOperationController> _logger; 
 
 
         public ProductsOperationController(IProductOperationsService productsOperationService, ICalorieCalculatorService calorieCalculatorService )
@@ -29,7 +27,7 @@ namespace BackendLogicApi.Controllers
             if (products == null || !products.Any())
                 return NotFound("No products found.");
 
-            return Ok(products); // Zwraca dane w formacie JSON
+            return Ok(products);
         }
 
         
@@ -40,20 +38,20 @@ namespace BackendLogicApi.Controllers
 
                 if (calculated == null)
                 {
-                    _logger.LogError("Calculated nutrients are missing.");
-                return BadRequest(new { message = "Calculated nutrients are missing." });
+                    
+                return BadRequest(new { message = "Brak wartości odżywczych błąd." });
             }
 
              await _productsOperationService.AddUserLogAsync(request.Product, request.Grams, calculated);
 
 
-            return Ok("Product added to log.");
+            return Ok("Produkt dodany");
         }
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteUserLog(int id)
         {
             await _productsOperationService.DeleteUserLogAsync(id);
-            return Ok("Product log deleted.");
+            return Ok("Produkt usunięty");
         }
         [HttpPut("update")]
         public async Task<IActionResult> UpdateUserLog([FromBody] ProductLogEntry updatedEntry)
@@ -61,7 +59,7 @@ namespace BackendLogicApi.Controllers
             try
             {
                 await _productsOperationService.UpdateUserLogAsync(updatedEntry);
-                return Ok("Product log updated.");
+                return Ok("Produkt zedytowany");
             }
             catch (ArgumentException ex)
             {
