@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
 using BackendLogicApi.Models;
-using FitnessApp.Services;
 using System.Windows;
 using Newtonsoft.Json;
-using System.Windows.Input;
 using BackendLogicApi.Services;
 namespace FitnessApp.ViewModels
 {

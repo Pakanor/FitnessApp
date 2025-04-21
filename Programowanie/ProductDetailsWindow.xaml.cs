@@ -1,8 +1,6 @@
 ﻿using System.Windows;
 using BackendLogicApi.Models;
 using FitnessApp.ViewModels;
-using FitnessApp.Services;
-using FitnessApp.Services;
 
 namespace FitnessApp
 {

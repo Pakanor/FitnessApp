@@ -5,8 +5,6 @@ using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using FitnessApp.Services;
-using FitnessApp.DataAccess;
-using System.Net.Http;
 
 namespace FitnessApp.ViewModels
 {
@@ -27,7 +25,6 @@ namespace FitnessApp.ViewModels
         public ProductViewModel ProductViewModel => _productViewModel;
         public UIStateManager UIStateManager => _uiStateManager;
         public ObservableCollection<ProductLogEntry> ProductLogs { get; set; } = new();
-        private readonly ProductLogRepository _repository;
 
 
 
@@ -101,7 +98,6 @@ namespace FitnessApp.ViewModels
             _uiStateManager = new UIStateManager();
             DeleteProductLogCommand = new RelayCommand<ProductLogEntry>(DeleteProductLog);
             EditProductLogCommand = new RelayCommand<ProductLogEntry>(EditProductLog);
-            _repository = new ProductLogRepository(new AppDbContext());
             _cameraViewModel.BarcodeDetected += OnBarcodeDetected;
 
             StartScanningCommand = new RelayCommand(StartScanning);

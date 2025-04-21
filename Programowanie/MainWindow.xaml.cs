@@ -1,10 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using FitnessApp.DataAccess;
-using FitnessApp.Interfaces;
 using BackendLogicApi.Models;
-using FitnessApp.Services;
 using FitnessApp.ViewModels;
 
 namespace FitnessApp
