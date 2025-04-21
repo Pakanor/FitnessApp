@@ -1,6 +1,6 @@
 ﻿using FitnessApp.Helpers;
 using FitnessApp.Interfaces;
-using FitnessApp.Models;
+using BackendLogicApi.Models;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;

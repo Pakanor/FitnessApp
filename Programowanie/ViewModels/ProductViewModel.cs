@@ -2,13 +2,12 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using FitnessApp.Models;
+using BackendLogicApi.Models;
 using FitnessApp.Services;
 using System.Windows;
 using Newtonsoft.Json;
 using System.Windows.Input;
-using static FitnessApp.Services.ProductServiceAPI;
-
+using BackendLogicApi.Services;
 namespace FitnessApp.ViewModels
 {
     public class ProductViewModel : BaseViewModel

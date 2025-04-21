@@ -3,7 +3,7 @@ using System.Windows.Input;
 using FitnessApp.Interfaces;
 using FitnessApp.Services;
 using FitnessApp.Interfaces;
-using FitnessApp.Models;
+using BackendLogicApi.Models;
 using FitnessApp.Services;
 using FitnessApp.DataAccess;
 

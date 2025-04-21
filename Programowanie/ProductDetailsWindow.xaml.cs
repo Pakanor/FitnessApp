@@ -1,5 +1,5 @@
 ﻿using System.Windows;
-using FitnessApp.Models;
+using BackendLogicApi.Models;
 using FitnessApp.ViewModels;
 using FitnessApp.Services;
 using FitnessApp.Services;
@@ -14,7 +14,7 @@ namespace FitnessApp
         private MainWindow mainWindow;
 
 
-        public ProductDetailsWindow(Product product, double grams = 100)
+        public ProductDetailsWindow(BackendLogicApi.Models.Product product, double grams = 100)
         {
             InitializeComponent();
             mainWindow = new MainWindow();
