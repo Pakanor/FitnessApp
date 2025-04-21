@@ -1,6 +1,7 @@
 ﻿using BackendLogicApi.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using BackendLogicApi.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace BackendLogicApi.Controllers
 {
@@ -20,17 +21,23 @@ namespace BackendLogicApi.Controllers
         }
 
         [HttpGet("recent")]
-        public async Task<IActionResult> GetRecentProducts()
+        public async Task<ActionResult<List<ProductLogEntry>>> GetRecentLogs([FromQuery] DateTime? date)
         {
-            var products = await _productsOperationService.GetRecentLogsAsync();
+            // Pobieramy wszystkie logi
+            var logs = await _productsOperationService.GetRecentLogsAsync();
 
-            if (products == null || !products.Any())
-                return NotFound("No products found.");
+            // Jeśli data jest podana, filtrujemy logi po dacie
+            if (date.HasValue)
+            {
+                logs = logs.Where(log => log.LoggedAt.Date == date.Value.Date).ToList();
+            }
 
-            return Ok(products);
+            // Jeśli brak daty, to wyświetlamy wszystkie logi
+            // (w tym przypadku logi są już dostępne w zmiennej 'logs', niezależnie od tego, czy była podana data, czy nie)
+            return Ok(logs);
         }
 
-        
+
         [HttpPost("add")]
         public async Task<IActionResult> AddUserLog([FromBody] AddLogRequest request)
         {
