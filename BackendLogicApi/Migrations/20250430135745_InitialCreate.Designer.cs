@@ -11,8 +11,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BackendLogicApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250421161254_ChangeLoggedAtToDateTimeOffset")]
-    partial class ChangeLoggedAtToDateTimeOffset
+    [Migration("20250430135745_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -70,7 +70,7 @@ namespace BackendLogicApi.Migrations
                     b.Property<double>("Grams")
                         .HasColumnType("double precision");
 
-                    b.Property<DateTimeOffset>("LoggedAt")
+                    b.Property<DateTime>("LoggedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ProductName")
@@ -91,7 +91,42 @@ namespace BackendLogicApi.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("ProductLogEntries");
+                });
+
+            modelBuilder.Entity("BackendLogicApi.Models.User", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTime?>("LastLogin")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("BackendLogicApi.Models.Product", b =>
@@ -130,6 +165,18 @@ namespace BackendLogicApi.Migrations
 
                     b.Navigation("Nutriments")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("BackendLogicApi.Models.ProductLogEntry", b =>
+                {
+                    b.HasOne("BackendLogicApi.Models.User", null)
+                        .WithMany("ProductLogs")
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("BackendLogicApi.Models.User", b =>
+                {
+                    b.Navigation("ProductLogs");
                 });
 #pragma warning restore 612, 618
         }

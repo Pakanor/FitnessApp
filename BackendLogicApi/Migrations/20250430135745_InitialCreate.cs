@@ -33,6 +33,23 @@ namespace BackendLogicApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Username = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Email = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    PasswordHash = table.Column<string>(type: "text", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastLogin = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProductLogEntries",
                 columns: table => new
                 {
@@ -53,7 +70,17 @@ namespace BackendLogicApi.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ProductLogEntries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductLogEntries_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "ID");
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductLogEntries_UserId",
+                table: "ProductLogEntries",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -64,6 +91,9 @@ namespace BackendLogicApi.Migrations
 
             migrationBuilder.DropTable(
                 name: "ProductLogEntries");
+
+            migrationBuilder.DropTable(
+                name: "Users");
         }
     }
 }

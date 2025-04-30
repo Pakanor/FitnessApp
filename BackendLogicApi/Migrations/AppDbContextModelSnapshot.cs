@@ -88,7 +88,42 @@ namespace BackendLogicApi.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId");
+
                     b.ToTable("ProductLogEntries");
+                });
+
+            modelBuilder.Entity("BackendLogicApi.Models.User", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<DateTime?>("LastLogin")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("BackendLogicApi.Models.Product", b =>
@@ -127,6 +162,18 @@ namespace BackendLogicApi.Migrations
 
                     b.Navigation("Nutriments")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("BackendLogicApi.Models.ProductLogEntry", b =>
+                {
+                    b.HasOne("BackendLogicApi.Models.User", null)
+                        .WithMany("ProductLogs")
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("BackendLogicApi.Models.User", b =>
+                {
+                    b.Navigation("ProductLogs");
                 });
 #pragma warning restore 612, 618
         }
