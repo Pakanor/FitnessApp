@@ -76,9 +76,5 @@ namespace BackendLogicApi.Models
     }
 
 
-    //for future
-    public class User
-    {
-        public int ID { get; set; }
-    }
+   
 }

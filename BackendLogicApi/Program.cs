@@ -11,10 +11,14 @@ builder.Services.AddControllersWithViews();
 // Services registration
 builder.Services.AddScoped<IProductOperationsService, ProductOperationsService>();
 builder.Services.AddScoped<ICalorieCalculatorService, CalorieCalculatorService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
 builder.Services.AddScoped<IProductServiceAPI, ProductServiceAPI>();
 builder.Services.AddLogging();
 // Rejestracja repozytoriów i DbContext
 builder.Services.AddScoped<ProductLogRepository>();
+builder.Services.AddScoped<UserLogrepository>();
+
 builder.Services.AddScoped<AppDbContext>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
