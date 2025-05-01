@@ -21,6 +21,12 @@ namespace BackendLogicApi.Controllers
             await _authService.RegisterAsync(dto);
             return Ok(new { message = "Rejestracja zakończona pomyślnie." });
         }
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        {
+            await _authService.LoginAsync(dto);
+            return Ok(new { message = "zalogowano" });
+        }
 
 
     }
