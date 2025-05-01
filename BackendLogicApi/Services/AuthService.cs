@@ -7,7 +7,10 @@ namespace BackendLogicApi.Services
     public class AuthService : IAuthService
     {
         private readonly UserLogrepository _userRepo;
-
+        public class ConflictException : Exception
+        {
+            public ConflictException(string message) : base(message) { }
+        }
 
 
 
@@ -20,7 +23,7 @@ namespace BackendLogicApi.Services
             var userExist = await _userRepo.UserExistsAsync(dto.Email, dto.Username);
             if (userExist)
             {
-                throw new Exception("istniejacy uzytkownik");
+                throw new ConflictException("Użytkownik już istnieje.");
             }
             var user = new User { Username = dto.Username,
                 Email=dto.Email,
@@ -40,4 +43,8 @@ namespace BackendLogicApi.Services
             return token;
         }
     }
+
+    
+
+
 }
