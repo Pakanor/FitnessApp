@@ -31,7 +31,7 @@ namespace BackendLogicApi.Services
             var userExist = await _userRepo.UserExistsAsync(dto.Email, dto.Username);
             if (userExist)
             {
-                throw new ConflictException("Użytkownik już istnieje.");
+                throw new ConflictException("Użytkownik już istnieje");
             }
             var user = new User { Username = dto.Username,
                 Email=dto.Email,
