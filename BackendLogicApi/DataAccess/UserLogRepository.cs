@@ -28,5 +28,6 @@ namespace BackendLogicApi.DataAccess
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == emailOrLogin || u.Username == emailOrLogin);
         }
+        
     }
 }

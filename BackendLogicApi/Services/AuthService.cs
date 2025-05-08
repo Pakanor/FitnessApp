@@ -12,6 +12,8 @@ namespace BackendLogicApi.Services
     {
         private readonly UserLogrepository _userRepo;
         private readonly IConfiguration _configuration;
+        private readonly JwtService _jwtService;
+        private readonly IEmailService _emailService;
 
         public class ConflictException : Exception
         {
@@ -20,9 +22,11 @@ namespace BackendLogicApi.Services
 
 
 
-        public AuthService(UserLogrepository userRepo, IConfiguration configuration) { 
+        public AuthService(UserLogrepository userRepo, IConfiguration configuration,JwtService jwtService,IEmailService emailService) { 
             _userRepo = userRepo;
             _configuration = configuration;
+            _emailService = emailService;
+            _jwtService = jwtService;
 
         }
 
@@ -36,10 +40,21 @@ namespace BackendLogicApi.Services
             var user = new User { Username = dto.Username,
                 Email=dto.Email,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password) };
-
             await _userRepo.AddUserAsync(user);
+            var token = _jwtService.GenerateEmailVerificationToken(user);
+            var verificationLink = $"http://localhost:5142/api/auth/verify?token={token}";
+            await _emailService.SendEmailAsync(
+    user.Email,
+    "Potwierdzenie rejestracji",
+    $"Kliknij <a href=\"{verificationLink}\">tutaj</a>, aby potwierdzić rejestrację."
+);
+
+
 
         }
+
+
+
         public async Task<string> LoginAsync(LoginDto dto)
         {
             var user =  await _userRepo.GetByEmailOrLoginAsync(dto.EmailOrLogin);
@@ -47,27 +62,13 @@ namespace BackendLogicApi.Services
             {
                 throw new Exception("Nieprawidłowy login lub hasło.");
             }
-            var claims = new[]
-    {
-        new Claim(ClaimTypes.NameIdentifier, user.ID.ToString()), 
-        new Claim(ClaimTypes.Name, user.Username),
-        new Claim(ClaimTypes.Email, user.Email),
-        new Claim(ClaimTypes.Role, "User")
-    };
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
-                issuer: _configuration["Jwt:Issuer"],
-                audience: _configuration["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(double.Parse(_configuration["Jwt:ExpireMinutes"])),
-                signingCredentials: creds
-            );
-            return new JwtSecurityTokenHandler().WriteToken(token);
+
+            return _jwtService.GenerateToken(user);
 
 
         }
+        
     }
 
     
