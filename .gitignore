@@ -4,4 +4,4 @@ obj/
 *.user
 *.suo
 AppDbContext.cs
-/appsettings.json
+BackendLogicApi/appsettings.json
