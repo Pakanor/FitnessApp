@@ -1,5 +1,6 @@
 ﻿using BackendLogicApi.Interfaces;
 using BackendLogicApi.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BackendLogicApi.Controllers
@@ -24,8 +25,26 @@ namespace BackendLogicApi.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
-            await _authService.LoginAsync(dto);
-            return Ok(new { message = "zalogowano" });
+            try
+            {
+                var tokenString = await _authService.LoginAsync(dto);
+                if (string.IsNullOrEmpty(tokenString))
+                {
+                    return Unauthorized("Nieprawidłowy login lub hasło.");
+                }
+                Response.Headers.Add("Location", "/home");
+                return Ok(new { token = tokenString });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [Authorize]
+        [HttpGet("protected-resource")]
+        public IActionResult GetProtectedResource()
+        {
+            return Ok(new { message = "Dostęp do chronionego zasobu." });
         }
 
 
