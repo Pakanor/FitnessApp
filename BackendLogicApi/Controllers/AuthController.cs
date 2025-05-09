@@ -1,7 +1,9 @@
 ﻿using BackendLogicApi.Interfaces;
 using BackendLogicApi.Models;
+using BackendLogicApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace BackendLogicApi.Controllers
 {
@@ -10,10 +12,12 @@ namespace BackendLogicApi.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
+        private readonly JwtService _jwtService;
 
-        public AuthController(IAuthService authService)
+        public AuthController(IAuthService authService, JwtService jwtService)
         {
             _authService = authService;
+           _jwtService = jwtService;
         }
 
         [HttpPost("register")]
@@ -40,11 +44,19 @@ namespace BackendLogicApi.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [Authorize]
-        [HttpGet("protected-resource")]
-        public IActionResult GetProtectedResource()
+        [HttpGet("verify")]
+        public async Task<IActionResult> VerifyEmail([FromQuery] string token)
         {
-            return Ok(new { message = "Dostęp do chronionego zasobu." });
+            var principal = _jwtService.ValidateToken(token);
+            if (principal == null || principal.FindFirst("verify")?.Value != "true")
+                return BadRequest("Nieprawidłowy lub przeterminowany token");
+
+            var email = principal.FindFirst(ClaimTypes.Email)?.Value;
+            if (string.IsNullOrEmpty(email))
+                return BadRequest("Brak adresu e-mail");
+
+
+            return Ok("Email został zweryfikowany!");
         }
 
 

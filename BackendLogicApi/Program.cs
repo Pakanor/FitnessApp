@@ -17,6 +17,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IProductOperationsService, ProductOperationsService>();
 builder.Services.AddScoped<ICalorieCalculatorService, CalorieCalculatorService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>(); 
+builder.Services.AddScoped<JwtService>();
 
 builder.Services.AddScoped<IProductServiceAPI, ProductServiceAPI>();
 builder.Services.AddLogging();
