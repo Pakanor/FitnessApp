@@ -35,4 +35,18 @@ namespace BackendLogicApi.Models
         public string EmailOrLogin { get; set; }
         public string Password { get; set; }
     }
+    public class UpdateProfileDto
+    {
+        public string Username { get; set; }
+        public string Email { get; set; }
+    }
+    public class EmailDto
+    {
+        public string Email { get; set; } = string.Empty;
+    }
+    public class ChangePasswordDto
+    {
+        public string CurrentPassword { get; set; }
+        public string NewPassword { get; set; }
+    }
 }
