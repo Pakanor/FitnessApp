@@ -22,7 +22,8 @@ namespace BackendLogicApi.Services
 
 
 
-        public AuthService(UserLogrepository userRepo, IConfiguration configuration,JwtService jwtService,IEmailService emailService) { 
+        public AuthService(UserLogrepository userRepo, IConfiguration configuration, JwtService jwtService, IEmailService emailService)
+        {
             _userRepo = userRepo;
             _configuration = configuration;
             _emailService = emailService;
@@ -37,9 +38,12 @@ namespace BackendLogicApi.Services
             {
                 throw new ConflictException("Użytkownik już istnieje");
             }
-            var user = new User { Username = dto.Username,
-                Email=dto.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password) };
+            var user = new User
+            {
+                Username = dto.Username,
+                Email = dto.Email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+            };
             await _userRepo.AddUserAsync(user);
             var token = _jwtService.GenerateEmailVerificationToken(user);
             var verificationLink = $"http://localhost:5142/api/auth/verify?token={token}";
@@ -54,10 +58,10 @@ namespace BackendLogicApi.Services
         }
 
 
-    
+
         public async Task<string> LoginAsync(LoginDto dto)
         {
-            var user =  await _userRepo.GetByEmailOrLoginAsync(dto.EmailOrLogin);
+            var user = await _userRepo.GetByEmailOrLoginAsync(dto.EmailOrLogin);
             if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             {
                 throw new Exception("Nieprawidłowy login lub hasło.");
@@ -68,10 +72,10 @@ namespace BackendLogicApi.Services
 
 
         }
-        
+
     }
 
-    
+
 
 
 }

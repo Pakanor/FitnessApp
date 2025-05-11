@@ -1,7 +1,7 @@
 ﻿using static BackendLogicApi.Services.AuthService;
 using System.Net;
 
-namespace BackendLogicApi.Services
+namespace BackendLogicApi.Services.Validators
 {
     public class ExceptionHandlingMiddleware
     {
