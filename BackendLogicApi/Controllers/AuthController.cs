@@ -1,7 +1,9 @@
-﻿using BackendLogicApi.Interfaces;
+﻿using BackendLogicApi.DataAccess;
+using BackendLogicApi.Interfaces;
 using BackendLogicApi.Models;
 using BackendLogicApi.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -13,11 +15,15 @@ namespace BackendLogicApi.Controllers
     {
         private readonly IAuthService _authService;
         private readonly JwtService _jwtService;
+        private readonly UserLogrepository _userRepo;
 
-        public AuthController(IAuthService authService, JwtService jwtService)
+
+        public AuthController(IAuthService authService, JwtService jwtService, UserLogrepository userRepo)
         {
             _authService = authService;
            _jwtService = jwtService;
+            _userRepo = userRepo;
+
         }
 
         [HttpPost("register")]
@@ -54,9 +60,20 @@ namespace BackendLogicApi.Controllers
             var email = principal.FindFirst(ClaimTypes.Email)?.Value;
             if (string.IsNullOrEmpty(email))
                 return BadRequest("Brak adresu e-mail");
+            var user = await _userRepo.GetByEmailAsync(email);
+            if (user == null)
+                return NotFound("Użytkownik nie istnieje.");
+
+            user.IsEmailVerified = true;
+            var result = _userRepo.UpdateUserAsync(user);
+
+            
+
+            return Ok("Email został zweryfikowany.");
 
 
-            return Ok("Email został zweryfikowany!");
+
+
         }
 
 
