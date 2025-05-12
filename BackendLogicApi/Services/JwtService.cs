@@ -1,4 +1,5 @@
-﻿using BackendLogicApi.Models;
+﻿using BackendLogicApi.DataAccess;
+using BackendLogicApi.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -11,9 +12,12 @@ namespace BackendLogicApi.Services
     public class JwtService
     {
         private readonly IConfiguration _configuration;
+
         public JwtService(IConfiguration configuration)
         {
+
             _configuration = configuration;
+
         }
         public string GenerateToken(User user)
         {
@@ -22,6 +26,8 @@ namespace BackendLogicApi.Services
             new Claim(ClaimTypes.NameIdentifier, user.ID.ToString()),
             new Claim(ClaimTypes.Name, user.Username),
             new Claim(ClaimTypes.Email, user.Email),
+            new Claim("isEmailVerified", user.IsEmailVerified.ToString().ToLower()),
+
             new Claim(ClaimTypes.Role, "User")
         };
 
@@ -58,6 +64,7 @@ namespace BackendLogicApi.Services
                 }, out _);
 
                 return principal;
+
             }
             catch
             {

@@ -66,6 +66,11 @@ namespace BackendLogicApi.Services
             {
                 throw new Exception("Nieprawidłowy login lub hasło.");
             }
+            else if (!user.IsEmailVerified)
+            {
+                throw new Exception("Nieprawidłowy login lub hasło.");
+
+            }
 
 
             return _jwtService.GenerateToken(user);
