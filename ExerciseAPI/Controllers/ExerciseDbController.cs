@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ExerciseAPI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ExerciseAPI.Controllers
 {
     [ApiController]
+
     [Route("api/[controller]")]
     public class ExerciseDbController : ControllerBase
     {
@@ -17,6 +19,7 @@ namespace ExerciseAPI.Controllers
             _importService = importService;
             _context = context;
         }
+        [Authorize(Roles = "Admin")]
 
         [HttpPost("import")]
         public async Task<IActionResult> Import()

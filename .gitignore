@@ -5,3 +5,4 @@ obj/
 *.suo
 AppDbContext.cs
 BackendLogicApi/appsettings.json
+/AuthAPI/appsettings.json
