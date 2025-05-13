@@ -1,26 +1,31 @@
 using BackendLogicApi.DataAccess;
 using BackendLogicApi.Interfaces;
-using BackendLogicApi.Models;
 using BackendLogicApi.Services;
-using Microsoft.EntityFrameworkCore;
-using FluentValidation;
+using BackendLogicApi.Services.Validators;
 using FluentValidation.AspNetCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+// Add services to the container.
 
-builder.Services.AddScoped<IProductOperationsService, ProductOperationsService>();
-builder.Services.AddScoped<ICalorieCalculatorService, CalorieCalculatorService>();
-
-builder.Services.AddScoped<ProductLogRepository>();
+builder.Services.AddControllers();
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<IProductServiceAPI, ProductServiceAPI>();
-builder.Services.AddLogging();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<UserLogrepository>();
+builder.Services.AddControllers()
+    .AddFluentValidation(fv =>
+    {
+        fv.RegisterValidatorsFromAssemblyContaining<RegisterDtoValidator>();
+    });
 
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
@@ -41,25 +46,18 @@ builder.Services.AddAuthentication("Bearer")
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql("Host=localhost;Database=product;Username=postgres;Password=Pakan135@"));
 
-
-
-builder.Services.AddControllers();
-builder.Services.AddAuthorization();
-
-
 var app = builder.Build();
+
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseAuthentication();
+
+app.UseHttpsRedirection();
 
 app.UseAuthorization();
-
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllers();
 

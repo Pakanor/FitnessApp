@@ -16,7 +16,7 @@ namespace BackendLogicApi.DataAccess
         public async Task<bool> UserExistsAsync(string email, string login)
         {
             return await _context.Users
-                .AnyAsync(u => u.Email == email || u.Username == login);  
+                .AnyAsync(u => u.Email == email || u.Username == login);
         }
         public async Task AddUserAsync(User user)
         {

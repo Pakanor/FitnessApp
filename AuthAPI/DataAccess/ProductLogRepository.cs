@@ -1,12 +1,8 @@
-﻿using FitnessApp.Models;
+﻿using BackendLogicApi.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace FitnessApp.DataAccess
+
+namespace BackendLogicApi.DataAccess
 {
     public class ProductLogRepository
     {
@@ -15,6 +11,10 @@ namespace FitnessApp.DataAccess
         public ProductLogRepository(AppDbContext context)
         {
             _context = context;
+        }
+        public async Task<ProductLogEntry?> GetByIdAsync(int id)
+        {
+            return await _context.ProductLogEntries.FindAsync(id);
         }
 
         public async Task AddLogEntryAsync(ProductLogEntry entry)
