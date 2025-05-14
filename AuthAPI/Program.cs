@@ -44,7 +44,7 @@ builder.Services.AddAuthentication("Bearer")
     });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql("Host=localhost;Database=product;Username=postgres;Password=Pakan135@"));
+    options.UseNpgsql("Host=localhost;Database=user;Username=postgres;Password=Pakan135@"));
 
 var app = builder.Build();
 

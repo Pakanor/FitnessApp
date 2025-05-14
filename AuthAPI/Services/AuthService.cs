@@ -46,7 +46,7 @@ namespace BackendLogicApi.Services
             };
             await _userRepo.AddUserAsync(user);
             var token = _jwtService.GenerateEmailVerificationToken(user);
-            var verificationLink = $"http://localhost:5142/api/auth/verify?token={token}";
+            var verificationLink = $"http://localhost:5010/api/auth/verify?token={token}";
             await _emailService.SendEmailAsync(
     user.Email,
     "Potwierdzenie rejestracji",
