@@ -21,7 +21,6 @@ namespace BackendLogicApi.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? LastLogin { get; set; }
 
-        public List<ProductLogEntry> ProductLogs { get; set; }
         public bool IsEmailVerified { get; set; } = false;
     }
     public class RegisterDto
