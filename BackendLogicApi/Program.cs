@@ -22,6 +22,19 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IProductServiceAPI, ProductServiceAPI>();
 builder.Services.AddLogging();
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                          policy.WithOrigins("http://localhost:3000")
+                                .AllowAnyHeader()
+                                .AllowAnyMethod();
+                      });
+});
+
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
     {
@@ -48,6 +61,8 @@ builder.Services.AddAuthorization();
 
 
 var app = builder.Build();
+app.UseCors(MyAllowSpecificOrigins);
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

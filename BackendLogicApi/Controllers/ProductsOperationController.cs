@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using BackendLogicApi.Models;
 using Microsoft.EntityFrameworkCore;
+using BackendLogicApi.Services;
 
 namespace BackendLogicApi.Controllers
 {
@@ -11,12 +12,14 @@ namespace BackendLogicApi.Controllers
     {
         private readonly IProductOperationsService _productsOperationService;
         private readonly ICalorieCalculatorService _caloreieCalculatorService;
+        private readonly IProductServiceAPI _productServiceAPI;
 
 
-        public ProductsOperationController(IProductOperationsService productsOperationService, ICalorieCalculatorService calorieCalculatorService )
+        public ProductsOperationController(IProductOperationsService productsOperationService, ICalorieCalculatorService calorieCalculatorService,IProductServiceAPI productServiceAPI )
         {
             _productsOperationService = productsOperationService;
             _caloreieCalculatorService = calorieCalculatorService;
+            _productServiceAPI = productServiceAPI;
 
         }
 
@@ -71,6 +74,22 @@ namespace BackendLogicApi.Controllers
             catch (ArgumentException ex)
             {
                 return NotFound(new { message = ex.Message });
+            }
+        }
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchProducts([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return BadRequest("Zapytanie nie może być puste.");
+
+            try
+            {
+                var result = await _productServiceAPI.GetProductFromApiName(query);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Błąd podczas wyszukiwania produktów: {ex.Message}");
             }
         }
 
