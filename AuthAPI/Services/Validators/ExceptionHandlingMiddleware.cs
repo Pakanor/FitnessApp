@@ -1,5 +1,6 @@
-﻿using static BackendLogicApi.Services.AuthService;
-using System.Net;
+﻿using System.Net;
+using System.Text.Json;
+using static BackendLogicApi.Services.AuthService;
 
 namespace BackendLogicApi.Services.Validators
 {
@@ -14,25 +15,32 @@ namespace BackendLogicApi.Services.Validators
             _logger = logger;
         }
 
-        public async Task InvokeAsync(HttpContext httpContext)
+        public async Task InvokeAsync(HttpContext context)
         {
             try
             {
-                await _next(httpContext); // Przechodzi do następnego middleware w pipeline
+                await _next(context);
             }
             catch (ConflictException ex)
             {
-                _logger.LogError(ex, "Konflikt: {0}", ex.Message);
-                httpContext.Response.StatusCode = (int)HttpStatusCode.Conflict; // 409 dla konfliktu
-                await httpContext.Response.WriteAsync(ex.Message); // Zwróć szczegóły konfliktu
+                _logger.LogError(ex, "Conflict: {Message}", ex.Message);
+                await HandleExceptionAsync(context, HttpStatusCode.Conflict, ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Wystąpił nieoczekiwany błąd.");
-                httpContext.Response.StatusCode = (int)HttpStatusCode.InternalServerError; // 500 dla ogólnych błędów
-                await httpContext.Response.WriteAsync("Wystąpił błąd serwera.");
+                _logger.LogError(ex, "Unexpected error");
+                await HandleExceptionAsync(context, HttpStatusCode.InternalServerError, "Wystąpił błąd serwera.");
             }
         }
-    }
 
+        private static Task HandleExceptionAsync(HttpContext context, HttpStatusCode statusCode, string message)
+        {
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)statusCode;
+
+            var result = JsonSerializer.Serialize(new { message });
+
+            return context.Response.WriteAsync(result);
+        }
+    }
 }
