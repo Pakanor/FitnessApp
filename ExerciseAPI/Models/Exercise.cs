@@ -8,6 +8,6 @@
         public string Description { get; set; }
         public string Category { get; set; }
         public string? ImageUrl { get; set; }
-        public string? GifUrl { get; set; }  // Nowe pole na URL do gifa
+        public string? GifUrl { get; set; } 
     }
 }

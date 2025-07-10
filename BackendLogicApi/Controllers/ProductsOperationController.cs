@@ -36,7 +36,6 @@ namespace BackendLogicApi.Controllers
             }
 
             // Jeśli brak daty, to wyświetlamy wszystkie logi
-            // (w tym przypadku logi są już dostępne w zmiennej 'logs', niezależnie od tego, czy była podana data, czy nie)
             return Ok(logs);
         }
 
