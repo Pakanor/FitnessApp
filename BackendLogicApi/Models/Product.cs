@@ -44,25 +44,27 @@ namespace BackendLogicApi.Models
 
 
     public class ProductLogEntry
-    {
-        public int Id { get; set; }
+{
+    public int Id { get; set; }
 
-        public string ProductName { get; set; }
-        public string Brands { get; set; }
+    public string ProductName { get; set; }
+    public string Brands { get; set; }
 
-        public double Grams { get; set; }
+    public double Grams { get; set; }
 
-        public double Energy { get; set; }
-        public double Fat { get; set; }
-        public double Sugars { get; set; }
-        public double Proteins { get; set; }
-        public double Salt { get; set; }
-        public string EnergyUnit { get; set; }
+    public double Energy { get; set; }
+    public double Fat { get; set; }
+    public double Sugars { get; set; }
+    public double Proteins { get; set; }
+    public double Salt { get; set; }
+    public string EnergyUnit { get; set; }
 
-        public DateTime LoggedAt { get; set; } = DateTime.UtcNow;
+    public DateTime LoggedAt { get; set; } = DateTime.UtcNow;
 
-        public int? UserId { get; set; }
-    }
+    public int? UserId { get; set; }
+
+    public User? User { get; set; }
+}
     public class CalculationRequest
     {
         public Product Product { get; set; }

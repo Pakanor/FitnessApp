@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 
 
+
 namespace BackendLogicApi.DataAccess
 {
     public class ProductLogRepository

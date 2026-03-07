@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace BackendLogicApi.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(BackendLogicApi.DataAccess.AppDbContext))]
     [Migration("20250508112906_ActivateUser")]
     partial class ActivateUser
     {
