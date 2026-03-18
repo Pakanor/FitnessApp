@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace AuthAPI.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(AuthAPI.DataAccess.AppDbContext))]
     [Migration("20250514161048_InitialCreate2")]
     partial class InitialCreate2
     {
@@ -24,7 +24,7 @@ namespace AuthAPI.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("BackendLogicApi.Models.Product", b =>
+            modelBuilder.Entity("AuthAPI.Models.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -45,7 +45,7 @@ namespace AuthAPI.Migrations
                     b.ToTable("Product");
                 });
 
-            modelBuilder.Entity("BackendLogicApi.Models.User", b =>
+            modelBuilder.Entity("AuthAPI.Models.User", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -81,9 +81,9 @@ namespace AuthAPI.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("BackendLogicApi.Models.Product", b =>
+            modelBuilder.Entity("AuthAPI.Models.Product", b =>
                 {
-                    b.OwnsOne("BackendLogicApi.Models.Nutriments", "Nutriments", b1 =>
+                    b.OwnsOne("AuthAPI.Models.Nutriments", "Nutriments", b1 =>
                         {
                             b1.Property<int>("ProductId")
                                 .HasColumnType("integer");

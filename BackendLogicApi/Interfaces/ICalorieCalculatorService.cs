@@ -5,7 +5,7 @@ namespace BackendLogicApi.Interfaces
 {
     public interface ICalorieCalculatorService
     {
-        Nutriments CalculateForWeight(Product product, double grams);
+        Nutriments? CalculateForWeight(Product product, double grams);
 
     }
 }

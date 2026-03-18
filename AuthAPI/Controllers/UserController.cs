@@ -1,10 +1,10 @@
-﻿using BackendLogicApi.Interfaces;
+﻿using AuthAPI.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using BackendLogicApi.Models;
-using BackendLogicApi.Services;
+using AuthAPI.Models;
+using AuthAPI.Services;
 
-namespace BackendLogicApi.Controllers
+namespace AuthAPI.Controllers
 {
     [ApiController]
     [Route("api/user")]

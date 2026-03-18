@@ -1,8 +1,8 @@
-﻿using BackendLogicApi.Models;
+﻿using AuthAPI.Models;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace BackendLogicApi.Interfaces
+namespace AuthAPI.Interfaces
 {
     public interface IUserService
     {

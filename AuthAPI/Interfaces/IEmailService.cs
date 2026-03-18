@@ -1,4 +1,4 @@
-﻿namespace BackendLogicApi.Interfaces
+﻿namespace AuthAPI.Interfaces
 {
     public interface IEmailService
     {

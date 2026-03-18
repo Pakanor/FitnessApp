@@ -3,7 +3,7 @@ using ExerciseAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
-
+using ExerciseAPI.Data;
 namespace ExerciseAPI.Controllers
 {
     [ApiController]
@@ -20,14 +20,14 @@ namespace ExerciseAPI.Controllers
             _importService = importService;
             _context = context;
         }
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
 
         [HttpPost("import")]
         public async Task<IActionResult> Import()
         {
             var firstImported = await _importService.ImportAsync();
 
-            if (firstImported == null)
+            if (firstImported == 0)
                 return NotFound(new { message = "Nie udało się zaimportować żadnych ćwiczeń." });
 
             var count = await _importService.ImportAsync();

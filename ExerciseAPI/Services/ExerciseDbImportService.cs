@@ -2,7 +2,7 @@
 using System.Text.Json;
 using ExerciseAPI.Models;
 using Microsoft.EntityFrameworkCore;
-
+using ExerciseAPI.Data;
 
 namespace ExerciseAPI.Services
 {

@@ -17,7 +17,6 @@ namespace BackendLogicApi.Services
             _client = new HttpClient();
         }
 
-        // API
         public async Task<dynamic> GetProductFromApiBarcode(string barcode)
         {
             try
@@ -26,7 +25,6 @@ namespace BackendLogicApi.Services
 
                 var response = await _client.GetStringAsync(url);
 
-                // deserialising Object
                 dynamic apiResponse = JsonConvert.DeserializeObject(response);
 
                 if (apiResponse != null && apiResponse.product != null)
@@ -50,7 +48,7 @@ namespace BackendLogicApi.Services
         {
             try
             {
-                string url = $"https://world.openfoodfacts.org/cgi/search.pl?search_terms={Uri.EscapeDataString(productName)}&search_simple=1&action=process&json=1";
+                string url = $"https://world.openfoodfacts.org/cgi/search.pl?search_terms={Uri.EscapeDataString(productName)}&search_simple=1&action=process&json=1&lc=pl";
 
 
                 var response = await _client.GetStringAsync(url);
@@ -61,9 +59,15 @@ namespace BackendLogicApi.Services
                 if (apiResponse?.Products != null && apiResponse.Products.Any())
 
                 {
+                    var filteredProducts = apiResponse.Products.Where(p =>
+                        p.Nutriments != null &&
+                        p.Nutriments.Energy != null &&
+                        p.Nutriments.Fat != null &&
+                        p.Nutriments.Carbs != null &&
+                        p.Nutriments.Proteins != null &&
+                        p.Nutriments.Salt != null).ToList();
 
-
-                    return apiResponse.Products;
+                    return filteredProducts;
                 }
                 else
                 {

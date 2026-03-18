@@ -1,7 +1,7 @@
-using BackendLogicApi.DataAccess;
-using BackendLogicApi.Interfaces;
-using BackendLogicApi.Services;
-using BackendLogicApi.Services.Validators;
+using AuthAPI.DataAccess;
+using AuthAPI.Interfaces;
+using AuthAPI.Services;
+using AuthAPI.Services.Validators;
 using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -56,7 +56,7 @@ builder.Services.AddAuthentication("Bearer")
     });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql("Host=localhost;Database=user;Username=postgres;Password=Pakan135@"));
+    options.UseNpgsql("Host=localhost;Database=auth;Username=fitnessapp;Password=Pakan135@"));
 
 var app = builder.Build();
 
@@ -70,7 +70,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

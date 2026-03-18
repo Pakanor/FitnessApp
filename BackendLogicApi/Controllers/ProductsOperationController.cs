@@ -26,16 +26,13 @@ namespace BackendLogicApi.Controllers
         [HttpGet("recent")]
         public async Task<ActionResult<List<ProductLogEntry>>> GetRecentLogs([FromQuery] DateTime? date)
         {
-            // Pobieramy wszystkie logi
             var logs = await _productsOperationService.GetRecentLogsAsync();
 
-            // Jeśli data jest podana, filtrujemy logi po dacie
             if (date.HasValue)
             {
-                logs = logs.Where(log => log.LoggedAt.Date == date.Value.Date).ToList();
+                logs = logs.Where(log => log.LoggedAt.ToLocalTime().Date == date.Value.Date).ToList();
             }
 
-            // Jeśli brak daty, to wyświetlamy wszystkie logi
             return Ok(logs);
         }
 
@@ -76,6 +73,7 @@ namespace BackendLogicApi.Controllers
             }
         }
         [HttpGet("search")]
+        [Microsoft.AspNetCore.Authorization.AllowAnonymous]
         public async Task<IActionResult> SearchProducts([FromQuery] string query)
         {
             if (string.IsNullOrWhiteSpace(query))
@@ -88,6 +86,7 @@ namespace BackendLogicApi.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"SearchProducts error: {ex}");
                 return StatusCode(500, $"Błąd podczas wyszukiwania produktów: {ex.Message}");
             }
         }

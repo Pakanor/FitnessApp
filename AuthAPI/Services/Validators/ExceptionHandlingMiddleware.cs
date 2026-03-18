@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using System.Text.Json;
-using static BackendLogicApi.Services.AuthService;
+using static AuthAPI.Services.AuthService;
 
-namespace BackendLogicApi.Services.Validators
+namespace AuthAPI.Services.Validators
 {
     public class ExceptionHandlingMiddleware
     {

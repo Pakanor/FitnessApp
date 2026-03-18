@@ -1,8 +1,8 @@
 ﻿using System.Net.Mail;
 using System.Net;
-using BackendLogicApi.Interfaces;
+using AuthAPI.Interfaces;
 
-namespace BackendLogicApi.Services
+namespace AuthAPI.Services
 {
     public class EmailService : IEmailService
     {

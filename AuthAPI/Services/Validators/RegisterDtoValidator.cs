@@ -1,8 +1,8 @@
-﻿using BackendLogicApi.Models;
+﻿using AuthAPI.Models;
 using FluentValidation;
 
 
-namespace BackendLogicApi.Services.Validators
+namespace AuthAPI.Services.Validators
 
 {
     public class RegisterDtoValidator : AbstractValidator<RegisterDto>

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace BackendLogicApi.Models
+namespace AuthAPI.Models
 {
     public class User
     {

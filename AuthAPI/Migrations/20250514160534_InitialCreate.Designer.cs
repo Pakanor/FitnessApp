@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace AuthAPI.Migrations
 {
-    [DbContext(typeof(AppDbContext))]
+    [DbContext(typeof(AuthAPI.DataAccess.AppDbContext))]
     [Migration("20250514160534_InitialCreate")]
     partial class InitialCreate
     {
@@ -24,7 +24,7 @@ namespace AuthAPI.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("BackendLogicApi.Models.Product", b =>
+            modelBuilder.Entity("AuthAPI.Models.Product", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -45,7 +45,7 @@ namespace AuthAPI.Migrations
                     b.ToTable("Product");
                 });
 
-            modelBuilder.Entity("BackendLogicApi.Models.ProductLogEntry", b =>
+            modelBuilder.Entity("AuthAPI.Models.ProductLogEntry", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -96,7 +96,7 @@ namespace AuthAPI.Migrations
                     b.ToTable("ProductLogEntry");
                 });
 
-            modelBuilder.Entity("BackendLogicApi.Models.User", b =>
+            modelBuilder.Entity("AuthAPI.Models.User", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -132,9 +132,9 @@ namespace AuthAPI.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("BackendLogicApi.Models.Product", b =>
+            modelBuilder.Entity("AuthAPI.Models.Product", b =>
                 {
-                    b.OwnsOne("BackendLogicApi.Models.Nutriments", "Nutriments", b1 =>
+                    b.OwnsOne("AuthAPI.Models.Nutriments", "Nutriments", b1 =>
                         {
                             b1.Property<int>("ProductId")
                                 .HasColumnType("integer");
@@ -170,14 +170,14 @@ namespace AuthAPI.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("BackendLogicApi.Models.ProductLogEntry", b =>
+            modelBuilder.Entity("AuthAPI.Models.ProductLogEntry", b =>
                 {
-                    b.HasOne("BackendLogicApi.Models.User", null)
+                    b.HasOne("AuthAPI.Models.User", null)
                         .WithMany("ProductLogs")
                         .HasForeignKey("UserId");
                 });
 
-            modelBuilder.Entity("BackendLogicApi.Models.User", b =>
+            modelBuilder.Entity("AuthAPI.Models.User", b =>
                 {
                     b.Navigation("ProductLogs");
                 });

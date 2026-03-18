@@ -1,8 +1,8 @@
 ﻿
 
-using BackendLogicApi.Models;
+using AuthAPI.Models;
 
-namespace BackendLogicApi.Interfaces
+namespace AuthAPI.Interfaces
 {
     public interface IAuthService
     {

@@ -1,10 +1,10 @@
-﻿using BackendLogicApi.DataAccess;
-using BackendLogicApi.Interfaces;
+﻿using AuthAPI.DataAccess;
+using AuthAPI.Interfaces;
 using System.Security.Claims;
-using BackendLogicApi.Models;
+using AuthAPI.Models;
 
 
-namespace BackendLogicApi.Services
+namespace AuthAPI.Services
 {
     public class UserService : IUserService
     {

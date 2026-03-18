@@ -1,7 +1,7 @@
-﻿using BackendLogicApi.Models;
+﻿using AuthAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace BackendLogicApi.DataAccess
+namespace AuthAPI.DataAccess
 {
     public class UserLogrepository
     {

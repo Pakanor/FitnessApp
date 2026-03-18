@@ -1,11 +1,11 @@
-﻿using BackendLogicApi.DataAccess;
-using BackendLogicApi.Models;
+﻿using AuthAPI.DataAccess;
+using AuthAPI.Models;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace BackendLogicApi.Services
+namespace AuthAPI.Services
 {
 
 
