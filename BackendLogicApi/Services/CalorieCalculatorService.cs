@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace BackendLogicApi.Services
 {
 
-    //calculator for calories
    
     public class CalorieCalculatorService : ICalorieCalculatorService
     {

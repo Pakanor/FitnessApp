@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using ExerciseAPI.Data;
+using ExerciseAPI.Models;
 namespace ExerciseAPI.Controllers
 {
     [ApiController]
@@ -75,6 +76,27 @@ namespace ExerciseAPI.Controllers
                 .ToListAsync();
             return Ok(exercise);
 
+        }
+        [HttpPost("userexercise/add")]
+        [Authorize]
+        public async Task<IActionResult> AddUserExercise([FromBody] UserExercise model)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c =>
+            c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+            if (userIdClaim == null)
+                return Unauthorized();
+             model.Date = model.Date.Kind == DateTimeKind.Utc 
+            ? model.Date 
+            : model.Date.ToUniversalTime();
+
+            model.UserId = int.Parse(userIdClaim);
+            var exerciseExists = await _context.Exercises.AnyAsync(e => e.Id == model.ExerciseId);
+            if (!exerciseExists)
+                return BadRequest("Niepoprawne ćwiczenie");
+
+            _context.UserExercise.Add(model);
+            await _context.SaveChangesAsync();
+            return Ok(model);
         }
 
 
