@@ -44,10 +44,8 @@ namespace FitnessApp.Services
 
         public void ProcessFrame(Bitmap frame)
         {
-            // Convert the image black and white 
             Bitmap grayscaleBitmap = ConvertToGrayscale(frame);
 
-            // Emiting frameReceived
             FrameReceived?.Invoke(this, grayscaleBitmap);
         }
 

@@ -36,7 +36,7 @@ namespace FitnessApp.ViewModels
             set
             {
                 _products = value;
-                OnPropertyChanged(nameof(Products)); // ifno about changes
+                OnPropertyChanged(nameof(Products)); 
             }
         }
 

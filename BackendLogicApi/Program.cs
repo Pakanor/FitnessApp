@@ -58,7 +58,6 @@ if (!string.IsNullOrWhiteSpace(jwtKey) && !string.IsNullOrWhiteSpace(jwtIssuer) 
 }
 else
 {
-    // no JWT config, skip authentication registration (useful for local dev or endpoints that don't require auth)
     builder.Services.AddAuthentication();
 }
 
