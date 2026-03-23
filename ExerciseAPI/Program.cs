@@ -39,7 +39,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql("Host=localhost;Database=exercise;Username=fitnessapp;Password=Pakan135@"));
+    options.UseNpgsql("Host=localhost;Database=exercise;Username=fitnessapp;Password="));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
