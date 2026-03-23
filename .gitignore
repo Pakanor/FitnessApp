@@ -6,3 +6,4 @@ obj/
 AppDbContext.cs
 BackendLogicApi/appsettings.json
 /AuthAPI/appsettings.json
+wwwroot/

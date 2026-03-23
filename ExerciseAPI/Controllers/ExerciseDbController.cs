@@ -12,14 +12,18 @@ namespace ExerciseAPI.Controllers
     [Route("api/[controller]")]
     public class ExerciseDbController : ControllerBase
     {
+        private readonly HttpClient _httpClient;
         private readonly ExerciseDbImportService _importService;
         private readonly AppDbContext _context;
 
 
-        public ExerciseDbController(ExerciseDbImportService importService, AppDbContext context)
+        public ExerciseDbController(ExerciseDbImportService importService, AppDbContext context,HttpClient httpClient)
         {
             _importService = importService;
             _context = context;
+            _httpClient = httpClient;
+            
+            
         }
         //[Authorize(Roles = "Admin")]
 
@@ -34,18 +38,19 @@ namespace ExerciseAPI.Controllers
             var count = await _importService.ImportAsync();
             return Ok($"{count} ćwiczeń zostało zaimportowanych.");
         }
+
+
+        [HttpDelete("exercises/clear")]
+        public async Task<IActionResult> ClearExercises()
+        {
+            _context.Exercises.RemoveRange(_context.Exercises);
+            await _context.SaveChangesAsync();
+            return Ok("Wyczyszczono wszystkie ćwiczenia.");
+        }
         [HttpGet("exercise")]
         public async Task<IActionResult> GetAll()
         {
             var exercises = await _context.Exercises.ToListAsync();
-            return Ok(exercises);
-        }
-        [HttpGet("exercise/{bodyPart}")]
-        public async Task<IActionResult> GetExercisesByBodyParts(string bodyPart)
-        {
-            var exercises = await _context.Exercises
-                .Where(e => e.Category.ToLower() == bodyPart.ToLower())
-                .ToListAsync();
             return Ok(exercises);
         }
         [HttpGet("exercise/categories")]
@@ -57,6 +62,15 @@ namespace ExerciseAPI.Controllers
             .ToListAsync();
             return Ok(categories);
         }
+        [HttpGet("exercise/{bodyPart}")]
+        public async Task<IActionResult> GetExercisesByBodyParts(string bodyPart)
+        {
+            var exercises = await _context.Exercises
+                .Where(e => e.Category.ToLower() == bodyPart.ToLower())
+                .ToListAsync();
+            return Ok(exercises);
+        }
+        
         [HttpGet("exercise/id/{id}")]
         public async Task<IActionResult> GetExerciseById(int id)
         {
@@ -165,6 +179,37 @@ namespace ExerciseAPI.Controllers
             _context.UserExercise.Remove(entry);
             await _context.SaveChangesAsync();
             return NoContent();
+        }
+   [HttpGet("gif/proxy")]
+        public async Task<IActionResult> ProxyGif([FromQuery] string url)
+        {
+            if (string.IsNullOrEmpty(url))
+                return BadRequest();
+
+            try
+            {
+                var gifRequest = new HttpRequestMessage(HttpMethod.Get, url);
+                gifRequest.Headers.Add("x-rapidapi-key", "b7550e5dcemsh5957bdfba9e4ccap1a2997jsnf861439e9228");
+                gifRequest.Headers.Add("x-rapidapi-host", "exercisedb.p.rapidapi.com");
+
+                var gifResponse = await _httpClient.SendAsync(gifRequest);
+                var responseBody = await gifResponse.Content.ReadAsStringAsync();
+
+                Console.WriteLine($"GIF proxy status: {gifResponse.StatusCode}");
+                Console.WriteLine($"GIF proxy body: {responseBody}");
+
+                if (!gifResponse.IsSuccessStatusCode)
+                    return StatusCode((int)gifResponse.StatusCode, responseBody);
+
+                var gifBytes = System.Text.Encoding.UTF8.GetBytes(responseBody);
+                var contentType = gifResponse.Content.Headers.ContentType?.MediaType ?? "image/gif";
+                return File(gifBytes, contentType);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"GIF proxy exception: {ex.Message}");
+                return StatusCode(500, ex.Message);
+            }
         }
 }
 }
