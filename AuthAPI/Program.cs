@@ -55,7 +55,7 @@ builder.Services.AddAuthentication("Bearer")
     });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql("Host=localhost;Database=auth;Username=fitnessapp;Password=Pakan135@"));
+    options.UseNpgsql("Host=localhost;Database=auth;Username=fitnessapp;Password="));
 
 var app = builder.Build();
 
