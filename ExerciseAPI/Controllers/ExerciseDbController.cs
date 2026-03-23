@@ -85,9 +85,7 @@ namespace ExerciseAPI.Controllers
             c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
             if (userIdClaim == null)
                 return Unauthorized();
-             model.Date = model.Date.Kind == DateTimeKind.Utc 
-            ? model.Date 
-            : model.Date.ToUniversalTime();
+            model.Date = DateTime.SpecifyKind(model.Date.Date, DateTimeKind.Utc);
 
             model.UserId = int.Parse(userIdClaim);
             var exerciseExists = await _context.Exercises.AnyAsync(e => e.Id == model.ExerciseId);
@@ -100,7 +98,73 @@ namespace ExerciseAPI.Controllers
         }
 
 
+        [HttpGet("userexercise/bydate")]
+        [Authorize]
+        public async Task<IActionResult> GetExercisesByDate([FromQuery] string date)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c =>
+                c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            var userId = int.Parse(userIdClaim);
+
+            if (!DateTime.TryParse(date, out var parsedDate))
+                return BadRequest("Nieprawidłowy format daty");
+
+            var all = await _context.UserExercise
+                .Where(ue => ue.UserId == userId)
+                .ToListAsync();
+
+            var filtered = all
+            .Where(ue => ue.Date.Date == parsedDate.Date) 
+            .ToList();
+
+            var exerciseIds = filtered.Select(ue => ue.ExerciseId).Distinct().ToList();
+
+            var exercises = await _context.Exercises
+                .Where(e => exerciseIds.Contains(e.Id))
+                .ToListAsync();
+
+            var result = filtered.Select(ue => {
+                var exercise = exercises.FirstOrDefault(e => e.Id == ue.ExerciseId);
+                return new {
+                    userExerciseId = ue.Id,
+                    exerciseId = ue.ExerciseId,
+                    name = exercise?.Name ?? "Nieznane",
+                    category = exercise?.Category ?? "",
+                    gifUrl = exercise?.GifUrl ?? "",
+                    sets = ue.Sets,
+                    reps = ue.Reps,
+                    weight = ue.Weight,
+                    date = ue.Date
+                };
+            }).ToList();
+
+            return Ok(result);
+        }
 
 
-    }
+       [HttpDelete("userexercise/{id}")]
+        [Authorize]
+        public async Task<IActionResult> DeleteUserExercise(int id)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c =>
+                c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            var userId = int.Parse(userIdClaim);
+            var entry = await _context.UserExercise.FindAsync(id);
+
+            if (entry == null || entry.UserId != userId)
+                return NotFound();
+
+            _context.UserExercise.Remove(entry);
+            await _context.SaveChangesAsync();
+            return NoContent();
+        }
+}
 }
