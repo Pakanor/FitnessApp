@@ -1,8 +1,4 @@
 ```md
-![.NET](https://img.shields.io/badge/.NET-7-blue)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
-![Docker](https://img.shields.io/badge/Docker-Ready-blue)
-![License](https://img.shields.io/badge/License-MIT-green)
 
 # FitnessApp Backend
 
@@ -16,7 +12,7 @@ ASP.NET Core backend microservices for FitnessApp. Handles authentication, exerc
 - [Installation](#installation)
 - [API Documentation](#api-documentation)
 - [Database Setup](#database-setup)
-- [Future Improvements](#future-improvements)
+- [Future Improvements](#future-improvements coming) 
 
 ## Architecture
 
@@ -114,6 +110,5 @@ Secret key configured in appsettings.json
 Future Improvements
 Dockerize all services
 Environment variable management
-Unit & integration tests
 CI/CD pipeline
 Advanced analytics & social features
