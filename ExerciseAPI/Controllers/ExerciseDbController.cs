@@ -180,36 +180,5 @@ namespace ExerciseAPI.Controllers
             await _context.SaveChangesAsync();
             return NoContent();
         }
-   [HttpGet("gif/proxy")]
-        public async Task<IActionResult> ProxyGif([FromQuery] string url)
-        {
-            if (string.IsNullOrEmpty(url))
-                return BadRequest();
-
-            try
-            {
-                var gifRequest = new HttpRequestMessage(HttpMethod.Get, url);
-                gifRequest.Headers.Add("x-rapidapi-key", "b7550e5dcemsh5957bdfba9e4ccap1a2997jsnf861439e9228");
-                gifRequest.Headers.Add("x-rapidapi-host", "exercisedb.p.rapidapi.com");
-
-                var gifResponse = await _httpClient.SendAsync(gifRequest);
-                var responseBody = await gifResponse.Content.ReadAsStringAsync();
-
-                Console.WriteLine($"GIF proxy status: {gifResponse.StatusCode}");
-                Console.WriteLine($"GIF proxy body: {responseBody}");
-
-                if (!gifResponse.IsSuccessStatusCode)
-                    return StatusCode((int)gifResponse.StatusCode, responseBody);
-
-                var gifBytes = System.Text.Encoding.UTF8.GetBytes(responseBody);
-                var contentType = gifResponse.Content.Headers.ContentType?.MediaType ?? "image/gif";
-                return File(gifBytes, contentType);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"GIF proxy exception: {ex.Message}");
-                return StatusCode(500, ex.Message);
-            }
-        }
 }
 }

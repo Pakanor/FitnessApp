@@ -62,7 +62,7 @@ else
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql("Host=localhost;Database=product;Username=fitnessapp;Password="));
+    options.UseNpgsql("Host=db_products;Database=products;Username=fitnessapp;Password=Pakan135@"));
 
 
 
@@ -87,5 +87,11 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapControllers();
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
+
 
 app.Run();

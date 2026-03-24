@@ -55,7 +55,7 @@ builder.Services.AddAuthentication("Bearer")
     });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql("Host=localhost;Database=auth;Username=fitnessapp;Password="));
+    options.UseNpgsql("Host=db_auth;Database=auth;Username=fitnessapp;Password=Pakan135@"));
 
 var app = builder.Build();
 
@@ -73,5 +73,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate();
+}
 
 app.Run();

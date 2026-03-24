@@ -6,29 +6,32 @@ using ExerciseAPI.Data;
 
 namespace ExerciseAPI.Services
 {
-    public class ExerciseDbImportService
-    {
-        private readonly HttpClient _httpClient;
-        private readonly AppDbContext _context;
+public class ExerciseDbImportService
+{
+            private readonly HttpClient _httpClient;
+            private readonly AppDbContext _context;
+            private readonly string _rapidApiKey;
 
-        public ExerciseDbImportService(HttpClient httpClient, AppDbContext context)
-        {
-            _httpClient = httpClient;
-            _context = context;
-        }
-
-       public async Task<int> ImportAsync()
-        {
-            var request = new HttpRequestMessage
+            public ExerciseDbImportService(HttpClient httpClient, AppDbContext context)
             {
-                Method = HttpMethod.Get,
-                RequestUri = new Uri("https://exercisedb.p.rapidapi.com/exercises?limit=1000"),
-                Headers =
+                _httpClient = httpClient;
+                _context = context;
+                _rapidApiKey = Environment.GetEnvironmentVariable("RAPIDAPI_KEY") 
+                            ?? throw new InvalidOperationException("RAPIDAPI_KEY not set");
+            }
+
+            public async Task<int> ImportAsync()
+            {
+                var request = new HttpRequestMessage
                 {
-                    { "x-rapidapi-key", "b7550e5dcemsh5957bdfba9e4ccap1a2997jsnf861439e9228" },
-                    { "x-rapidapi-host", "exercisedb.p.rapidapi.com" },
-                }
-            };
+                    Method = HttpMethod.Get,
+                    RequestUri = new Uri("https://exercisedb.p.rapidapi.com/exercises?limit=1000"),
+                    Headers =
+                    {
+                        { "x-rapidapi-key", _rapidApiKey },
+                        { "x-rapidapi-host", "exercisedb.p.rapidapi.com" }
+                    }
+                };
 
             using var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
@@ -49,7 +52,6 @@ namespace ExerciseAPI.Services
             {
                 var existing = _context.Exercises.FirstOrDefault(e => e.ExternalId == dto.Id);
                 
-                // Pobierz gif lokalnie
                 string? localGifUrl = null;
                 if (!string.IsNullOrEmpty(dto.GifUrl))
                 {
@@ -61,7 +63,7 @@ namespace ExerciseAPI.Services
                         if (!File.Exists(gifPath))
                         {
                             var gifRequest = new HttpRequestMessage(HttpMethod.Get, dto.GifUrl);
-                            gifRequest.Headers.Add("x-rapidapi-key", "b7550e5dcemsh5957bdfba9e4ccap1a2997jsnf861439e9228");
+                            gifRequest.Headers.Add("x-rapidapi-key", _rapidApiKey);
                             gifRequest.Headers.Add("x-rapidapi-host", "exercisedb.p.rapidapi.com");
 
                             var gifResponse = await _httpClient.SendAsync(gifRequest);
