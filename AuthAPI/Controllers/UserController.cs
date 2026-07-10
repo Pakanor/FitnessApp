@@ -24,13 +24,13 @@ namespace AuthAPI.Controllers
         {
             var user = await _userService.GetCurrentUserAsync(User);
             if (user == null) return NotFound();
-            return Ok(new { user.Username, user.Email });
+            return Ok(new { user.Username, user.Email, user.BirthDate, user.CurrentWeight, user.CaloriesDelta });
         }
 
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
         {
-            await _userService.UpdateProfileAsync(User, dto.Username, dto.Email);
+            await _userService.UpdateProfileAsync(User, dto.Username, dto.Email, dto.BirthDate, dto.CurrentWeight, dto.CaloriesDelta);
             return NoContent();
         }
 

@@ -8,6 +8,7 @@
         public string Description { get; set; }
         public string Category { get; set; }
         public string? ImageUrl { get; set; }
-        public string? GifUrl { get; set; } 
+        public string? GifUrl { get; set; }
+        public ICollection<ExerciseMuscleMapping> MuscleMappings { get; set; } = new List<ExerciseMuscleMapping>();
     }
 }

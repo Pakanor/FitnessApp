@@ -5,6 +5,7 @@ using BackendLogicApi.Services;
 using Microsoft.EntityFrameworkCore;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -54,6 +55,18 @@ if (!string.IsNullOrWhiteSpace(jwtKey) && !string.IsNullOrWhiteSpace(jwtIssuer) 
                 IssuerSigningKey = new SymmetricSecurityKey(
                      Encoding.UTF8.GetBytes(jwtKey))
             };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    if (context.Request.Cookies.ContainsKey("FitnessApp-Auth"))
+                    {
+                        context.Token = context.Request.Cookies["FitnessApp-Auth"];
+                    }
+                    return Task.CompletedTask;
+                }
+            };
         });
 }
 else
@@ -62,7 +75,7 @@ else
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql("Host=db_products;Database=products;Username=fitnessapp;Password=Pakan135@"));
+    options.UseNpgsql("Host=localhost;Database=products;Username=fitnessapp;Password=Pakan135@"));
 
 
 

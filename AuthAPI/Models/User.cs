@@ -22,6 +22,10 @@ namespace AuthAPI.Models
         public DateTime? LastLogin { get; set; }
 
         public bool IsEmailVerified { get; set; } = false;
+
+        public DateTime? BirthDate { get; set; }
+        public decimal? CurrentWeight { get; set; }
+        public int CaloriesDelta { get; set; } = 0;
     }
     public class RegisterDto
     {
@@ -38,6 +42,9 @@ namespace AuthAPI.Models
     {
         public string Username { get; set; }
         public string Email { get; set; }
+        public DateTime? BirthDate { get; set; }
+        public decimal? CurrentWeight { get; set; }
+        public int? CaloriesDelta { get; set; }
     }
     public class EmailDto
     {

@@ -16,9 +16,10 @@ ASP.NET Core backend microservices for FitnessApp. Handles authentication, exerc
 
 ## Architecture
 
-The backend is split into three microservices:
+The backend uses a YARP API Gateway that routes requests to microservices:
 
 
+YARP Gateway (Port 8000) - API Gateway & Routing
 AuthAPI (Port 5010) - User Authentication
 ExerciseAPI (Port 5185) - Exercise Database & Logs
 BackendLogicApi (Port 5142)- Product & Calorie Tracking
@@ -29,17 +30,18 @@ Each service has its own PostgreSQL database and runs independently.
 ### Microservice Flow
 
 
-Frontend → AuthAPI → JWT validation → Access other services
-Frontend → ExerciseAPI → Log exercises
-Frontend → BackendLogicApi → Log products / calculate calories
+Frontend → YARP Gateway → AuthAPI → JWT validation
+Frontend → YARP Gateway → ExerciseAPI → Log exercises
+Frontend → YARP Gateway → BackendLogicApi → Log products / calculate calories
 
 
 ## Tech Stack
 
-- ASP.NET Core 7+
-- Entity Framework Core
+- ASP.NET Core 9
+- YARP Reverse Proxy
+- Entity Framework Core 9
 - PostgreSQL 12+
-- JWT Authentication
+- JWT Authentication (HttpOnly Cookies)
 - Swagger/OpenAPI
 - FluentValidation
 
@@ -47,6 +49,9 @@ Frontend → BackendLogicApi → Log products / calculate calories
 
 
 FitnessApp/
+├── Gateway/
+│ ├── Program.cs
+│ └── appsettings.json
 ├── AuthAPI/
 │ ├── Controllers/
 │ ├── Services/
@@ -68,12 +73,15 @@ FitnessApp/
 
 ### Prerequisites
 
-- .NET 7+
+- .NET 9
 - PostgreSQL 12+
 
 ### Setup Services
 
 ```bash
+cd FitnessApp/Gateway
+dotnet run
+
 cd FitnessApp/AuthAPI
 dotnet restore
 dotnet ef database update
@@ -96,6 +104,7 @@ API Documentation
 
 Swagger UI is available for each service:
 
+Gateway: http://localhost:8000
 AuthAPI: http://localhost:5010/swagger
 ExerciseAPI: http://localhost:5185/swagger
 BackendLogicApi: http://localhost:5142/swagger
@@ -103,8 +112,8 @@ BackendLogicApi: http://localhost:5142/swagger
 Endpoints cover registration, login, exercise CRUD, product logging, and calorie calculations.
 
 Authentication
-JWT token-based
-Token stored in localStorage on frontend
+JWT token-based with HttpOnly cookies
+Token stored as __Host-FitnessApp-Auth cookie
 Token expiration: 60 minutes
 Secret key configured in appsettings.json
 Future Improvements

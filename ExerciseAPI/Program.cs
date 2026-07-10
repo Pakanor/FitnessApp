@@ -23,6 +23,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes("SUPER_SECRET_KEY_123456789012345678901234567890"))
         };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                    if (context.Request.Cookies.ContainsKey("FitnessApp-Auth"))
+                    {
+                        context.Token = context.Request.Cookies["FitnessApp-Auth"];
+                    }
+                return Task.CompletedTask;
+            }
+        };
     });
 
 
@@ -45,6 +57,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<ExerciseDbImportService>();
+builder.Services.AddScoped<MuscleSeedService>();
+builder.Services.AddScoped<IFatigueService, TimeDecayFatigueService>();
 
 var app = builder.Build();
 
@@ -67,6 +81,9 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     db.Database.Migrate();
+
+    var muscleSeedService = scope.ServiceProvider.GetRequiredService<MuscleSeedService>();
+    await muscleSeedService.SeedMuscleMappingsAsync();
 }
 
 

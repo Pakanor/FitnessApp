@@ -32,6 +32,24 @@ namespace AuthAPI.Controllers
             await _authService.RegisterAsync(dto);
             return Ok(new { message = "Rejestracja zakończona pomyślnie." });
         }
+
+        [HttpGet("me")]
+        [Authorize]
+        public IActionResult Me()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var username = User.FindFirst(ClaimTypes.Name)?.Value;
+            var email = User.FindFirst(ClaimTypes.Email)?.Value;
+            return Ok(new { id = userId, username, email });
+        }
+
+        [HttpPost("logout")]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("FitnessApp-Auth");
+            return Ok(new { message = "Wylogowano pomyślnie." });
+        }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto dto)
         {
@@ -42,8 +60,17 @@ namespace AuthAPI.Controllers
                 {
                     return Unauthorized("Nieprawidłowy login lub hasło.");
                 }
+
+                Response.Cookies.Append("FitnessApp-Auth", tokenString, new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = false,
+                    SameSite = SameSiteMode.Strict,
+                    Path = "/"
+                });
+
                 Response.Headers.Add("Location", "/home");
-                return Ok(new { token = tokenString });
+                return Ok(new { message = "Zalogowano pomyślnie." });
             }
             catch (Exception ex)
             {

@@ -16,12 +16,14 @@ public class ExerciseDbImportService
             {
                 _httpClient = httpClient;
                 _context = context;
-                _rapidApiKey = Environment.GetEnvironmentVariable("RAPIDAPI_KEY") 
-                            ?? throw new InvalidOperationException("RAPIDAPI_KEY not set");
+                _rapidApiKey = Environment.GetEnvironmentVariable("RAPIDAPI_KEY") ?? "";
             }
 
             public async Task<int> ImportAsync()
             {
+                if (string.IsNullOrEmpty(_rapidApiKey))
+                    throw new InvalidOperationException("RAPIDAPI_KEY not set - nie można zaimportować ćwiczeń");
+
                 var request = new HttpRequestMessage
                 {
                     Method = HttpMethod.Get,

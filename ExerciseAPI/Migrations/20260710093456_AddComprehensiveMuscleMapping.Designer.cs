@@ -3,6 +3,7 @@ using System;
 using ExerciseAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ExerciseAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260710093456_AddComprehensiveMuscleMapping")]
+    partial class AddComprehensiveMuscleMapping
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -217,46 +220,6 @@ namespace ExerciseAPI.Migrations
                         });
                 });
 
-            modelBuilder.Entity("ExerciseAPI.Models.PersonalRecord", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("DietStatusAtTime")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ExerciseId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Reps")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal?>("StrengthToWeightRatio")
-                        .HasColumnType("numeric");
-
-                    b.Property<int?>("UserAgeAtTime")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal?>("UserWeightAtTime")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("Weight")
-                        .HasColumnType("numeric");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PersonalRecords");
-                });
-
             modelBuilder.Entity("ExerciseAPI.Models.UserExercise", b =>
                 {
                     b.Property<int>("Id")
@@ -269,9 +232,6 @@ namespace ExerciseAPI.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("ExerciseId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("RPE")
                         .HasColumnType("integer");
 
                     b.Property<int?>("Reps")

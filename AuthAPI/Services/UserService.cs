@@ -24,13 +24,20 @@ namespace AuthAPI.Services
             return await _userRepo.GetByIdAsync(userId);
         }
 
-        public async Task UpdateProfileAsync(ClaimsPrincipal principal, string newUsername, string newEmail)
+        public async Task UpdateProfileAsync(ClaimsPrincipal principal, string newUsername, string newEmail, DateTime? birthDate = null, decimal? currentWeight = null, int? caloriesDelta = null)
         {
             var user = await GetCurrentUserAsync(principal);
             if (user == null) throw new Exception("Użytkownik nie istnieje");
 
             user.Username = newUsername;
             user.Email = newEmail;
+
+            if (birthDate.HasValue)
+                user.BirthDate = birthDate.Value;
+            if (currentWeight.HasValue)
+                user.CurrentWeight = currentWeight.Value;
+            if (caloriesDelta.HasValue)
+                user.CaloriesDelta = caloriesDelta.Value;
 
             await _userRepo.UpdateUserAsync(user);
         }

@@ -35,6 +35,10 @@ namespace AuthAPI.DataAccess
             modelBuilder.Entity<User>()
                 .Property(u => u.CreatedAt)
                 .HasDefaultValueSql("NOW()");
+
+            modelBuilder.Entity<User>()
+                .Property(u => u.CaloriesDelta)
+                .HasDefaultValue(0);
         }
     }
 }

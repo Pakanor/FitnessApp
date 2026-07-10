@@ -7,7 +7,7 @@ namespace AuthAPI.Interfaces
     public interface IUserService
     {
         Task<User?> GetCurrentUserAsync(ClaimsPrincipal principal);
-        Task UpdateProfileAsync(ClaimsPrincipal principal, string newUsername, string newEmail);
+        Task UpdateProfileAsync(ClaimsPrincipal principal, string newUsername, string newEmail, DateTime? birthDate = null, decimal? currentWeight = null, int? caloriesDelta = null);
         Task ChangePasswordAsync(ClaimsPrincipal principal, string currentPassword, string newPassword);
         Task DeleteAccountAsync(ClaimsPrincipal principal);
         Task SendPasswordResetLinkAsync(string email);
