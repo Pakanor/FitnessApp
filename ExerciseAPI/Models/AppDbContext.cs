@@ -15,6 +15,7 @@ namespace ExerciseAPI.Data
         public DbSet<PersonalRecord> PersonalRecords { get; set; }
         public DbSet<ExerciseMuscleGroup> ExerciseMuscleGroups { get; set; }
         public DbSet<MuscleGroup> MuscleGroups { get; set; }
+        public DbSet<MuscleDamage> MuscleDamage { get; set; }
         public DbSet<WorkoutTemplate> WorkoutTemplates { get; set; }
         public DbSet<TemplateExercise> TemplateExercises { get; set; }
 

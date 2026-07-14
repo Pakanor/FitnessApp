@@ -16,8 +16,9 @@ namespace ExerciseAPI.Services
 
         public async Task<WorkoutStatus?> GetWorkoutStatus(int userId, DateTime date)
         {
+            var target = DateTime.SpecifyKind(date, DateTimeKind.Utc).Date;
             var exercises = await _context.UserExercise
-                .Where(ue => ue.UserId == userId && ue.Date.Date == date.Date)
+                .Where(ue => ue.UserId == userId && ue.Date.Date == target)
                 .ToListAsync();
 
             if (!exercises.Any())
@@ -39,8 +40,9 @@ namespace ExerciseAPI.Services
 
         public async Task UpdateWorkoutStatus(int userId, DateTime date, WorkoutStatus status)
         {
+            var target = DateTime.SpecifyKind(date, DateTimeKind.Utc).Date;
             var exercises = await _context.UserExercise
-                .Where(ue => ue.UserId == userId && ue.Date.Date == date.Date)
+                .Where(ue => ue.UserId == userId && ue.Date.Date == target)
                 .ToListAsync();
 
             foreach (var exercise in exercises)

@@ -65,6 +65,9 @@ builder.Services.AddScoped<ExerciseAPI.Interfaces.IWorkoutStartModeService, Exer
 builder.Services.AddScoped<ExerciseAPI.Interfaces.IWorkoutStatusService, ExerciseAPI.Services.WorkoutStatusService>();
 builder.Services.AddScoped<ExerciseAPI.Interfaces.IWorkloadCalculationService, ExerciseAPI.Services.WorkloadCalculationService>();
 builder.Services.AddScoped<ExerciseAPI.Interfaces.ICarbohydrateScalingService, ExerciseAPI.Services.CarbohydrateScalingService>();
+builder.Services.AddScoped<ExerciseAPI.Interfaces.IAcwrService, ExerciseAPI.Services.AcwrService>();
+builder.Services.AddScoped<ExerciseAPI.Interfaces.IMuscleRecoveryService, ExerciseAPI.Services.MuscleRecoveryService>();
+builder.Services.AddScoped<ExerciseAPI.Interfaces.IMuscleDamageService, ExerciseAPI.Services.MuscleDamageService>();
 builder.Services.AddMemoryCache();
 
 var app = builder.Build();
@@ -172,6 +175,15 @@ using (var scope = app.Services.CreateScope())
             ALTER TABLE "UserExercise" ADD COLUMN IF NOT EXISTS "StartMode" integer;
             ALTER TABLE "UserExercise" ADD COLUMN IF NOT EXISTS "TemplateId" integer;
             ALTER TABLE "UserExercise" ADD COLUMN IF NOT EXISTS "Status" integer;
+
+            CREATE TABLE IF NOT EXISTS "MuscleDamage" (
+                "UserId" integer NOT NULL,
+                "MuscleGroupKey" text NOT NULL,
+                "SessionDate" timestamp with time zone NOT NULL,
+                "DamagePercent" double precision NOT NULL,
+                "IsPrimary" boolean NOT NULL,
+                PRIMARY KEY ("UserId", "MuscleGroupKey")
+            );
         """);
     }
 

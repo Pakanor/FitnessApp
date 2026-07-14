@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using ExerciseAPI.Data;
 using ExerciseAPI.Models;
 using ExerciseAPI.DTOs;
+using ExerciseAPI.Interfaces;
 using System.Text.Json;
 namespace ExerciseAPI.Controllers
 {
@@ -18,16 +19,18 @@ namespace ExerciseAPI.Controllers
         private readonly ExerciseDbImportService _importService;
         private readonly AppDbContext _context;
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IMuscleDamageService _muscleDamageService;
 
 
-        public ExerciseDbController(ExerciseDbImportService importService, AppDbContext context, HttpClient httpClient, IHttpClientFactory httpClientFactory)
+        public ExerciseDbController(ExerciseDbImportService importService, AppDbContext context, HttpClient httpClient, IHttpClientFactory httpClientFactory, IMuscleDamageService muscleDamageService)
         {
             _importService = importService;
             _context = context;
             _httpClient = httpClient;
             _httpClientFactory = httpClientFactory;
-            
-            
+            _muscleDamageService = muscleDamageService;
+
+
         }
         //[Authorize(Roles = "Admin")]
 
@@ -369,6 +372,10 @@ namespace ExerciseAPI.Controllers
 
             _context.UserExercise.Remove(entry);
             await _context.SaveChangesAsync();
+
+            // Editing/deleting a session changes the damage baseline -> rebuild it.
+            await _muscleDamageService.RecordSessionDamageAsync(userId, entry.Date);
+
             return NoContent();
         }
 }
