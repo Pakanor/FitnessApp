@@ -34,13 +34,8 @@ namespace ExerciseAPI.Controllers
         [HttpPost("import")]
         public async Task<IActionResult> Import()
         {
-            var firstImported = await _importService.ImportAsync();
-
-            if (firstImported == 0)
-                return NotFound(new { message = "Nie udało się zaimportować żadnych ćwiczeń." });
-
-            var count = await _importService.ImportAsync();
-            return Ok($"{count} ćwiczeń zostało zaimportowanych.");
+            await _importService.ImportExercisesAsync();
+            return Ok("Import ćwiczeń zakończony.");
         }
 
 
@@ -54,7 +49,26 @@ namespace ExerciseAPI.Controllers
         [HttpGet("exercise")]
         public async Task<IActionResult> GetAll()
         {
-            var exercises = await _context.Exercises.ToListAsync();
+            var exercises = await _context.Exercises
+                .Select(e => new
+                {
+                    e.Id,
+                    e.ExternalId,
+                    e.Name,
+                    e.Description,
+                    e.Category,
+                    e.ImageUrl,
+                    e.GifUrl,
+                    MuscleMappings = _context.ExerciseMuscleGroups
+                        .Where(emg => emg.ExerciseId == e.Id)
+                        .Select(emg => new
+                        {
+                            MuscleGroupKey = emg.MuscleGroupKey,
+                            WeightPercentage = emg.WeightPercentage
+                        })
+                        .ToList()
+                })
+                .ToListAsync();
             return Ok(exercises);
         }
         [HttpGet("exercise/categories")]
@@ -71,6 +85,22 @@ namespace ExerciseAPI.Controllers
         {
             var exercises = await _context.Exercises
                 .Where(e => e.Category.ToLower() == bodyPart.ToLower())
+                .Select(e => new
+                {
+                    e.Id,
+                    e.Name,
+                    e.Category,
+                    e.ImageUrl,
+                    e.GifUrl,
+                    MuscleMappings = _context.ExerciseMuscleGroups
+                        .Where(emg => emg.ExerciseId == e.Id)
+                        .Select(emg => new
+                        {
+                            emg.MuscleGroupKey,
+                            emg.WeightPercentage
+                        })
+                        .ToList()
+                })
                 .ToListAsync();
             return Ok(exercises);
         }
@@ -80,21 +110,74 @@ namespace ExerciseAPI.Controllers
         {
             var exercise = await _context.Exercises.FindAsync(id);
             if (exercise == null)
-            {
                 return NotFound();
-            }
 
-            return Ok(exercise);
+            var mappings = await _context.ExerciseMuscleGroups
+                .Where(emg => emg.ExerciseId == id)
+                .Select(emg => new
+                {
+                    emg.MuscleGroupKey,
+                    emg.WeightPercentage
+                })
+                .ToListAsync();
+
+            return Ok(new
+            {
+                exercise.Id,
+                exercise.ExternalId,
+                exercise.Name,
+                exercise.Description,
+                exercise.Category,
+                exercise.ImageUrl,
+                exercise.GifUrl,
+                MuscleMappings = mappings
+            });
         }
         [HttpGet("exercise/search/{term}")]
         public async Task<IActionResult> SearchExercises(string term)
         {
-            var exercise = await _context.Exercises
+            var exercises = await _context.Exercises
                 .Where(e => e.Name.ToLower().Contains(term.ToLower()))
+                .Select(e => new
+                {
+                    e.Id,
+                    e.Name,
+                    e.Category,
+                    MuscleMappings = _context.ExerciseMuscleGroups
+                        .Where(emg => emg.ExerciseId == e.Id)
+                        .Select(emg => new
+                        {
+                            emg.MuscleGroupKey,
+                            emg.WeightPercentage
+                        })
+                        .ToList()
+                })
                 .ToListAsync();
-            return Ok(exercise);
-
+            return Ok(exercises);
         }
+        [HttpPut("exercise/{id}/mappings")]
+        public async Task<IActionResult> UpdateMappings(int id, [FromBody] List<ExerciseAPI.Models.ExerciseMuscleGroup> mappings)
+        {
+            var exercise = await _context.Exercises.FindAsync(id);
+            if (exercise == null)
+                return NotFound("Ćwiczenie nie istnieje");
+
+            var existing = await _context.ExerciseMuscleGroups
+                .Where(emg => emg.ExerciseId == id)
+                .ToListAsync();
+            _context.ExerciseMuscleGroups.RemoveRange(existing);
+
+            foreach (var m in mappings)
+            {
+                m.ExerciseId = id;
+                m.Id = 0;
+                _context.ExerciseMuscleGroups.Add(m);
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok("Zapisano");
+        }
+
         [HttpPost("userexercise/add")]
         [Authorize]
         public async Task<IActionResult> AddUserExercise([FromBody] AddUserExerciseDto dto)
@@ -111,6 +194,9 @@ namespace ExerciseAPI.Controllers
             if (dto.RPE.HasValue && (dto.RPE < 1 || dto.RPE > 10))
                 return BadRequest("RPE musi być w zakresie 1-10");
 
+            if (dto.RIR.HasValue && (dto.RIR < 0 || dto.RIR > 4))
+                return BadRequest("RIR musi być w zakresie 0-4");
+
             var entity = new UserExercise
             {
                 UserId = int.Parse(userIdClaim),
@@ -119,6 +205,7 @@ namespace ExerciseAPI.Controllers
                 Reps = dto.Reps,
                 Weight = dto.Weight,
                 RPE = dto.RPE,
+                RIR = dto.RIR,
                 Date = dto.Date.HasValue
                     ? DateTime.SpecifyKind(dto.Date.Value.Date, DateTimeKind.Utc)
                     : DateTime.UtcNow
@@ -138,8 +225,6 @@ namespace ExerciseAPI.Controllers
                 {
                     decimal? userWeight = null;
                     int? userAge = null;
-                    int? caloriesDelta = null;
-
                     try
                     {
                         var profileClient = _httpClientFactory.CreateClient();
@@ -156,8 +241,6 @@ namespace ExerciseAPI.Controllers
                                 if (DateTime.TryParse(b.GetString(), out var birthDate))
                                     userAge = DateTime.UtcNow.Year - birthDate.Year - (DateTime.UtcNow.DayOfYear < birthDate.DayOfYear ? 1 : 0);
                             }
-                            if (profile.TryGetProperty("caloriesDelta", out var c) && c.ValueKind == JsonValueKind.Number)
-                                caloriesDelta = c.GetInt32();
                         }
                     }
                     catch { }
@@ -171,7 +254,6 @@ namespace ExerciseAPI.Controllers
                         Date = entity.Date,
                         UserWeightAtTime = userWeight,
                         UserAgeAtTime = userAge,
-                        DietStatusAtTime = caloriesDelta,
                         StrengthToWeightRatio = userWeight.HasValue && userWeight > 0
                             ? Math.Round(entity.Weight.Value / userWeight.Value, 2)
                             : null
@@ -190,6 +272,7 @@ namespace ExerciseAPI.Controllers
                 Reps = entity.Reps,
                 Weight = entity.Weight,
                 RPE = entity.RPE,
+                RIR = entity.RIR,
                 Date = entity.Date
             };
 
@@ -237,6 +320,9 @@ namespace ExerciseAPI.Controllers
                     sets = ue.Sets,
                     reps = ue.Reps,
                     weight = ue.Weight,
+                    rpe = ue.RPE,
+                    rir = ue.RIR,
+                    templateId = ue.TemplateId,
                     date = ue.Date
                 };
             }).ToList();
@@ -244,6 +330,26 @@ namespace ExerciseAPI.Controllers
             return Ok(result);
         }
 
+
+        [HttpGet("userexercise/byuser")]
+        [Authorize]
+        public async Task<IActionResult> GetUserExercises()
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c =>
+                c.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
+
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            var userId = int.Parse(userIdClaim);
+
+            var exercises = await _context.UserExercise
+                .Where(ue => ue.UserId == userId)
+                .Select(ue => new { ue.ExerciseId })
+                .ToListAsync();
+
+            return Ok(exercises);
+        }
 
        [HttpDelete("userexercise/{id}")]
         [Authorize]

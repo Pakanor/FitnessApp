@@ -42,7 +42,12 @@ namespace AuthAPI.Services
             {
                 Username = dto.Username,
                 Email = dto.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+                BirthDate = dto.BirthDate,
+                Height = dto.Height,
+                CurrentWeight = dto.CurrentWeight,
+                Gender = dto.Gender,
+                JobType = dto.JobType
             };
             await _userRepo.AddUserAsync(user);
             var token = _jwtService.GenerateEmailVerificationToken(user);

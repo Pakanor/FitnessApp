@@ -16,11 +16,15 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<AnthropometryService>();
 builder.Services.AddScoped<UserLogrepository>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(o =>
+{
+    o.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+});
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
@@ -87,7 +91,42 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+
+    db.Database.ExecuteSqlRaw("""ALTER TABLE "Users" DROP COLUMN IF EXISTS "CaloriesDelta" """);
+    db.Database.ExecuteSqlRaw("""ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "Height" numeric """);
+    db.Database.ExecuteSqlRaw("""ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "Gender" text """);
+    db.Database.ExecuteSqlRaw("""ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "JobType" text """);
+    db.Database.ExecuteSqlRaw("""ALTER TABLE "Users" ADD COLUMN IF NOT EXISTS "Goal" text """);
+
+    db.Database.ExecuteSqlRaw("""
+        CREATE TABLE IF NOT EXISTS "BodyMeasurements" (
+            "Id" serial PRIMARY KEY,
+            "UserId" integer NOT NULL,
+            "Height" numeric NOT NULL DEFAULT 0,
+            "Neck" numeric NOT NULL DEFAULT 0,
+            "Waist" numeric NOT NULL DEFAULT 0,
+            "Hips" numeric NOT NULL DEFAULT 0,
+            "Shoulders" numeric NOT NULL DEFAULT 0,
+            "Weight" numeric NOT NULL DEFAULT 0,
+            "Chest" numeric,
+            "Biceps" numeric,
+            "Thigh" numeric,
+            "Calf" numeric,
+            "BicepsLeft" numeric,
+            "BicepsRight" numeric,
+            "ThighLeft" numeric,
+            "ThighRight" numeric,
+            "CalfLeft" numeric,
+            "CalfRight" numeric,
+            "Belly" numeric,
+            "ForearmLeft" numeric,
+            "ForearmRight" numeric,
+            "BfPercent" numeric,
+            "Whr" numeric,
+            "Vtaper" numeric,
+            "MeasuredAt" timestamptz NOT NULL DEFAULT NOW()
+        );
+    """);
 }
 
 app.Run();

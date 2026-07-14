@@ -3,6 +3,7 @@ using System;
 using ExerciseAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ExerciseAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260712183427_AddBiomechanicsAndHeatmap")]
+    partial class AddBiomechanicsAndHeatmap
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -78,9 +81,6 @@ namespace ExerciseAPI.Migrations
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("text");
-
-                    b.Property<bool>("IsBenchmark")
-                        .HasColumnType("boolean");
 
                     b.Property<decimal>("Lats")
                         .HasColumnType("numeric");
@@ -321,9 +321,6 @@ namespace ExerciseAPI.Migrations
                     b.Property<int>("ExerciseId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("RIR")
-                        .HasColumnType("integer");
-
                     b.Property<int?>("RPE")
                         .HasColumnType("integer");
 
@@ -333,15 +330,6 @@ namespace ExerciseAPI.Migrations
                     b.Property<int?>("Sets")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("StartMode")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("Status")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("TemplateId")
-                        .HasColumnType("integer");
-
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
@@ -349,10 +337,6 @@ namespace ExerciseAPI.Migrations
                         .HasColumnType("numeric");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Date");
-
-                    b.HasIndex("UserId", "Date");
 
                     b.ToTable("UserExercise");
                 });
@@ -379,85 +363,6 @@ namespace ExerciseAPI.Migrations
             modelBuilder.Entity("ExerciseAPI.Models.Exercise", b =>
                 {
                     b.Navigation("MuscleGroupMappings");
-                });
-
-            modelBuilder.Entity("ExerciseAPI.Models.WorkoutTemplate", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("WorkoutTemplates");
-                });
-
-            modelBuilder.Entity("ExerciseAPI.Models.TemplateExercise", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ExerciseId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TemplateId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ExerciseId");
-
-                    b.HasIndex("TemplateId", "Order");
-
-                    b.ToTable("TemplateExercises");
-                });
-
-            modelBuilder.Entity("ExerciseAPI.Models.TemplateExercise", b =>
-                {
-                    b.HasOne("ExerciseAPI.Models.Exercise", "Exercise")
-                        .WithMany()
-                        .HasForeignKey("ExerciseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ExerciseAPI.Models.WorkoutTemplate", "Template")
-                        .WithMany("TemplateExercises")
-                        .HasForeignKey("TemplateId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Exercise");
-
-                    b.Navigation("Template");
-                });
-
-            modelBuilder.Entity("ExerciseAPI.Models.WorkoutTemplate", b =>
-                {
-                    b.Navigation("TemplateExercises");
                 });
 #pragma warning restore 612, 618
         }
