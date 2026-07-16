@@ -17,6 +17,7 @@ namespace ExerciseAPI.Services
 
         // Onboarding guard: ACWR is suppressed until this many distinct training
         // days exist in the rolling window. Below it we use an estimated baseline.
+        //a
         private const int ColdStartDays = 14;
         private const string AuthBaseUrl = "http://localhost:5010";
 
