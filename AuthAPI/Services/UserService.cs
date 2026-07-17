@@ -1,6 +1,5 @@
 ﻿using AuthAPI.DataAccess;
 using AuthAPI.Interfaces;
-using System.Security.Claims;
 using AuthAPI.Models;
 
 
@@ -11,22 +10,24 @@ namespace AuthAPI.Services
         private readonly UserLogrepository _userRepo;
         private readonly JwtService _jwtService;
         private readonly IEmailService _emailService;
-        public UserService(UserLogrepository userRepo, JwtService jwtService, IEmailService emailService)
+        private readonly IConfiguration _configuration;
+
+        public UserService(UserLogrepository userRepo, JwtService jwtService, IEmailService emailService, IConfiguration configuration)
         {
             _userRepo = userRepo;
             _jwtService = jwtService;
             _emailService = emailService;
+            _configuration = configuration;
         }
 
-        public async Task<User?> GetCurrentUserAsync(ClaimsPrincipal principal)
+        public async Task<User?> GetCurrentUserAsync(int userId)
         {
-            int userId = _jwtService.GetUserIdFromClaims(principal);
             return await _userRepo.GetByIdAsync(userId);
         }
 
-        public async Task UpdateProfileAsync(ClaimsPrincipal principal, string newUsername, string newEmail, DateTime? birthDate = null, decimal? currentWeight = null, decimal? height = null, string? gender = null, string? jobType = null, string? goal = null)
+        public async Task UpdateProfileAsync(int userId, string newUsername, string newEmail, DateTime? birthDate = null, decimal? currentWeight = null, decimal? height = null, string? gender = null, string? jobType = null, string? goal = null)
         {
-            var user = await GetCurrentUserAsync(principal);
+            var user = await GetCurrentUserAsync(userId);
             if (user == null) throw new Exception("Użytkownik nie istnieje");
 
             if (!string.IsNullOrEmpty(newUsername))
@@ -50,9 +51,9 @@ namespace AuthAPI.Services
             await _userRepo.UpdateUserAsync(user);
         }
 
-        public async Task ChangePasswordAsync(ClaimsPrincipal principal, string currentPassword, string newPassword)
+        public async Task ChangePasswordAsync(int userId, string currentPassword, string newPassword)
         {
-            var user = await GetCurrentUserAsync(principal);
+            var user = await GetCurrentUserAsync(userId);
             if (user == null) throw new Exception("Użytkownik nie istnieje");
 
             if (!BCrypt.Net.BCrypt.Verify(currentPassword, user.PasswordHash))
@@ -62,9 +63,9 @@ namespace AuthAPI.Services
             await _userRepo.UpdateUserAsync(user);
         }
 
-        public async Task DeleteAccountAsync(ClaimsPrincipal principal)
+        public async Task DeleteAccountAsync(int userId)
         {
-            var user = await GetCurrentUserAsync(principal);
+            var user = await GetCurrentUserAsync(userId);
             if (user == null) throw new Exception("Użytkownik nie istnieje");
 
             await _userRepo.DeleteUserAsync(user);
@@ -77,7 +78,8 @@ namespace AuthAPI.Services
                 throw new Exception("Użytkownik o podanym adresie e-mail nie istnieje.");
 
             var token = _jwtService.GeneratePasswordResetToken(user);
-            var resetLink = $"http://localhost:5142/api/user/reset-password?token={token}";
+            var gatewayBaseUrl = _configuration["App:GatewayBaseUrl"] ?? "http://localhost:8000";
+            var resetLink = $"{gatewayBaseUrl}/api/user/reset-password?token={token}";
 
             string subject = "Resetowanie hasła";
             string body = $"Kliknij <a href=\"{resetLink}\">tutaj</a>, aby zresetować swoje hasło. Link ważny przez 15 minut.";

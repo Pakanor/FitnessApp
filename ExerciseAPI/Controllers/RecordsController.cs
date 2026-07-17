@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using ExerciseAPI.Data;
 using ExerciseAPI.Models;
 using ExerciseAPI.Services;
-using System.Security.Claims;
+using ExerciseAPI.Infrastructure;
 using System.Text.Json;
 
 namespace ExerciseAPI.Controllers
@@ -12,12 +12,13 @@ namespace ExerciseAPI.Controllers
     [ApiController]
     [Route("api/records")]
     [Authorize]
-    public class RecordsController : ControllerBase
+    public class RecordsController : UserHeaderControllerBase
     {
         private readonly AppDbContext _context;
         private readonly RecordsService _recordsService;
 
-        public RecordsController(AppDbContext context, RecordsService recordsService)
+        public RecordsController(AppDbContext context, RecordsService recordsService, IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _context = context;
             _recordsService = recordsService;
@@ -26,14 +27,12 @@ namespace ExerciseAPI.Controllers
         [HttpGet("history")]
         public async Task<IActionResult> GetHistory()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null)
+            var userId = GetUserId();
+            if (!userId.HasValue)
                 return Unauthorized();
 
-            int userId = int.Parse(userIdClaim);
-
             var records = await _context.PersonalRecords
-                .Where(pr => pr.UserId == userId)
+                .Where(pr => pr.UserId == userId.Value)
                 .Join(_context.Exercises,
                     pr => pr.ExerciseId,
                     e => e.Id,
@@ -60,14 +59,12 @@ namespace ExerciseAPI.Controllers
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string query)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null)
+            var userId = GetUserId();
+            if (!userId.HasValue)
                 return Unauthorized();
 
             if (string.IsNullOrWhiteSpace(query))
                 return Ok(new List<object>());
-
-            int userId = int.Parse(userIdClaim);
 
             var exercises = await _context.Exercises
                 .Where(e => EF.Functions.ILike(e.Name, $"%{query}%"))
@@ -77,7 +74,7 @@ namespace ExerciseAPI.Controllers
                     e.Id,
                     e.Name,
                     e.Category,
-                    HasPR = _context.PersonalRecords.Any(pr => pr.UserId == userId && pr.ExerciseId == e.Id)
+                    HasPR = _context.PersonalRecords.Any(pr => pr.UserId == userId.Value && pr.ExerciseId == e.Id)
                 })
                 .ToListAsync();
 
@@ -87,14 +84,12 @@ namespace ExerciseAPI.Controllers
         [HttpGet("exercise/{exerciseId}")]
         public async Task<IActionResult> GetExerciseHistory(int exerciseId)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null)
+            var userId = GetUserId();
+            if (!userId.HasValue)
                 return Unauthorized();
 
-            int userId = int.Parse(userIdClaim);
-
             var records = await _context.PersonalRecords
-                .Where(pr => pr.UserId == userId && pr.ExerciseId == exerciseId)
+                .Where(pr => pr.UserId == userId.Value && pr.ExerciseId == exerciseId)
                 .Join(_context.Exercises,
                     pr => pr.ExerciseId,
                     e => e.Id,
@@ -120,12 +115,11 @@ namespace ExerciseAPI.Controllers
         [HttpGet("1rm-progression")]
         public async Task<IActionResult> Get1RMProgression()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null)
+            var userId = GetUserId();
+            if (!userId.HasValue)
                 return Unauthorized();
 
-            int userId = int.Parse(userIdClaim);
-            var result = await _recordsService.Get1RMProgression(userId);
+            var result = await _recordsService.Get1RMProgression(userId.Value);
             return Ok(result);
         }
     }

@@ -2,32 +2,28 @@ using ExerciseAPI.Data;
 using ExerciseAPI.DTOs;
 using ExerciseAPI.Interfaces;
 using ExerciseAPI.Models;
+using ExerciseAPI.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text.Json;
 
 namespace ExerciseAPI.Services
 {
     public class AcwrService : IAcwrService
     {
         private readonly AppDbContext _context;
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         // Onboarding guard: ACWR is suppressed until this many distinct training
         // days exist in the rolling window. Below it we use an estimated baseline.
         //a
         private const int ColdStartDays = 14;
-        private const string AuthBaseUrl = "http://localhost:5010";
 
-        public AcwrService(AppDbContext context, IHttpClientFactory httpClientFactory)
+        public AcwrService(AppDbContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
-            _httpClientFactory = httpClientFactory;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<AcwrResultDto> GetAcwrAsync(int userId, string? token = null)
+        public async Task<AcwrResultDto> GetAcwrAsync(int userId)
         {
             var since = DateTime.UtcNow.AddDays(-(ColdStartDays + 14));
             // Use completion date (e.Date) as the session date and only count
@@ -80,7 +76,7 @@ namespace ExerciseAPI.Services
             double acute = dailySeries.TakeLast(7).Average(x => x.Workload);
             double chronic = dailySeries.Average(x => x.Workload);
 
-            var estimatedBaseline = await GetEstimatedBaselineAsync(token);
+            var estimatedBaseline = await GetEstimatedBaselineAsync();
             bool coldStart = trainingDays < ColdStartDays;
 
             double ratio;
@@ -130,45 +126,21 @@ namespace ExerciseAPI.Services
             return ("Przeciążenie OUN (Krytyczne ryzyko kontuzji - zalecany Deload)", "Wysokie ryzyko kontuzji! Zastosuj deload.");
         }
 
-        // Estimated onboarding baseline = ExperienceFactor x BodyWeight(kg).
-        // Experience is derived from the declared activity level (JobType).
-        private async Task<double> GetEstimatedBaselineAsync(string? token)
+        // Estimated onboarding baseline = experience factor x body weight.
+        // The gateway injects both values as headers, so the service remains shared-nothing.
+        private Task<double> GetEstimatedBaselineAsync()
         {
-            double weightKg = 75;
-            double factor = 8; // intermediate default
+            var weightKg = (double)(UserHeaderContext.GetDecimal(_httpContextAccessor, UserHeaderContext.UserWeightHeader) ?? 75m);
+            var experience = UserHeaderContext.GetHeader(_httpContextAccessor, UserHeaderContext.UserTrainingExperienceHeader);
+            var factor = ExperienceFactor(experience);
 
-            if (!string.IsNullOrEmpty(token))
-            {
-                try
-                {
-                    var client = _httpClientFactory.CreateClient();
-                    client.BaseAddress = new Uri(AuthBaseUrl);
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                    var resp = await client.GetAsync("/api/user/profile");
-                    if (resp.IsSuccessStatusCode)
-                    {
-                        using var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
-                        var root = doc.RootElement;
-                        if (root.TryGetProperty("currentWeight", out var w) && w.ValueKind == JsonValueKind.Number)
-                            weightKg = (double)w.GetDecimal();
-                        if (root.TryGetProperty("jobType", out var j) && j.ValueKind == JsonValueKind.String)
-                            factor = ExperienceFactor(j.GetString());
-                    }
-                }
-                catch
-                {
-                    // fall back to defaults
-                }
-            }
-
-            return factor * weightKg;
+            return Task.FromResult(factor * weightKg);
         }
 
-        private static double ExperienceFactor(string? jobType) => jobType switch
+        private static double ExperienceFactor(string? trainingExperience) => trainingExperience?.ToLowerInvariant() switch
         {
-            "sedentary" or "light_active" => 4,
-            "moderate_active" => 8,
-            "very_active" or "extra_active" => 12,
+            "beginner" => 6,
+            "advanced" => 10,
             _ => 8,
         };
     }

@@ -3,18 +3,19 @@ using Microsoft.AspNetCore.Authorization;
 using ExerciseAPI.Interfaces;
 using ExerciseAPI.DTOs;
 using ExerciseAPI.Models;
-using System.Security.Claims;
+using ExerciseAPI.Infrastructure;
 
 namespace ExerciseAPI.Controllers
 {
     [ApiController]
     [Route("api/templates")]
     [Authorize]
-    public class TemplateController : ControllerBase
+    public class TemplateController : UserHeaderControllerBase
     {
         private readonly ITemplateService _templateService;
 
-        public TemplateController(ITemplateService templateService)
+        public TemplateController(ITemplateService templateService, IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _templateService = templateService;
         }
@@ -22,15 +23,13 @@ namespace ExerciseAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTemplate([FromBody] CreateTemplateDto dto)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null)
+            var userId = GetUserId();
+            if (!userId.HasValue)
                 return Unauthorized();
-
-            int userId = int.Parse(userIdClaim);
 
             try
             {
-                var template = await _templateService.CreateTemplate(userId, dto.Name, dto.ExerciseIds);
+                var template = await _templateService.CreateTemplate(userId.Value, dto.Name, dto.ExerciseIds);
                 var response = MapToResponseDto(template);
                 return CreatedAtAction(nameof(GetTemplate), new { id = template.Id }, response);
             }
@@ -43,13 +42,11 @@ namespace ExerciseAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTemplate(int id)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null)
+            var userId = GetUserId();
+            if (!userId.HasValue)
                 return Unauthorized();
 
-            int userId = int.Parse(userIdClaim);
-
-            var template = await _templateService.GetTemplateById(id, userId);
+            var template = await _templateService.GetTemplateById(id, userId.Value);
             if (template == null)
                 return NotFound();
 
@@ -60,13 +57,11 @@ namespace ExerciseAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUserTemplates()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null)
+            var userId = GetUserId();
+            if (!userId.HasValue)
                 return Unauthorized();
 
-            int userId = int.Parse(userIdClaim);
-
-            var templates = await _templateService.GetUserTemplates(userId);
+            var templates = await _templateService.GetUserTemplates(userId.Value);
             var response = templates.Select(MapToResponseDto).ToList();
             return Ok(response);
         }
@@ -74,15 +69,13 @@ namespace ExerciseAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTemplate(int id, [FromBody] UpdateTemplateDto dto)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null)
+            var userId = GetUserId();
+            if (!userId.HasValue)
                 return Unauthorized();
-
-            int userId = int.Parse(userIdClaim);
 
             try
             {
-                var template = await _templateService.UpdateTemplate(id, userId, dto.Name, dto.ExerciseIds);
+                var template = await _templateService.UpdateTemplate(id, userId.Value, dto.Name, dto.ExerciseIds);
                 var response = MapToResponseDto(template);
                 return Ok(response);
             }
@@ -99,13 +92,11 @@ namespace ExerciseAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTemplate(int id)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null)
+            var userId = GetUserId();
+            if (!userId.HasValue)
                 return Unauthorized();
 
-            int userId = int.Parse(userIdClaim);
-
-            var deleted = await _templateService.DeleteTemplate(id, userId);
+            var deleted = await _templateService.DeleteTemplate(id, userId.Value);
             if (!deleted)
                 return NotFound();
 

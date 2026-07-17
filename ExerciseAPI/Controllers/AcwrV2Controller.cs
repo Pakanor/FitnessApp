@@ -4,17 +4,18 @@ using ExerciseAPI.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
+using ExerciseAPI.Infrastructure;
 
 namespace ExerciseAPI.Controllers
 {
     [ApiController]
     [Route("api/ExerciseDb")]
-    public class AcwrV2Controller : ControllerBase
+    public class AcwrV2Controller : UserHeaderControllerBase
     {
         private readonly AppDbContext _context;
 
-        public AcwrV2Controller(AppDbContext context)
+        public AcwrV2Controller(AppDbContext context, IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _context = context;
         }
@@ -23,13 +24,12 @@ namespace ExerciseAPI.Controllers
         [Authorize]
         public async Task<IActionResult> GetAcwr()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null) return Unauthorized();
-            int userId = int.Parse(userIdClaim);
+            var userId = GetUserId();
+            if (!userId.HasValue) return Unauthorized();
 
             var since = DateTime.UtcNow.AddDays(-28);
             var exercises = await _context.UserExercise
-                .Where(e => e.UserId == userId && e.Date >= since)
+                .Where(e => e.UserId == userId.Value && e.Date >= since)
                 .OrderBy(e => e.Date)
                 .ToListAsync();
 
@@ -107,13 +107,12 @@ namespace ExerciseAPI.Controllers
         [Authorize]
         public async Task<IActionResult> DeloadPreview()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null) return Unauthorized();
-            int userId = int.Parse(userIdClaim);
+            var userId = GetUserId();
+            if (!userId.HasValue) return Unauthorized();
 
             var since = DateTime.UtcNow.AddDays(-14);
             var recent = await _context.UserExercise
-                .Where(e => e.UserId == userId && e.Date >= since)
+                .Where(e => e.UserId == userId.Value && e.Date >= since)
                 .OrderBy(e => e.Date)
                 .ToListAsync();
 
@@ -152,9 +151,8 @@ namespace ExerciseAPI.Controllers
         [Authorize]
         public async Task<IActionResult> DeloadApply([FromBody] List<DeloadEntryDto> entries)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null) return Unauthorized();
-            int userId = int.Parse(userIdClaim);
+            var userId = GetUserId();
+            if (!userId.HasValue) return Unauthorized();
 
             if (entries == null || entries.Count == 0)
                 return BadRequest("Brak ćwiczeń do zastosowania.");
@@ -164,7 +162,7 @@ namespace ExerciseAPI.Controllers
             {
                 var exercise = new UserExercise
                 {
-                    UserId = userId,
+                    UserId = userId.Value,
                     ExerciseId = entry.ExerciseId,
                     Date = entry.Date,
                     Sets = entry.Sets,

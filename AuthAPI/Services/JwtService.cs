@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Globalization;
 
 namespace AuthAPI.Services
 {
@@ -21,11 +22,18 @@ namespace AuthAPI.Services
         }
         public string GenerateToken(User user)
         {
+            var currentWeight = user.CurrentWeight?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+            var trainingExperience = GetTrainingExperience(user.JobType);
+            var caloricTarget = CalculateCaloricTarget(user);
+
             var claims = new[]
             {
             new Claim(ClaimTypes.NameIdentifier, user.ID.ToString()),
             new Claim(ClaimTypes.Name, user.Username),
             new Claim(ClaimTypes.Email, user.Email),
+            new Claim("current_weight", currentWeight),
+            new Claim("training_experience", trainingExperience),
+            new Claim("caloric_target", caloricTarget.ToString(CultureInfo.InvariantCulture)),
             new Claim("isEmailVerified", user.IsEmailVerified.ToString().ToLower()),
 
             new Claim(ClaimTypes.Role, "User")
@@ -146,6 +154,26 @@ namespace AuthAPI.Services
         {
             var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
             return int.Parse(userIdClaim?.Value ?? throw new Exception("User ID not found"));
+        }
+
+        private static string GetTrainingExperience(string? jobType)
+        {
+            return jobType?.ToLowerInvariant() switch
+            {
+                "sedentary" or "light_active" => "beginner",
+                "moderate_active" => "intermediate",
+                "very_active" or "extra_active" => "advanced",
+                _ => "intermediate"
+            };
+        }
+
+        private static decimal CalculateCaloricTarget(User user)
+        {
+            var tdee = user.GetTdee();
+            if (!tdee.HasValue)
+                return 0;
+
+            return tdee.Value;
         }
 
     }

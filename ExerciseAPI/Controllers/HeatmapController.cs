@@ -1,18 +1,19 @@
 using ExerciseAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using ExerciseAPI.Infrastructure;
 
 namespace ExerciseAPI.Controllers
 {
     [Route("api/heatmap")]
     [ApiController]
     [Authorize]
-    public class HeatmapController : ControllerBase
+    public class HeatmapController : UserHeaderControllerBase
     {
         private readonly HeatmapService _heatmapService;
 
-        public HeatmapController(HeatmapService heatmapService)
+        public HeatmapController(HeatmapService heatmapService, IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _heatmapService = heatmapService;
         }
@@ -20,12 +21,11 @@ namespace ExerciseAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetHeatmap()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null)
+            var userId = GetUserId();
+            if (!userId.HasValue)
                 return Unauthorized();
 
-            int userId = int.Parse(userIdClaim);
-            var result = await _heatmapService.GetHeatmapData(userId);
+            var result = await _heatmapService.GetHeatmapData(userId.Value);
             return Ok(result);
         }
     }

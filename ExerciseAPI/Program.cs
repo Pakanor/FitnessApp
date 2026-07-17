@@ -55,7 +55,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ExerciseDbImportService>();
 builder.Services.AddScoped<HeatmapService>();
 builder.Services.AddScoped<OneRepMaxCalculator>();

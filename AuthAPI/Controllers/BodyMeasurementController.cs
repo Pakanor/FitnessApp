@@ -4,19 +4,20 @@ using AuthAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
+using AuthAPI.Infrastructure;
 
 namespace AuthAPI.Controllers
 {
     [Route("api/body-measurements")]
     [ApiController]
     [Authorize]
-    public class BodyMeasurementController : ControllerBase
+    public class BodyMeasurementController : UserHeaderControllerBase
     {
         private readonly AppDbContext _context;
         private readonly AnthropometryService _anthropometry;
 
-        public BodyMeasurementController(AppDbContext context, AnthropometryService anthropometry)
+        public BodyMeasurementController(AppDbContext context, AnthropometryService anthropometry, IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _context = context;
             _anthropometry = anthropometry;
@@ -25,11 +26,10 @@ namespace AuthAPI.Controllers
         [HttpGet("status")]
         public async Task<IActionResult> GetStatus()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null) return Unauthorized();
-            int userId = int.Parse(userIdClaim);
+            var userId = GetUserId();
+            if (!userId.HasValue) return Unauthorized();
 
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _context.Users.FindAsync(userId.Value);
             if (user == null) return Unauthorized();
 
             // Gate requires the four core anthropometric fields only.
@@ -57,16 +57,15 @@ namespace AuthAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] BodyMeasurementDto dto)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null) return Unauthorized();
-            int userId = int.Parse(userIdClaim);
+            var userId = GetUserId();
+            if (!userId.HasValue) return Unauthorized();
 
             var (bfPercent, whr, vtaper) = _anthropometry.Calculate(
                 dto.Height, dto.Neck, dto.Waist, dto.Hips, dto.Shoulders, dto.Weight, dto.Gender);
 
             var entity = new BodyMeasurement
             {
-                UserId = userId,
+                UserId = userId.Value,
                 Height = dto.Height,
                 Neck = dto.Neck,
                 Waist = dto.Waist,
@@ -101,12 +100,11 @@ namespace AuthAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null) return Unauthorized();
-            int userId = int.Parse(userIdClaim);
+            var userId = GetUserId();
+            if (!userId.HasValue) return Unauthorized();
 
             var measurements = await _context.BodyMeasurements
-                .Where(bm => bm.UserId == userId)
+                .Where(bm => bm.UserId == userId.Value)
                 .OrderByDescending(bm => bm.MeasuredAt)
                 .ToListAsync();
 
@@ -116,12 +114,11 @@ namespace AuthAPI.Controllers
         [HttpGet("latest")]
         public async Task<IActionResult> GetLatest()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null) return Unauthorized();
-            int userId = int.Parse(userIdClaim);
+            var userId = GetUserId();
+            if (!userId.HasValue) return Unauthorized();
 
             var measurement = await _context.BodyMeasurements
-                .Where(bm => bm.UserId == userId)
+                .Where(bm => bm.UserId == userId.Value)
                 .OrderByDescending(bm => bm.MeasuredAt)
                 .FirstOrDefaultAsync();
 
@@ -134,12 +131,11 @@ namespace AuthAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null) return Unauthorized();
-            int userId = int.Parse(userIdClaim);
+            var userId = GetUserId();
+            if (!userId.HasValue) return Unauthorized();
 
             var measurement = await _context.BodyMeasurements
-                .FirstOrDefaultAsync(bm => bm.Id == id && bm.UserId == userId);
+                .FirstOrDefaultAsync(bm => bm.Id == id && bm.UserId == userId.Value);
 
             if (measurement == null)
                 return NotFound();

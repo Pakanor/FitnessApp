@@ -20,7 +20,7 @@ builder.Services.AddScoped<ICalorieCalculatorService, CalorieCalculatorService>(
 builder.Services.AddScoped<ProductLogRepository>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<IProductServiceAPI, ProductServiceAPI>();
+builder.Services.AddHttpClient<IProductServiceAPI, ProductServiceAPI>();
 builder.Services.AddLogging();
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";

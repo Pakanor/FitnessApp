@@ -2,7 +2,7 @@ namespace ExerciseAPI.Interfaces
 {
     public interface IAcwrService
     {
-        System.Threading.Tasks.Task<ExerciseAPI.DTOs.AcwrResultDto> GetAcwrAsync(int userId, string? token = null);
+        System.Threading.Tasks.Task<ExerciseAPI.DTOs.AcwrResultDto> GetAcwrAsync(int userId);
     }
 
     public interface IMuscleRecoveryService

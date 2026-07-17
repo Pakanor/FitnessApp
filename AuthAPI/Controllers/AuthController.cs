@@ -3,22 +3,23 @@ using AuthAPI.Interfaces;
 using AuthAPI.Models;
 using AuthAPI.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using AuthAPI.Infrastructure;
 using System.Security.Claims;
 
 namespace AuthAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController : UserHeaderControllerBase
     {
         private readonly IAuthService _authService;
         private readonly JwtService _jwtService;
         private readonly UserLogrepository _userRepo;
 
 
-        public AuthController(IAuthService authService, JwtService jwtService, UserLogrepository userRepo)
+        public AuthController(IAuthService authService, JwtService jwtService, UserLogrepository userRepo, IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _authService = authService;
            _jwtService = jwtService;
@@ -37,10 +38,13 @@ namespace AuthAPI.Controllers
         [Authorize]
         public IActionResult Me()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var username = User.FindFirst(ClaimTypes.Name)?.Value;
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            return Ok(new { id = userId, username, email });
+            var userId = GetHeader(UserHeaderContext.UserIdHeader);
+            var username = GetHeader(UserHeaderContext.UserNameHeader);
+            var email = GetHeader(UserHeaderContext.UserEmailHeader);
+            var weight = GetHeader(UserHeaderContext.UserWeightHeader);
+            var trainingExperience = GetHeader(UserHeaderContext.UserTrainingExperienceHeader);
+            var caloricTarget = GetHeader(UserHeaderContext.UserCaloricTargetHeader);
+            return Ok(new { id = userId, username, email, weight, trainingExperience, caloricTarget });
         }
 
         [HttpPost("logout")]

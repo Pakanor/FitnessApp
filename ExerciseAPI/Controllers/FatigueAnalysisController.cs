@@ -3,18 +3,19 @@ using ExerciseAPI.Interfaces;
 using ExerciseAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using ExerciseAPI.Infrastructure;
 
 namespace ExerciseAPI.Controllers
 {
     [ApiController]
     [Route("api/fatigue-analysis")]
-    public class FatigueAnalysisController : ControllerBase
+    public class FatigueAnalysisController : UserHeaderControllerBase
     {
         private readonly IAcwrService _acwr;
         private readonly IMuscleRecoveryService _recovery;
 
-        public FatigueAnalysisController(IAcwrService acwr, IMuscleRecoveryService recovery)
+        public FatigueAnalysisController(IAcwrService acwr, IMuscleRecoveryService recovery, IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _acwr = acwr;
             _recovery = recovery;
@@ -24,12 +25,11 @@ namespace ExerciseAPI.Controllers
         [Authorize]
         public async Task<IActionResult> Get()
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (userIdClaim == null) return Unauthorized();
-            int userId = int.Parse(userIdClaim);
+            var userId = GetUserId();
+            if (!userId.HasValue) return Unauthorized();
 
-            var acwr = await _acwr.GetAcwrAsync(userId, Request.Cookies["FitnessApp-Auth"]);
-            var recovery = await _recovery.ComputeAsync(userId);
+            var acwr = await _acwr.GetAcwrAsync(userId.Value);
+            var recovery = await _recovery.ComputeAsync(userId.Value);
 
             return Ok(new FatigueAnalysisResponseDto
             {
