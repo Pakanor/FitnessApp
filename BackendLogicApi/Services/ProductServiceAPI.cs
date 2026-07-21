@@ -12,9 +12,9 @@ namespace BackendLogicApi.Services
     {
         private readonly HttpClient _client;
 
-        public ProductServiceAPI()
+        public ProductServiceAPI(HttpClient client)
         {
-            _client = new HttpClient();
+            _client = client;
         }
 
         public async Task<dynamic> GetProductFromApiBarcode(string barcode)

@@ -9,12 +9,13 @@ namespace AuthAPI.Controllers
     [ApiController]
     [Route("api/user")]
     [Authorize]
-    public class UserController : ControllerBase
+    public class UserController : FitnessControllerBase
     {
         private readonly IUserService _userService;
         
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _userService = userService;
         }
@@ -22,15 +23,31 @@ namespace AuthAPI.Controllers
         [HttpGet("profile")]
         public async Task<IActionResult> GetProfile()
         {
-            var user = await _userService.GetCurrentUserAsync(User);
+            if (!HasCurrentUser) return Unauthorized();
+
+            var user = await _userService.GetCurrentUserAsync(CurrentUserId);
             if (user == null) return NotFound();
-            return Ok(new { user.Username, user.Email, user.BirthDate, user.CurrentWeight, user.CaloriesDelta });
+            return Ok(new ProfileResponseDto
+            {
+                Username = user.Username,
+                Email = user.Email,
+                BirthDate = user.BirthDate,
+                CurrentWeight = user.CurrentWeight,
+                Height = user.Height,
+                Gender = user.Gender,
+                JobType = user.JobType,
+                Goal = user.Goal,
+                Bmr = user.GetBmr(),
+                Tdee = user.GetTdee()
+            });
         }
 
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
         {
-            await _userService.UpdateProfileAsync(User, dto.Username, dto.Email, dto.BirthDate, dto.CurrentWeight, dto.CaloriesDelta);
+            if (!HasCurrentUser) return Unauthorized();
+
+            await _userService.UpdateProfileAsync(CurrentUserId, dto.Username, dto.Email, dto.BirthDate, dto.CurrentWeight, dto.Height, dto.Gender, dto.JobType, dto.Goal);
             return NoContent();
         }
 
@@ -39,14 +56,18 @@ namespace AuthAPI.Controllers
         [HttpPut("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
         {
-            await _userService.ChangePasswordAsync(User, dto.CurrentPassword, dto.NewPassword);
+            if (!HasCurrentUser) return Unauthorized();
+
+            await _userService.ChangePasswordAsync(CurrentUserId, dto.CurrentPassword, dto.NewPassword);
             return NoContent();
         }
 
         [HttpDelete("delete")]
         public async Task<IActionResult> DeleteAccount()
         {
-            await _userService.DeleteAccountAsync(User);
+            if (!HasCurrentUser) return Unauthorized();
+
+            await _userService.DeleteAccountAsync(CurrentUserId);
             return NoContent();
         }
         [HttpPost("send-reset-password-email")]

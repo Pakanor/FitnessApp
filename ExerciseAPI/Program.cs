@@ -51,14 +51,26 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql("Host=localhost;Database=exercise;Username=fitnessapp;Password=Pakan135@"));
+    options.UseNpgsql("Host=localhost;Port=5443;Database=exercise;Username=fitnessapp;Password=Pakan135@"));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<ExerciseDbImportService>();
+builder.Services.AddHostedService<ExerciseStartupSeeder>();
+builder.Services.AddScoped<HeatmapService>();
+builder.Services.AddScoped<OneRepMaxCalculator>();
+builder.Services.AddScoped<RecordsService>();
+builder.Services.AddScoped<ExerciseAPI.Interfaces.ITemplateService, ExerciseAPI.Services.TemplateService>();
+builder.Services.AddScoped<ExerciseAPI.Interfaces.IWorkoutStartModeService, ExerciseAPI.Services.WorkoutStartModeService>();
+builder.Services.AddScoped<ExerciseAPI.Interfaces.IWorkoutStatusService, ExerciseAPI.Services.WorkoutStatusService>();
+builder.Services.AddScoped<ExerciseAPI.Interfaces.IWorkloadCalculationService, ExerciseAPI.Services.WorkloadCalculationService>();
+builder.Services.AddScoped<ExerciseAPI.Interfaces.ICarbohydrateScalingService, ExerciseAPI.Services.CarbohydrateScalingService>();
+builder.Services.AddScoped<ExerciseAPI.Interfaces.IAcwrService, ExerciseAPI.Services.AcwrService>();
+builder.Services.AddScoped<ExerciseAPI.Interfaces.IMuscleRecoveryService, ExerciseAPI.Services.MuscleRecoveryService>();
+builder.Services.AddScoped<ExerciseAPI.Interfaces.IMuscleDamageService, ExerciseAPI.Services.MuscleDamageService>();
 builder.Services.AddHttpClient();
-builder.Services.AddScoped<ExerciseDbImportService>();
-builder.Services.AddScoped<MuscleSeedService>();
-builder.Services.AddScoped<IFatigueService, TimeDecayFatigueService>();
+builder.Services.AddMemoryCache();
 
 var app = builder.Build();
 
@@ -80,12 +92,9 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
 
-    var muscleSeedService = scope.ServiceProvider.GetRequiredService<MuscleSeedService>();
-    await muscleSeedService.SeedMuscleMappingsAsync();
+    db.Database.Migrate();
 }
 
 
 app.Run();
-

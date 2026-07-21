@@ -30,56 +30,83 @@ namespace ExerciseAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal>("Abs")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Biceps")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Calves")
+                        .HasColumnType("numeric");
+
                     b.Property<string>("Category")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<decimal>("ChestMain")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("CoreStabilizers")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("DeltoidAnterior")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("DeltoidLateral")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("DeltoidPosterior")
+                        .HasColumnType("numeric");
+
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("ExternalId")
-                        .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<decimal>("Forearms")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("GifUrl")
                         .HasColumnType("text");
 
+                    b.Property<decimal>("Glutes")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Hamstrings")
+                        .HasColumnType("numeric");
+
                     b.Property<string>("ImageUrl")
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsBenchmark")
+                        .HasColumnType("boolean");
+
+                    b.Property<decimal>("Lats")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("LowerBack")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<decimal>("Quadriceps")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Rhomboids")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("Triceps")
+                        .HasColumnType("numeric");
 
                     b.HasKey("Id");
 
                     b.ToTable("Exercises");
                 });
 
-            modelBuilder.Entity("ExerciseAPI.Models.ExerciseMuscleMapping", b =>
-                {
-                    b.Property<int>("ExerciseId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("MuscleId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("Factor")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("ExerciseId", "MuscleId");
-
-                    b.HasIndex("MuscleId");
-
-                    b.ToTable("ExerciseMuscleMappings");
-                });
-
-            modelBuilder.Entity("ExerciseAPI.Models.Muscle", b =>
+            modelBuilder.Entity("ExerciseAPI.Models.ExerciseMuscleGroup", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -87,132 +114,184 @@ namespace ExerciseAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<bool>("IsFront")
-                        .HasColumnType("boolean");
+                    b.Property<int>("ExerciseId")
+                        .HasColumnType("integer");
 
-                    b.Property<string>("NameKey")
+                    b.Property<string>("MuscleGroupKey")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<decimal>("WeightPercentage")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExerciseId");
+
+                    b.HasIndex("MuscleGroupKey");
+
+                    b.ToTable("ExerciseMuscleGroups");
+                });
+
+            modelBuilder.Entity("ExerciseAPI.Models.MuscleDamage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<double>("DamagePercent")
+                        .HasColumnType("double precision");
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("MuscleGroupKey")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("SessionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MuscleDamage");
+                });
+
+            modelBuilder.Entity("ExerciseAPI.Models.MuscleGroup", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasColumnType("text");
+
+                    b.Property<double>("HalfLife")
+                        .HasColumnType("double precision");
+
+                    b.Property<bool>("IsFront")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("NamePl")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
+                    b.HasKey("Key");
 
-                    b.ToTable("Muscles");
+                    b.ToTable("MuscleGroups");
 
                     b.HasData(
                         new
                         {
-                            Id = 1,
+                            Key = "chest_main",
+                            HalfLife = 42.0,
                             IsFront = true,
-                            NameKey = "chest_main",
                             NamePl = "Klatka piersiowa"
                         },
                         new
                         {
-                            Id = 2,
+                            Key = "deltoid_anterior",
+                            HalfLife = 30.0,
                             IsFront = true,
-                            NameKey = "deltoid_anterior",
                             NamePl = "Bark przedni"
                         },
                         new
                         {
-                            Id = 3,
+                            Key = "deltoid_lateral",
+                            HalfLife = 30.0,
                             IsFront = true,
-                            NameKey = "deltoid_lateral",
                             NamePl = "Bark boczny"
                         },
                         new
                         {
-                            Id = 4,
-                            IsFront = true,
-                            NameKey = "biceps",
-                            NamePl = "Biceps"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            IsFront = true,
-                            NameKey = "forearms",
-                            NamePl = "Przedramiona"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            IsFront = true,
-                            NameKey = "abs",
-                            NamePl = "Brzuch"
-                        },
-                        new
-                        {
-                            Id = 7,
-                            IsFront = true,
-                            NameKey = "quadriceps",
-                            NamePl = "Czwórki"
-                        },
-                        new
-                        {
-                            Id = 8,
-                            IsFront = true,
-                            NameKey = "core_stabilizers",
-                            NamePl = "Stabilizatory tułowia"
-                        },
-                        new
-                        {
-                            Id = 9,
+                            Key = "deltoid_posterior",
+                            HalfLife = 30.0,
                             IsFront = false,
-                            NameKey = "lats",
-                            NamePl = "Plecy szerokie"
-                        },
-                        new
-                        {
-                            Id = 10,
-                            IsFront = false,
-                            NameKey = "lower_back",
-                            NamePl = "Dolny odcinek pleców"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            IsFront = false,
-                            NameKey = "rhomboids_trapezius",
-                            NamePl = "Romby i czworoboczny"
-                        },
-                        new
-                        {
-                            Id = 12,
-                            IsFront = false,
-                            NameKey = "deltoid_posterior",
                             NamePl = "Bark tylny"
                         },
                         new
                         {
-                            Id = 13,
+                            Key = "biceps",
+                            HalfLife = 30.0,
+                            IsFront = true,
+                            NamePl = "Biceps"
+                        },
+                        new
+                        {
+                            Key = "triceps",
+                            HalfLife = 30.0,
                             IsFront = false,
-                            NameKey = "triceps",
                             NamePl = "Triceps"
                         },
                         new
                         {
-                            Id = 14,
-                            IsFront = false,
-                            NameKey = "glutes",
-                            NamePl = "Pośladki"
+                            Key = "forearms",
+                            HalfLife = 24.0,
+                            IsFront = true,
+                            NamePl = "Przedramiona"
                         },
                         new
                         {
-                            Id = 15,
+                            Key = "lats",
+                            HalfLife = 42.0,
                             IsFront = false,
-                            NameKey = "hamstrings",
+                            NamePl = "Plecy szerokie"
+                        },
+                        new
+                        {
+                            Key = "rhomboids",
+                            HalfLife = 30.0,
+                            IsFront = false,
+                            NamePl = "Romby i czworoboczny"
+                        },
+                        new
+                        {
+                            Key = "lower_back",
+                            HalfLife = 30.0,
+                            IsFront = false,
+                            NamePl = "Dolny odcinek pleców"
+                        },
+                        new
+                        {
+                            Key = "abs",
+                            HalfLife = 24.0,
+                            IsFront = true,
+                            NamePl = "Brzuch"
+                        },
+                        new
+                        {
+                            Key = "core_stabilizers",
+                            HalfLife = 24.0,
+                            IsFront = true,
+                            NamePl = "Stabilizatory tułowia"
+                        },
+                        new
+                        {
+                            Key = "quadriceps",
+                            HalfLife = 42.0,
+                            IsFront = true,
+                            NamePl = "Czwórki"
+                        },
+                        new
+                        {
+                            Key = "hamstrings",
+                            HalfLife = 30.0,
+                            IsFront = false,
                             NamePl = "Dwugłowe uda"
                         },
                         new
                         {
-                            Id = 16,
+                            Key = "glutes",
+                            HalfLife = 42.0,
                             IsFront = false,
-                            NameKey = "calves",
+                            NamePl = "Pośladki"
+                        },
+                        new
+                        {
+                            Key = "calves",
+                            HalfLife = 24.0,
+                            IsFront = false,
                             NamePl = "Łydki"
                         });
                 });
@@ -257,6 +336,32 @@ namespace ExerciseAPI.Migrations
                     b.ToTable("PersonalRecords");
                 });
 
+            modelBuilder.Entity("ExerciseAPI.Models.TemplateExercise", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ExerciseId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TemplateId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExerciseId");
+
+                    b.HasIndex("TemplateId", "Order");
+
+                    b.ToTable("TemplateExercises");
+                });
+
             modelBuilder.Entity("ExerciseAPI.Models.UserExercise", b =>
                 {
                     b.Property<int>("Id")
@@ -271,6 +376,9 @@ namespace ExerciseAPI.Migrations
                     b.Property<int>("ExerciseId")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("RIR")
+                        .HasColumnType("integer");
+
                     b.Property<int?>("RPE")
                         .HasColumnType("integer");
 
@@ -278,6 +386,15 @@ namespace ExerciseAPI.Migrations
                         .HasColumnType("integer");
 
                     b.Property<int?>("Sets")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("StartMode")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("TemplateId")
                         .HasColumnType("integer");
 
                     b.Property<int>("UserId")
@@ -288,31 +405,101 @@ namespace ExerciseAPI.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Date");
+
+                    b.HasIndex("ExerciseId");
+
+                    b.HasIndex("UserId", "Date");
+
                     b.ToTable("UserExercise");
                 });
 
-            modelBuilder.Entity("ExerciseAPI.Models.ExerciseMuscleMapping", b =>
+            modelBuilder.Entity("ExerciseAPI.Models.WorkoutTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("WorkoutTemplates");
+                });
+
+            modelBuilder.Entity("ExerciseAPI.Models.ExerciseMuscleGroup", b =>
                 {
                     b.HasOne("ExerciseAPI.Models.Exercise", "Exercise")
-                        .WithMany("MuscleMappings")
+                        .WithMany("MuscleGroupMappings")
                         .HasForeignKey("ExerciseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("ExerciseAPI.Models.Muscle", "Muscle")
+                    b.HasOne("ExerciseAPI.Models.MuscleGroup", "MuscleGroup")
                         .WithMany()
-                        .HasForeignKey("MuscleId")
+                        .HasForeignKey("MuscleGroupKey")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Exercise");
 
-                    b.Navigation("Muscle");
+                    b.Navigation("MuscleGroup");
+                });
+
+            modelBuilder.Entity("ExerciseAPI.Models.TemplateExercise", b =>
+                {
+                    b.HasOne("ExerciseAPI.Models.Exercise", "Exercise")
+                        .WithMany()
+                        .HasForeignKey("ExerciseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("ExerciseAPI.Models.WorkoutTemplate", "Template")
+                        .WithMany("TemplateExercises")
+                        .HasForeignKey("TemplateId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Exercise");
+
+                    b.Navigation("Template");
+                });
+
+            modelBuilder.Entity("ExerciseAPI.Models.UserExercise", b =>
+                {
+                    b.HasOne("ExerciseAPI.Models.Exercise", "Exercise")
+                        .WithMany()
+                        .HasForeignKey("ExerciseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Exercise");
                 });
 
             modelBuilder.Entity("ExerciseAPI.Models.Exercise", b =>
                 {
-                    b.Navigation("MuscleMappings");
+                    b.Navigation("MuscleGroupMappings");
+                });
+
+            modelBuilder.Entity("ExerciseAPI.Models.WorkoutTemplate", b =>
+                {
+                    b.Navigation("TemplateExercises");
                 });
 #pragma warning restore 612, 618
         }

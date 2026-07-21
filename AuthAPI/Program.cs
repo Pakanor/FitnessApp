@@ -16,11 +16,17 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<AnthropometryService>();
 builder.Services.AddScoped<UserLogrepository>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
 
-builder.Services.AddControllers();
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddControllers().AddJsonOptions(o =>
+{
+    o.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
+});
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 builder.Services.AddCors(options =>
@@ -64,7 +70,7 @@ builder.Services.AddAuthentication("Bearer")
     });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql("Host=localhost;Database=auth;Username=fitnessapp;Password=Pakan135@"));
+    options.UseNpgsql("Host=localhost;Port=5442;Database=auth;Username=fitnessapp;Password=Pakan135@"));
     /*tu w dockerze pozniej host=db-auth*/
 
 var app = builder.Build();
@@ -87,6 +93,7 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
     db.Database.Migrate();
 }
 

@@ -42,11 +42,18 @@ namespace AuthAPI.Services
             {
                 Username = dto.Username,
                 Email = dto.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
+                BirthDate = dto.BirthDate,
+                Height = dto.Height,
+                CurrentWeight = dto.CurrentWeight,
+                Gender = dto.Gender,
+                JobType = dto.JobType,
+                IsEmailVerified = true
             };
             await _userRepo.AddUserAsync(user);
             var token = _jwtService.GenerateEmailVerificationToken(user);
-            var verificationLink = $"http://localhost:5010/api/auth/verify?token={token}";
+            var gatewayBaseUrl = _configuration["App:GatewayBaseUrl"] ?? "http://localhost:8000";
+            var verificationLink = $"{gatewayBaseUrl}/api/auth/verify?token={token}";
             await _emailService.SendEmailAsync(
     user.Email,
     "Potwierdzenie rejestracji",

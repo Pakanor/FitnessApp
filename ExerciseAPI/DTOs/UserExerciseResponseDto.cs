@@ -9,5 +9,6 @@ namespace ExerciseAPI.DTOs
         public decimal? Weight { get; set; }
         public DateTime Date { get; set; }
         public int? RPE { get; set; }
+        public int? RIR { get; set; }
     }
 }

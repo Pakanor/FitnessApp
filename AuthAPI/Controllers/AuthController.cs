@@ -3,7 +3,6 @@ using AuthAPI.Interfaces;
 using AuthAPI.Models;
 using AuthAPI.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -11,14 +10,15 @@ namespace AuthAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController : FitnessControllerBase
     {
         private readonly IAuthService _authService;
         private readonly JwtService _jwtService;
         private readonly UserLogrepository _userRepo;
 
 
-        public AuthController(IAuthService authService, JwtService jwtService, UserLogrepository userRepo)
+        public AuthController(IAuthService authService, JwtService jwtService, UserLogrepository userRepo, IHttpContextAccessor httpContextAccessor)
+            : base(httpContextAccessor)
         {
             _authService = authService;
            _jwtService = jwtService;
@@ -34,13 +34,19 @@ namespace AuthAPI.Controllers
         }
 
         [HttpGet("me")]
-        [Authorize]
         public IActionResult Me()
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            var username = User.FindFirst(ClaimTypes.Name)?.Value;
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            return Ok(new { id = userId, username, email });
+            if (!HasCurrentUser) return Ok(new { authenticated = false });
+
+            return Ok(new
+            {
+                authenticated = true,
+                id = CurrentUserId,
+                username = CurrentUserName,
+                email = CurrentUserEmail,
+                weight = UserWeight,
+                trainingExperience = UserExperience
+            });
         }
 
         [HttpPost("logout")]
@@ -65,11 +71,11 @@ namespace AuthAPI.Controllers
                 {
                     HttpOnly = true,
                     Secure = false,
-                    SameSite = SameSiteMode.Strict,
+                    SameSite = SameSiteMode.Lax,
                     Path = "/"
                 });
 
-                Response.Headers.Add("Location", "/home");
+                Response.Headers["Location"] = "/home";
                 return Ok(new { message = "Zalogowano pomyślnie." });
             }
             catch (Exception ex)

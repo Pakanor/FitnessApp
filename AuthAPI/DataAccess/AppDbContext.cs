@@ -9,6 +9,7 @@ namespace AuthAPI.DataAccess
             : base(options) { }
 
         public DbSet<User> Users { get; set; } = null!;
+        public DbSet<BodyMeasurement> BodyMeasurements { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -36,9 +37,7 @@ namespace AuthAPI.DataAccess
                 .Property(u => u.CreatedAt)
                 .HasDefaultValueSql("NOW()");
 
-            modelBuilder.Entity<User>()
-                .Property(u => u.CaloriesDelta)
-                .HasDefaultValue(0);
+
         }
     }
 }
