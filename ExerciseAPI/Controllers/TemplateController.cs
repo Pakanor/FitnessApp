@@ -3,14 +3,13 @@ using Microsoft.AspNetCore.Authorization;
 using ExerciseAPI.Interfaces;
 using ExerciseAPI.DTOs;
 using ExerciseAPI.Models;
-using ExerciseAPI.Infrastructure;
 
 namespace ExerciseAPI.Controllers
 {
     [ApiController]
     [Route("api/templates")]
     [Authorize]
-    public class TemplateController : UserHeaderControllerBase
+    public class TemplateController : FitnessControllerBase
     {
         private readonly ITemplateService _templateService;
 
@@ -23,13 +22,12 @@ namespace ExerciseAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateTemplate([FromBody] CreateTemplateDto dto)
         {
-            var userId = GetUserId();
-            if (!userId.HasValue)
+            if (!HasCurrentUser)
                 return Unauthorized();
 
             try
             {
-                var template = await _templateService.CreateTemplate(userId.Value, dto.Name, dto.ExerciseIds);
+                var template = await _templateService.CreateTemplate(CurrentUserId, dto.Name, dto.ExerciseIds);
                 var response = MapToResponseDto(template);
                 return CreatedAtAction(nameof(GetTemplate), new { id = template.Id }, response);
             }
@@ -42,11 +40,10 @@ namespace ExerciseAPI.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetTemplate(int id)
         {
-            var userId = GetUserId();
-            if (!userId.HasValue)
+            if (!HasCurrentUser)
                 return Unauthorized();
 
-            var template = await _templateService.GetTemplateById(id, userId.Value);
+            var template = await _templateService.GetTemplateById(id, CurrentUserId);
             if (template == null)
                 return NotFound();
 
@@ -57,11 +54,10 @@ namespace ExerciseAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUserTemplates()
         {
-            var userId = GetUserId();
-            if (!userId.HasValue)
+            if (!HasCurrentUser)
                 return Unauthorized();
 
-            var templates = await _templateService.GetUserTemplates(userId.Value);
+            var templates = await _templateService.GetUserTemplates(CurrentUserId);
             var response = templates.Select(MapToResponseDto).ToList();
             return Ok(response);
         }
@@ -69,13 +65,12 @@ namespace ExerciseAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateTemplate(int id, [FromBody] UpdateTemplateDto dto)
         {
-            var userId = GetUserId();
-            if (!userId.HasValue)
+            if (!HasCurrentUser)
                 return Unauthorized();
 
             try
             {
-                var template = await _templateService.UpdateTemplate(id, userId.Value, dto.Name, dto.ExerciseIds);
+                var template = await _templateService.UpdateTemplate(id, CurrentUserId, dto.Name, dto.ExerciseIds);
                 var response = MapToResponseDto(template);
                 return Ok(response);
             }
@@ -92,11 +87,10 @@ namespace ExerciseAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTemplate(int id)
         {
-            var userId = GetUserId();
-            if (!userId.HasValue)
+            if (!HasCurrentUser)
                 return Unauthorized();
 
-            var deleted = await _templateService.DeleteTemplate(id, userId.Value);
+            var deleted = await _templateService.DeleteTemplate(id, CurrentUserId);
             if (!deleted)
                 return NotFound();
 

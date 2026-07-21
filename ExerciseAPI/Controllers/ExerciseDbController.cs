@@ -7,13 +7,12 @@ using ExerciseAPI.Data;
 using ExerciseAPI.Models;
 using ExerciseAPI.DTOs;
 using ExerciseAPI.Interfaces;
-using ExerciseAPI.Infrastructure;
 namespace ExerciseAPI.Controllers
 {
     [ApiController]
 
     [Route("api/[controller]")]
-    public class ExerciseDbController : UserHeaderControllerBase
+    public class ExerciseDbController : FitnessControllerBase
     {
         private readonly ExerciseDbImportService _importService;
         private readonly AppDbContext _context;
@@ -36,6 +35,13 @@ namespace ExerciseAPI.Controllers
         {
             await _importService.ImportExercisesAsync();
             return Ok("Import ćwiczeń zakończony.");
+        }
+
+        [HttpPost("import-gifs")]
+        public async Task<IActionResult> ImportGifs()
+        {
+            var count = await _importService.ImportGifsFromApiAsync();
+            return Ok($"Zaktualizowano {count} ćwiczeń z GIF-ami.");
         }
 
 
@@ -182,8 +188,7 @@ namespace ExerciseAPI.Controllers
         [Authorize]
         public async Task<IActionResult> AddUserExercise([FromBody] AddUserExerciseDto dto)
         {
-            var userId = GetUserId();
-            if (!userId.HasValue)
+            if (!HasCurrentUser)
                 return Unauthorized();
 
             var exerciseExists = await _context.Exercises.AnyAsync(e => e.Id == dto.ExerciseId);
@@ -198,7 +203,7 @@ namespace ExerciseAPI.Controllers
 
             var entity = new UserExercise
             {
-                UserId = userId.Value,
+                UserId = CurrentUserId,
                 ExerciseId = dto.ExerciseId,
                 Sets = dto.Sets,
                 Reps = dto.Reps,
@@ -222,7 +227,7 @@ namespace ExerciseAPI.Controllers
 
                 if (previousRecord == null || entity.Weight > previousRecord.Weight)
                 {
-                    var userWeight = GetDecimal(ExerciseAPI.Infrastructure.UserHeaderContext.UserWeightHeader);
+                    decimal userWeight = (decimal)UserWeight;
                     int? userAge = null;
 
                     var pr = new PersonalRecord
@@ -234,8 +239,8 @@ namespace ExerciseAPI.Controllers
                         Date = entity.Date,
                         UserWeightAtTime = userWeight,
                         UserAgeAtTime = userAge,
-                        StrengthToWeightRatio = userWeight.HasValue && userWeight > 0
-                            ? Math.Round(entity.Weight.Value / userWeight.Value, 2)
+                        StrengthToWeightRatio = userWeight > 0
+                            ? Math.Round(entity.Weight.Value / userWeight, 2)
                             : null
                     };
 
@@ -264,15 +269,14 @@ namespace ExerciseAPI.Controllers
         [Authorize]
         public async Task<IActionResult> GetExercisesByDate([FromQuery] string date)
         {
-            var userId = GetUserId();
-            if (!userId.HasValue)
+            if (!HasCurrentUser)
                 return Unauthorized();
 
             if (!DateTime.TryParse(date, out var parsedDate))
                 return BadRequest("Nieprawidłowy format daty");
 
             var all = await _context.UserExercise
-                .Where(ue => ue.UserId == userId.Value)
+                .Where(ue => ue.UserId == CurrentUserId)
                 .ToListAsync();
 
             var filtered = all
@@ -311,12 +315,11 @@ namespace ExerciseAPI.Controllers
         [Authorize]
         public async Task<IActionResult> GetUserExercises()
         {
-            var userId = GetUserId();
-            if (!userId.HasValue)
+            if (!HasCurrentUser)
                 return Unauthorized();
 
             var exercises = await _context.UserExercise
-                .Where(ue => ue.UserId == userId.Value)
+                .Where(ue => ue.UserId == CurrentUserId)
                 .Select(ue => new { ue.ExerciseId })
                 .ToListAsync();
 
@@ -327,20 +330,19 @@ namespace ExerciseAPI.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteUserExercise(int id)
         {
-                var userId = GetUserId();
-                if (!userId.HasValue)
+                if (!HasCurrentUser)
                 return Unauthorized();
 
                 var entry = await _context.UserExercise.FindAsync(id);
 
-                if (entry == null || entry.UserId != userId.Value)
+                if (entry == null || entry.UserId != CurrentUserId)
                 return NotFound();
 
             _context.UserExercise.Remove(entry);
             await _context.SaveChangesAsync();
 
             // Editing/deleting a session changes the damage baseline -> rebuild it.
-            await _muscleDamageService.RecordSessionDamageAsync(userId.Value, entry.Date);
+            await _muscleDamageService.RecordSessionDamageAsync(CurrentUserId, entry.Date);
 
             return NoContent();
         }

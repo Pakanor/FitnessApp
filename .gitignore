@@ -1,18 +1,47 @@
-.vs/
-*.user
-*.suo
-
+## .NET
 bin/
 obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
 
+## Visual Studio
+.vs/
+*.csproj.user
+*.dbmdl
+*.jfm
+
+## JetBrains Rider
+.idea/
+*.sln.iml
+
+## Node / React
 node_modules/
 build/
+dist/
+npm-debug.log*
 
-appsettings.json
+## Secrets
+**/appsettings.json
+**/appsettings.Development.json
 .env
+*.env
 
+## Logs
 *.log
 
+## OS
 .DS_Store
 Thumbs.db
-wwwroot/
+desktop.ini
+
+## Generated / downloaded
+**/wwwroot/gifs/
+
+## EF Core Migrations (if you manage schema manually)
+**/Migrations/
+
+## Docker
+docker-compose.override.yml

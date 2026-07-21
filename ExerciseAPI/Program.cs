@@ -51,12 +51,13 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql("Host=localhost;Database=exercise;Username=fitnessapp;Password=Pakan135@"));
+    options.UseNpgsql("Host=localhost;Port=5443;Database=exercise;Username=fitnessapp;Password=Pakan135@"));
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ExerciseDbImportService>();
+builder.Services.AddSingleton<ExerciseDbImportService>();
+builder.Services.AddHostedService<ExerciseStartupSeeder>();
 builder.Services.AddScoped<HeatmapService>();
 builder.Services.AddScoped<OneRepMaxCalculator>();
 builder.Services.AddScoped<RecordsService>();
@@ -68,6 +69,7 @@ builder.Services.AddScoped<ExerciseAPI.Interfaces.ICarbohydrateScalingService, E
 builder.Services.AddScoped<ExerciseAPI.Interfaces.IAcwrService, ExerciseAPI.Services.AcwrService>();
 builder.Services.AddScoped<ExerciseAPI.Interfaces.IMuscleRecoveryService, ExerciseAPI.Services.MuscleRecoveryService>();
 builder.Services.AddScoped<ExerciseAPI.Interfaces.IMuscleDamageService, ExerciseAPI.Services.MuscleDamageService>();
+builder.Services.AddHttpClient();
 builder.Services.AddMemoryCache();
 
 var app = builder.Build();
@@ -91,104 +93,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-    try
-    {
-        db.Database.Migrate();
-    }
-    catch (Exception ex) when (ex is Npgsql.PostgresException or InvalidOperationException)
-    {
-        // Fallback: apply schema changes directly if migration fails
-        db.Database.ExecuteSqlRaw("""
-            ALTER TABLE "Exercises" ADD COLUMN IF NOT EXISTS "IsBenchmark" boolean NOT NULL DEFAULT false;
-            CREATE TABLE IF NOT EXISTS "MuscleGroups" (
-                "Key" text PRIMARY KEY,
-                "NamePl" text NOT NULL,
-                "IsFront" boolean NOT NULL,
-                "HalfLife" double precision NOT NULL
-            );
-            CREATE TABLE IF NOT EXISTS "ExerciseMuscleGroups" (
-                "Id" serial PRIMARY KEY,
-                "ExerciseId" integer NOT NULL REFERENCES "Exercises"("Id"),
-                "MuscleGroupKey" text NOT NULL REFERENCES "MuscleGroups"("Key"),
-                "WeightPercentage" numeric NOT NULL DEFAULT 0
-            );
-        """);
-
-        var existingMg = db.MuscleGroups.Any();
-        if (!existingMg)
-        {
-            db.Database.ExecuteSqlRaw("""
-                INSERT INTO "MuscleGroups" ("Key", "NamePl", "IsFront", "HalfLife") VALUES
-                ('chest_main', 'Klatka piersiowa', true, 42),
-                ('deltoid_anterior', 'Bark przedni', true, 30),
-                ('deltoid_lateral', 'Bark boczny', true, 30),
-                ('deltoid_posterior', 'Bark tylny', false, 30),
-                ('biceps', 'Biceps', true, 30),
-                ('triceps', 'Triceps', false, 30),
-                ('forearms', 'Przedramiona', true, 24),
-                ('lats', 'Plecy szerokie', false, 42),
-                ('rhomboids', 'Romby i czworoboczny', false, 30),
-                ('lower_back', 'Dolny odcinek pleców', false, 30),
-                ('abs', 'Brzuch', true, 24),
-                ('core_stabilizers', 'Stabilizatory tułowia', true, 24),
-                ('quadriceps', 'Czwórki', true, 42),
-                ('hamstrings', 'Dwugłowe uda', false, 30),
-                ('glutes', 'Pośladki', false, 42),
-                ('calves', 'Łydki', false, 24);
-            """);
-        }
-
-        var existingMappings = db.ExerciseMuscleGroups.Any();
-        if (!existingMappings)
-        {
-            db.Database.ExecuteSqlRaw("""
-                INSERT INTO "ExerciseMuscleGroups" ("ExerciseId", "MuscleGroupKey", "WeightPercentage") VALUES
-                (1028, 'lower_back', 40),
-                (1028, 'glutes', 30),
-                (1028, 'hamstrings', 30),
-                (1111, 'glutes', 40),
-                (1111, 'hamstrings', 30),
-                (1111, 'quadriceps', 20),
-                (1111, 'lower_back', 10);
-            """);
-        }
-
-        db.Database.ExecuteSqlRaw("""
-            CREATE TABLE IF NOT EXISTS "WorkoutTemplates" (
-                "Id" serial PRIMARY KEY,
-                "UserId" integer NOT NULL,
-                "Name" character varying(100) NOT NULL,
-                "CreatedAt" timestamp with time zone NOT NULL,
-                "UpdatedAt" timestamp with time zone NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS "IX_WorkoutTemplates_UserId" ON "WorkoutTemplates" ("UserId");
-
-            CREATE TABLE IF NOT EXISTS "TemplateExercises" (
-                "Id" serial PRIMARY KEY,
-                "TemplateId" integer NOT NULL REFERENCES "WorkoutTemplates"("Id") ON DELETE CASCADE,
-                "ExerciseId" integer NOT NULL REFERENCES "Exercises"("Id") ON DELETE CASCADE,
-                "Order" integer NOT NULL
-            );
-            CREATE INDEX IF NOT EXISTS "IX_TemplateExercises_TemplateId_Order" ON "TemplateExercises" ("TemplateId", "Order");
-            CREATE INDEX IF NOT EXISTS "IX_TemplateExercises_ExerciseId" ON "TemplateExercises" ("ExerciseId");
-
-            ALTER TABLE "UserExercise" ADD COLUMN IF NOT EXISTS "StartMode" integer;
-            ALTER TABLE "UserExercise" ADD COLUMN IF NOT EXISTS "TemplateId" integer;
-            ALTER TABLE "UserExercise" ADD COLUMN IF NOT EXISTS "Status" integer;
-
-            CREATE TABLE IF NOT EXISTS "MuscleDamage" (
-                "UserId" integer NOT NULL,
-                "MuscleGroupKey" text NOT NULL,
-                "SessionDate" timestamp with time zone NOT NULL,
-                "DamagePercent" double precision NOT NULL,
-                "IsPrimary" boolean NOT NULL,
-                PRIMARY KEY ("UserId", "MuscleGroupKey")
-            );
-        """);
-    }
-
-    var importService = scope.ServiceProvider.GetRequiredService<ExerciseDbImportService>();
-    await importService.ImportExercisesAsync();
+    db.Database.Migrate();
 }
 
 

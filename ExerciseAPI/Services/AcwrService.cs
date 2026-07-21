@@ -2,7 +2,6 @@ using ExerciseAPI.Data;
 using ExerciseAPI.DTOs;
 using ExerciseAPI.Interfaces;
 using ExerciseAPI.Models;
-using ExerciseAPI.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace ExerciseAPI.Services
@@ -10,20 +9,18 @@ namespace ExerciseAPI.Services
     public class AcwrService : IAcwrService
     {
         private readonly AppDbContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         // Onboarding guard: ACWR is suppressed until this many distinct training
         // days exist in the rolling window. Below it we use an estimated baseline.
         //a
         private const int ColdStartDays = 14;
 
-        public AcwrService(AppDbContext context, IHttpContextAccessor httpContextAccessor)
+        public AcwrService(AppDbContext context)
         {
             _context = context;
-            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<AcwrResultDto> GetAcwrAsync(int userId)
+        public async Task<AcwrResultDto> GetAcwrAsync(int userId, double weightKg, string trainingExperience)
         {
             var since = DateTime.UtcNow.AddDays(-(ColdStartDays + 14));
             // Use completion date (e.Date) as the session date and only count
@@ -76,7 +73,7 @@ namespace ExerciseAPI.Services
             double acute = dailySeries.TakeLast(7).Average(x => x.Workload);
             double chronic = dailySeries.Average(x => x.Workload);
 
-            var estimatedBaseline = await GetEstimatedBaselineAsync();
+            var estimatedBaseline = GetEstimatedBaselineAsync(weightKg, trainingExperience);
             bool coldStart = trainingDays < ColdStartDays;
 
             double ratio;
@@ -128,13 +125,10 @@ namespace ExerciseAPI.Services
 
         // Estimated onboarding baseline = experience factor x body weight.
         // The gateway injects both values as headers, so the service remains shared-nothing.
-        private Task<double> GetEstimatedBaselineAsync()
+        private static double GetEstimatedBaselineAsync(double weightKg, string trainingExperience)
         {
-            var weightKg = (double)(UserHeaderContext.GetDecimal(_httpContextAccessor, UserHeaderContext.UserWeightHeader) ?? 75m);
-            var experience = UserHeaderContext.GetHeader(_httpContextAccessor, UserHeaderContext.UserTrainingExperienceHeader);
-            var factor = ExperienceFactor(experience);
-
-            return Task.FromResult(factor * weightKg);
+            var factor = ExperienceFactor(trainingExperience);
+            return factor * weightKg;
         }
 
         private static double ExperienceFactor(string? trainingExperience) => trainingExperience?.ToLowerInvariant() switch

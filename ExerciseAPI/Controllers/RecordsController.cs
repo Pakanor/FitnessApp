@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using ExerciseAPI.Data;
 using ExerciseAPI.Models;
 using ExerciseAPI.Services;
-using ExerciseAPI.Infrastructure;
 using System.Text.Json;
 
 namespace ExerciseAPI.Controllers
@@ -12,7 +11,7 @@ namespace ExerciseAPI.Controllers
     [ApiController]
     [Route("api/records")]
     [Authorize]
-    public class RecordsController : UserHeaderControllerBase
+    public class RecordsController : FitnessControllerBase
     {
         private readonly AppDbContext _context;
         private readonly RecordsService _recordsService;
@@ -27,12 +26,11 @@ namespace ExerciseAPI.Controllers
         [HttpGet("history")]
         public async Task<IActionResult> GetHistory()
         {
-            var userId = GetUserId();
-            if (!userId.HasValue)
+            if (!HasCurrentUser)
                 return Unauthorized();
 
             var records = await _context.PersonalRecords
-                .Where(pr => pr.UserId == userId.Value)
+                .Where(pr => pr.UserId == CurrentUserId)
                 .Join(_context.Exercises,
                     pr => pr.ExerciseId,
                     e => e.Id,
@@ -59,8 +57,7 @@ namespace ExerciseAPI.Controllers
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string query)
         {
-            var userId = GetUserId();
-            if (!userId.HasValue)
+            if (!HasCurrentUser)
                 return Unauthorized();
 
             if (string.IsNullOrWhiteSpace(query))
@@ -74,7 +71,7 @@ namespace ExerciseAPI.Controllers
                     e.Id,
                     e.Name,
                     e.Category,
-                    HasPR = _context.PersonalRecords.Any(pr => pr.UserId == userId.Value && pr.ExerciseId == e.Id)
+                    HasPR = _context.PersonalRecords.Any(pr => pr.UserId == CurrentUserId && pr.ExerciseId == e.Id)
                 })
                 .ToListAsync();
 
@@ -84,12 +81,11 @@ namespace ExerciseAPI.Controllers
         [HttpGet("exercise/{exerciseId}")]
         public async Task<IActionResult> GetExerciseHistory(int exerciseId)
         {
-            var userId = GetUserId();
-            if (!userId.HasValue)
+            if (!HasCurrentUser)
                 return Unauthorized();
 
             var records = await _context.PersonalRecords
-                .Where(pr => pr.UserId == userId.Value && pr.ExerciseId == exerciseId)
+                .Where(pr => pr.UserId == CurrentUserId && pr.ExerciseId == exerciseId)
                 .Join(_context.Exercises,
                     pr => pr.ExerciseId,
                     e => e.Id,
@@ -115,11 +111,10 @@ namespace ExerciseAPI.Controllers
         [HttpGet("1rm-progression")]
         public async Task<IActionResult> Get1RMProgression()
         {
-            var userId = GetUserId();
-            if (!userId.HasValue)
+            if (!HasCurrentUser)
                 return Unauthorized();
 
-            var result = await _recordsService.Get1RMProgression(userId.Value);
+            var result = await _recordsService.Get1RMProgression(CurrentUserId);
             return Ok(result);
         }
     }

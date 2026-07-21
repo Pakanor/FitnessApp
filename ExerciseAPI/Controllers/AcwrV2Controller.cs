@@ -4,13 +4,12 @@ using ExerciseAPI.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ExerciseAPI.Infrastructure;
 
 namespace ExerciseAPI.Controllers
 {
     [ApiController]
     [Route("api/ExerciseDb")]
-    public class AcwrV2Controller : UserHeaderControllerBase
+    public class AcwrV2Controller : FitnessControllerBase
     {
         private readonly AppDbContext _context;
 
@@ -24,12 +23,11 @@ namespace ExerciseAPI.Controllers
         [Authorize]
         public async Task<IActionResult> GetAcwr()
         {
-            var userId = GetUserId();
-            if (!userId.HasValue) return Unauthorized();
+            if (!HasCurrentUser) return Unauthorized();
 
             var since = DateTime.UtcNow.AddDays(-28);
             var exercises = await _context.UserExercise
-                .Where(e => e.UserId == userId.Value && e.Date >= since)
+                .Where(e => e.UserId == CurrentUserId && e.Date >= since)
                 .OrderBy(e => e.Date)
                 .ToListAsync();
 
@@ -107,12 +105,11 @@ namespace ExerciseAPI.Controllers
         [Authorize]
         public async Task<IActionResult> DeloadPreview()
         {
-            var userId = GetUserId();
-            if (!userId.HasValue) return Unauthorized();
+            if (!HasCurrentUser) return Unauthorized();
 
             var since = DateTime.UtcNow.AddDays(-14);
             var recent = await _context.UserExercise
-                .Where(e => e.UserId == userId.Value && e.Date >= since)
+                .Where(e => e.UserId == CurrentUserId && e.Date >= since)
                 .OrderBy(e => e.Date)
                 .ToListAsync();
 
@@ -151,8 +148,7 @@ namespace ExerciseAPI.Controllers
         [Authorize]
         public async Task<IActionResult> DeloadApply([FromBody] List<DeloadEntryDto> entries)
         {
-            var userId = GetUserId();
-            if (!userId.HasValue) return Unauthorized();
+            if (!HasCurrentUser) return Unauthorized();
 
             if (entries == null || entries.Count == 0)
                 return BadRequest("Brak ćwiczeń do zastosowania.");
@@ -162,7 +158,7 @@ namespace ExerciseAPI.Controllers
             {
                 var exercise = new UserExercise
                 {
-                    UserId = userId.Value,
+                    UserId = CurrentUserId,
                     ExerciseId = entry.ExerciseId,
                     Date = entry.Date,
                     Sets = entry.Sets,

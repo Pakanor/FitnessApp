@@ -3,14 +3,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AuthAPI.Models;
 using AuthAPI.Services;
-using AuthAPI.Infrastructure;
 
 namespace AuthAPI.Controllers
 {
     [ApiController]
     [Route("api/user")]
     [Authorize]
-    public class UserController : UserHeaderControllerBase
+    public class UserController : FitnessControllerBase
     {
         private readonly IUserService _userService;
         
@@ -24,10 +23,9 @@ namespace AuthAPI.Controllers
         [HttpGet("profile")]
         public async Task<IActionResult> GetProfile()
         {
-            var userId = GetUserId();
-            if (!userId.HasValue) return Unauthorized();
+            if (!HasCurrentUser) return Unauthorized();
 
-            var user = await _userService.GetCurrentUserAsync(userId.Value);
+            var user = await _userService.GetCurrentUserAsync(CurrentUserId);
             if (user == null) return NotFound();
             return Ok(new ProfileResponseDto
             {
@@ -47,10 +45,9 @@ namespace AuthAPI.Controllers
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
         {
-            var userId = GetUserId();
-            if (!userId.HasValue) return Unauthorized();
+            if (!HasCurrentUser) return Unauthorized();
 
-            await _userService.UpdateProfileAsync(userId.Value, dto.Username, dto.Email, dto.BirthDate, dto.CurrentWeight, dto.Height, dto.Gender, dto.JobType, dto.Goal);
+            await _userService.UpdateProfileAsync(CurrentUserId, dto.Username, dto.Email, dto.BirthDate, dto.CurrentWeight, dto.Height, dto.Gender, dto.JobType, dto.Goal);
             return NoContent();
         }
 
@@ -59,20 +56,18 @@ namespace AuthAPI.Controllers
         [HttpPut("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
         {
-            var userId = GetUserId();
-            if (!userId.HasValue) return Unauthorized();
+            if (!HasCurrentUser) return Unauthorized();
 
-            await _userService.ChangePasswordAsync(userId.Value, dto.CurrentPassword, dto.NewPassword);
+            await _userService.ChangePasswordAsync(CurrentUserId, dto.CurrentPassword, dto.NewPassword);
             return NoContent();
         }
 
         [HttpDelete("delete")]
         public async Task<IActionResult> DeleteAccount()
         {
-            var userId = GetUserId();
-            if (!userId.HasValue) return Unauthorized();
+            if (!HasCurrentUser) return Unauthorized();
 
-            await _userService.DeleteAccountAsync(userId.Value);
+            await _userService.DeleteAccountAsync(CurrentUserId);
             return NoContent();
         }
         [HttpPost("send-reset-password-email")]

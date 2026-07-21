@@ -33,15 +33,27 @@ app.Use(async (context, next) =>
 
         if (TryReadJwtPayload(token, out var claims))
         {
-            claims.TryGetValue("nameid", out var userId);
-            claims.TryGetValue("unique_name", out var userName);
-            claims.TryGetValue("email", out var userEmail);
+            claims.TryGetValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier", out var userId);
+            if (string.IsNullOrWhiteSpace(userId))
+                claims.TryGetValue("sub", out userId);
+
+            claims.TryGetValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name", out var userName);
+            if (string.IsNullOrWhiteSpace(userName))
+                claims.TryGetValue("unique_name", out userName);
+
+            claims.TryGetValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress", out var userEmail);
+            if (string.IsNullOrWhiteSpace(userEmail))
+                claims.TryGetValue("email", out userEmail);
+
             claims.TryGetValue("current_weight", out var currentWeight);
             claims.TryGetValue("training_experience", out var trainingExperience);
             claims.TryGetValue("caloric_target", out var caloricTarget);
 
             if (!string.IsNullOrWhiteSpace(userId))
+            {
                 context.Request.Headers["X-User-Id"] = userId;
+                context.Request.Headers["Authorization"] = $"Bearer {token}";
+            }
             if (!string.IsNullOrWhiteSpace(userName))
                 context.Request.Headers["X-User-Name"] = userName;
             if (!string.IsNullOrWhiteSpace(userEmail))
@@ -59,7 +71,13 @@ app.Use(async (context, next) =>
 });
 
 app.UseCors("AllowFrontend");
+
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.MapReverseProxy();
+
+app.MapFallbackToFile("index.html");
 
 app.Run();
 

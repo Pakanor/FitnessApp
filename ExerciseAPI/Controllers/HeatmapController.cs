@@ -1,14 +1,13 @@
 using ExerciseAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ExerciseAPI.Infrastructure;
 
 namespace ExerciseAPI.Controllers
 {
     [Route("api/heatmap")]
     [ApiController]
     [Authorize]
-    public class HeatmapController : UserHeaderControllerBase
+    public class HeatmapController : FitnessControllerBase
     {
         private readonly HeatmapService _heatmapService;
 
@@ -21,11 +20,10 @@ namespace ExerciseAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetHeatmap()
         {
-            var userId = GetUserId();
-            if (!userId.HasValue)
+            if (!HasCurrentUser)
                 return Unauthorized();
 
-            var result = await _heatmapService.GetHeatmapData(userId.Value);
+            var result = await _heatmapService.GetHeatmapData(CurrentUserId);
             return Ok(result);
         }
     }

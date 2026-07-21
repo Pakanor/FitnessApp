@@ -4,14 +4,13 @@ using AuthAPI.Models;
 using AuthAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using AuthAPI.Infrastructure;
 using System.Security.Claims;
 
 namespace AuthAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController : UserHeaderControllerBase
+    public class AuthController : FitnessControllerBase
     {
         private readonly IAuthService _authService;
         private readonly JwtService _jwtService;
@@ -35,16 +34,19 @@ namespace AuthAPI.Controllers
         }
 
         [HttpGet("me")]
-        [Authorize]
         public IActionResult Me()
         {
-            var userId = GetHeader(UserHeaderContext.UserIdHeader);
-            var username = GetHeader(UserHeaderContext.UserNameHeader);
-            var email = GetHeader(UserHeaderContext.UserEmailHeader);
-            var weight = GetHeader(UserHeaderContext.UserWeightHeader);
-            var trainingExperience = GetHeader(UserHeaderContext.UserTrainingExperienceHeader);
-            var caloricTarget = GetHeader(UserHeaderContext.UserCaloricTargetHeader);
-            return Ok(new { id = userId, username, email, weight, trainingExperience, caloricTarget });
+            if (!HasCurrentUser) return Ok(new { authenticated = false });
+
+            return Ok(new
+            {
+                authenticated = true,
+                id = CurrentUserId,
+                username = CurrentUserName,
+                email = CurrentUserEmail,
+                weight = UserWeight,
+                trainingExperience = UserExperience
+            });
         }
 
         [HttpPost("logout")]
@@ -69,11 +71,11 @@ namespace AuthAPI.Controllers
                 {
                     HttpOnly = true,
                     Secure = false,
-                    SameSite = SameSiteMode.Strict,
+                    SameSite = SameSiteMode.Lax,
                     Path = "/"
                 });
 
-                Response.Headers.Add("Location", "/home");
+                Response.Headers["Location"] = "/home";
                 return Ok(new { message = "Zalogowano pomyślnie." });
             }
             catch (Exception ex)

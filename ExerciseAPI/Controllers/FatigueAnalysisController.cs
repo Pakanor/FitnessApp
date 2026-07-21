@@ -3,13 +3,12 @@ using ExerciseAPI.Interfaces;
 using ExerciseAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ExerciseAPI.Infrastructure;
 
 namespace ExerciseAPI.Controllers
 {
     [ApiController]
     [Route("api/fatigue-analysis")]
-    public class FatigueAnalysisController : UserHeaderControllerBase
+    public class FatigueAnalysisController : FitnessControllerBase
     {
         private readonly IAcwrService _acwr;
         private readonly IMuscleRecoveryService _recovery;
@@ -25,11 +24,10 @@ namespace ExerciseAPI.Controllers
         [Authorize]
         public async Task<IActionResult> Get()
         {
-            var userId = GetUserId();
-            if (!userId.HasValue) return Unauthorized();
+            if (!HasCurrentUser) return Unauthorized();
 
-            var acwr = await _acwr.GetAcwrAsync(userId.Value);
-            var recovery = await _recovery.ComputeAsync(userId.Value);
+            var acwr = await _acwr.GetAcwrAsync(CurrentUserId, UserWeight, UserExperience);
+            var recovery = await _recovery.ComputeAsync(CurrentUserId);
 
             return Ok(new FatigueAnalysisResponseDto
             {

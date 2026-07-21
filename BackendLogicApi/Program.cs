@@ -75,7 +75,7 @@ else
 }
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql("Host=localhost;Database=products;Username=fitnessapp;Password=Pakan135@"));
+    options.UseNpgsql("Host=localhost;Port=5444;Database=products;Username=fitnessapp;Password=Pakan135@"));
 
 
 

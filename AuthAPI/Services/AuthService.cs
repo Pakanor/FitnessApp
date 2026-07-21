@@ -47,7 +47,8 @@ namespace AuthAPI.Services
                 Height = dto.Height,
                 CurrentWeight = dto.CurrentWeight,
                 Gender = dto.Gender,
-                JobType = dto.JobType
+                JobType = dto.JobType,
+                IsEmailVerified = true
             };
             await _userRepo.AddUserAsync(user);
             var token = _jwtService.GenerateEmailVerificationToken(user);

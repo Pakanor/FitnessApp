@@ -1,4 +1,6 @@
-﻿using ExerciseAPI.Data;
+﻿using System.Text.Json;
+using ExerciseAPI.Data;
+using ExerciseAPI.DTOs;
 using ExerciseAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
@@ -9,11 +11,19 @@ namespace ExerciseAPI.Services
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<ExerciseDbImportService> _logger;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IWebHostEnvironment _env;
 
-        public ExerciseDbImportService(IServiceScopeFactory scopeFactory, ILogger<ExerciseDbImportService> logger)
+        public ExerciseDbImportService(
+            IServiceScopeFactory scopeFactory,
+            ILogger<ExerciseDbImportService> logger,
+            IHttpClientFactory httpClientFactory,
+            IWebHostEnvironment env)
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
+            _httpClientFactory = httpClientFactory;
+            _env = env;
         }
 
         public async Task ImportExercisesAsync()
@@ -92,6 +102,92 @@ namespace ExerciseAPI.Services
                 await context.SaveChangesAsync();
                 _logger.LogInformation("Imported {NewCount} new exercises, updated {UpdatedCount} existing", newExercises.Count, updatedCount);
             }
+        }
+
+        public async Task<int> ImportGifsFromApiAsync()
+        {
+            var apiKey = Environment.GetEnvironmentVariable("RAPIDAPI_KEY")
+                         ?? "b7550e5dcemsh5957bdfba9e4ccap1a2997jsnf861439e9228";
+
+            var client = _httpClientFactory.CreateClient();
+            var request = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri("https://exercisedb.p.rapidapi.com/exercises?limit=1000"),
+                Headers =
+                {
+                    { "x-rapidapi-key", apiKey },
+                    { "x-rapidapi-host", "exercisedb.p.rapidapi.com" },
+                }
+            };
+
+            using var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var body = await response.Content.ReadAsStringAsync();
+            var rawExercises = JsonSerializer.Deserialize<List<ExerciseDbDto>>(body, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (rawExercises == null || rawExercises.Count == 0)
+                return 0;
+
+            var gifsFolder = Path.Combine(_env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "gifs");
+            Directory.CreateDirectory(gifsFolder);
+
+            using var scope = _scopeFactory.CreateScope();
+            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+            var dbExercises = await context.Exercises.ToListAsync();
+            var updatedCount = 0;
+
+            foreach (var dto in rawExercises)
+            {
+                string? localGifUrl = null;
+
+                if (!string.IsNullOrEmpty(dto.GifUrl))
+                {
+                    try
+                    {
+                        var gifFileName = $"{dto.Id}.gif";
+                        var gifPath = Path.Combine(gifsFolder, gifFileName);
+
+                        if (!File.Exists(gifPath))
+                        {
+                            _logger.LogInformation("Downloading GIF for {ExerciseId}", dto.Id);
+                            var gifBytes = await client.GetByteArrayAsync(dto.GifUrl);
+                            await File.WriteAllBytesAsync(gifPath, gifBytes);
+                        }
+
+                        localGifUrl = $"/gifs/{gifFileName}";
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to download GIF for {ExerciseId}", dto.Id);
+                    }
+                }
+
+                if (localGifUrl == null) continue;
+
+                var normalizedApiName = dto.Name?.Trim().ToLowerInvariant();
+                var match = dbExercises.FirstOrDefault(e =>
+                    e.Name.Trim().ToLowerInvariant() == normalizedApiName);
+
+                if (match != null)
+                {
+                    match.GifUrl = localGifUrl;
+                    updatedCount++;
+                }
+            }
+
+            if (updatedCount > 0)
+            {
+                await context.SaveChangesAsync();
+                _logger.LogInformation("Updated {Count} exercises with GIF URLs", updatedCount);
+            }
+
+            return updatedCount;
         }
 
         private static bool SetMuscleCoefficient(Exercise e, string column, decimal value)
